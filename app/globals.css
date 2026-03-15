@@ -1,11 +1,5 @@
-@import 'tw-animate-css' layer(base);
-@import 'shadcn/tailwind.css' layer(base);
-
-@import 'tailwindcss';
-
-@plugin 'tailwindcss-animate';
-
-@custom-variant dark (&:is(.dark *));
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
