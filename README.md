@@ -11,7 +11,7 @@ This survey system is a university project for our class: SE104 using nextjs and
 ### 1. Clone the project
 
 ```bash
-git clone https://github.com/thaiminh2022/se104-survey-system
+git clone https://github.com/thaiminh2022/se104-survey-system.git
 ```
 
 ### 2. Install all dependencies
@@ -80,9 +80,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Working with git
 
-- Branch `master` will be the main branch for final updates
+- Branch `main` will be the main branch for final updates
+- Branch `dev` is for continuous update merges
+
 - Your feature will be in another branch
-- To submit feature, make a pull request to `master` branch
+- To submit feature, make a pull request to `dev` branch
+
+### Checkout dev
+
+- After cloning, checkout dev branch for latest infos
+
+```bash
+git switch dev
+```
 
 #### Add a feature
 
