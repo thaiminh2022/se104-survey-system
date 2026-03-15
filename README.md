@@ -80,9 +80,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Working with git
 
-- Branch `master` will be the main branch for final updates
+- Branch `main` will be the main branch for final updates
+- Branch `dev` is for continuous update merges
+
 - Your feature will be in another branch
-- To submit feature, make a pull request to `master` branch
+- To submit feature, make a pull request to `dev` branch
+
+### Checkout dev
+
+- After cloning, checkout dev branch for latest infos
+
+```bash
+git switch dev
+```
 
 #### Add a feature
 
