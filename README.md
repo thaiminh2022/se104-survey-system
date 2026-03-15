@@ -11,7 +11,7 @@ This survey system is a university project for our class: SE104 using nextjs and
 ### 1. Clone the project
 
 ```bash
-git clone https://github.com/thaiminh2022/se104-survey-system
+git clone https://github.com/thaiminh2022/se104-survey-system.git
 ```
 
 ### 2. Install all dependencies
