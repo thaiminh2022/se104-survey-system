@@ -1,3 +1,9 @@
+import { SiteHeader } from "@/components/dashboard/site-header";
+
 export default function Page() {
-  return <main>something</main>;
+  return (
+    <>
+      <SiteHeader header="New survey" />
+    </>
+  );
 }
