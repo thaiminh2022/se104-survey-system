@@ -32,7 +32,7 @@ pnpm supabase start
 Note: To stop the database later:
 
 ```bash
-pnpm supabase stop
+pnpm supabase stop --all
 ```
 
 ### 4. Copy the environment variables
@@ -107,6 +107,21 @@ git push -u origin "YOUR BRANCH NAME"
 
 - This project is configured with pnpm as recommended by nextjs docs
 - Supabase will be run locally using supabase cli
+
+### Add a table to database (Create migration)
+
+- Do it in your hosted supabase studio
+- Add a migration
+
+```bash
+npx supabase migration new add_table
+```
+
+### Update local database to match
+
+```bash
+pnpm supabase migration up
+```
 
 ### Component library
 
