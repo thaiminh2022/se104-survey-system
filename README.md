@@ -37,7 +37,7 @@ pnpm supabase stop
 
 ### 4. Copy the environment variables
 
-1. Create a file name .env.local at root folder
+1. Rename .env.example to .env.local (file at root folder)
 2. Open supabase studio localhost
 
 This path is usually the default:
