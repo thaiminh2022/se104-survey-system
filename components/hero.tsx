@@ -39,6 +39,9 @@ export function Hero() {
         </a>
       </p>
       <div className="w-full p-px bg-linear-to-r from-transparent via-foreground/10 to-transparent my-8" />
+      <a href="/dashboard" className="border-2 border-accent p-2">
+        Go to dashboard
+      </a>
     </div>
   );
 }

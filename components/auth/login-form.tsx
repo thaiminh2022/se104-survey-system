@@ -16,10 +16,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+interface LoginFormProps {
+  returnUrl?: string | null;
+}
+
+type Props = React.ComponentPropsWithoutRef<"div"> & LoginFormProps;
+
+export function LoginForm({ className, returnUrl, ...props }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export function LoginForm({
       });
       if (error) throw error;
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/me");
+      router.push(returnUrl ?? "/dashboard");
     } catch (error: unknown) {
       setError(
         error instanceof Error
@@ -100,7 +103,14 @@ export function LoginForm({
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link
-                href="/auth/sign-up"
+                href={
+                  returnUrl
+                    ? {
+                        pathname: "/auth/sign-up",
+                        query: { returnUrl: returnUrl },
+                      }
+                    : "/auth/sign-up"
+                }
                 className="underline underline-offset-4"
               >
                 Sign up

@@ -16,10 +16,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+interface SignUpProps {
+  returnUrl?: string | null;
+}
+
+type Props = React.ComponentPropsWithoutRef<"div"> & SignUpProps;
+
+export function SignUpForm({ className, returnUrl, ...props }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -112,7 +115,17 @@ export function SignUpForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link
+                href={
+                  returnUrl
+                    ? {
+                        pathname: "/auth/login",
+                        query: { returnUrl: returnUrl },
+                      }
+                    : "/auth/login"
+                }
+                className="underline underline-offset-4"
+              >
                 Login
               </Link>
             </div>
