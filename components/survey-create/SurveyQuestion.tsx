@@ -39,6 +39,7 @@ import { IconDots } from "@tabler/icons-react";
 import { useState } from "react";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+import { ToggleDescription } from "./ToggleDescription";
 
 interface SurveyQuestionProps {
   info: Question;
@@ -59,6 +60,7 @@ export default function SurveyQuestion({
   );
   const updateQuestionType = useSurveyStore((s) => s.updateQuestionType);
   const addQuestion = useSurveyStore((s) => s.addQuestion);
+  const deleteQuestion = useSurveyStore((s) => s.deleteQuestion);
 
   function getQuestionComponent() {
     if (questionType == "checkbox") {
@@ -139,16 +141,16 @@ export default function SurveyQuestion({
               </Button>
             </PopoverTrigger>
             <PopoverContent>
+              <ToggleDescription check={showDesc} setCheck={setShowDesc} />
               <Button
-                variant="secondary"
-                onClick={() => setShowDesc((prev) => !prev)}
+                variant={"destructive"}
+                type="button"
+                onClick={() => {
+                  deleteQuestion(sIndex, qIndex);
+                }}
               >
-                Toggle description
+                Delete question
               </Button>
-              <div className="flex items-center space-x-2">
-                <Switch id="airplane-mode" />
-                <Label htmlFor="airplane-mode">Airplane Mode</Label>
-              </div>
             </PopoverContent>
           </Popover>
         </CardAction>

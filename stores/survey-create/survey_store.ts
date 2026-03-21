@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 import {
   CheckBoxConfig,
   Question,
@@ -10,208 +11,127 @@ import {
   Survey,
 } from "@/types/survey-create/question-type";
 
-function getDefaultSection() {
-  const defaultSection: Section = {
-    title: "New section",
-    description: "",
-    questions: [getDefaultQuestion()],
-  };
-  return defaultSection;
-}
-
-function getDefaultQuestion() {
+function getDefaultQuestion(): Question {
   const checkboxConfig: CheckBoxConfig = {
     haveOther: false,
     options: [],
   };
-
-  const defaultQuestion: Question = {
+  return {
     title: "Title",
     description: "",
     question_type: "checkbox",
     config: checkboxConfig,
   };
-  return defaultQuestion;
+}
+
+function getDefaultSection(): Section {
+  return {
+    title: "New section",
+    description: "",
+    questions: [getDefaultQuestion()],
+  };
 }
 
 type SurveyStore = {
   survey: Survey;
   addSection: () => void;
+  deleteSection: (sectionIndex: number) => void;
   addQuestion: (sectionIndex: number) => void;
-  updateQuestionType: (
-    sectionIndex: number,
-    questionIndex: number,
-    type: QuestionTypes,
-  ) => void;
+  deleteQuestion: (sectionIndex: number, questionIndex: number) => void;
+  updateQuestionType: (sIdx: number, qIdx: number, type: QuestionTypes) => void;
   updateQuestionConfig: (
-    sectionIndex: number,
-    questionIndex: number,
+    sIdx: number,
+    qIdx: number,
     config: QuestionConfig,
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;
-  updateSectionTitle: (sectionIndex: number, title: string) => void;
-  updateSectionDescription: (sectionIndex: number, description: string) => void;
-  updateQuestionTitle: (
-    sectionIndex: number,
-    questionIndex: number,
-    title: string,
-  ) => void;
+  updateSectionTitle: (sIdx: number, title: string) => void;
+  updateSectionDescription: (sIdx: number, description: string) => void;
+  updateQuestionTitle: (sIdx: number, qIdx: number, title: string) => void;
   updateQuestionDescription: (
-    sectionIndex: number,
-    questionIndex: number,
+    sIdx: number,
+    qIdx: number,
     description: string,
   ) => void;
 };
 
-export const useSurveyStore = create<SurveyStore>((set) => ({
-  survey: {
-    title: "New survey",
-    description: "",
-    sections: [getDefaultSection()],
-  },
-  addSection: () =>
-    set((state) => {
-      return {
-        survey: {
-          ...state.survey,
-          sections: [...state.survey.sections, getDefaultSection()],
-        },
-      };
-    }),
-  addQuestion: (sectionIndex: number) =>
-    set((state) => {
-      const sections = [...state.survey.sections];
-      const updateSection = sections[sectionIndex];
+export const useSurveyStore = create<SurveyStore>()(
+  immer((set) => ({
+    survey: {
+      title: "New survey",
+      description: "",
+      sections: [getDefaultSection()],
+    },
 
-      sections[sectionIndex] = {
-        ...updateSection,
-        questions: [...updateSection.questions, getDefaultQuestion()],
-      };
+    // --- Section Actions ---
+    addSection: () =>
+      set((state) => {
+        state.survey.sections.push(getDefaultSection());
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: sections,
-        },
-      };
-    }),
-  updateQuestionType: (sectionIndex, questionIndex, type) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    deleteSection: (sIdx) =>
+      set((state) => {
+        if (state.survey.sections.length <= 1) {
+          return;
+        }
 
-      updatedQuestions[questionIndex].question_type = type;
+        state.survey.sections.splice(sIdx, 1);
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    updateSectionTitle: (sIdx, title) =>
+      set((state) => {
+        state.survey.sections[sIdx].title = title;
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
+    updateSectionDescription: (sIdx, description) =>
+      set((state) => {
+        state.survey.sections[sIdx].description = description;
+      }),
 
-  updateQuestionConfig: (sectionIndex, questionIndex, config) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    // --- Question Actions ---
+    addQuestion: (sIdx) =>
+      set((state) => {
+        state.survey.sections[sIdx].questions.push(getDefaultQuestion());
+      }),
 
-      updatedQuestions[questionIndex].config = config;
+    deleteQuestion: (sIdx, qIdx) =>
+      set((state) => {
+        if (state.survey.sections[sIdx].questions.length <= 1) {
+          return;
+        }
+        state.survey.sections[sIdx].questions.splice(qIdx, 1);
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    updateQuestionType: (sIdx, qIdx, type) =>
+      set((state) => {
+        state.survey.sections[sIdx].questions[qIdx].question_type = type;
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
+    updateQuestionConfig: (sIdx, qIdx, config) =>
+      set((state) => {
+        state.survey.sections[sIdx].questions[qIdx].config = config;
+      }),
 
-  updateSurveyTitle: (title) =>
-    set((state) => ({
-      survey: {
-        ...state.survey,
-        title,
-      },
-    })),
-  updateSurveyDescription: (description) =>
-    set((state) => ({
-      survey: {
-        ...state.survey,
-        description,
-      },
-    })),
-  updateSectionTitle: (sectionIndex, title) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      updatedSections[sectionIndex].title = title;
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateSectionDescription: (sectionIndex, description) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      updatedSections[sectionIndex].description = description;
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateQuestionTitle: (sectionIndex, questionIndex, title) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    updateQuestionTitle: (sIdx, qIdx, title) =>
+      set((state) => {
+        state.survey.sections[sIdx].questions[qIdx].title = title;
+      }),
 
-      updatedQuestions[questionIndex].title = title;
+    updateQuestionDescription: (sIdx, qIdx, description) =>
+      set((state) => {
+        state.survey.sections[sIdx].questions[qIdx].description = description;
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    // --- Survey Actions ---
+    updateSurveyTitle: (title) =>
+      set((state) => {
+        state.survey.title = title;
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateQuestionDescription: (sectionIndex, questionIndex, description) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
-
-      updatedQuestions[questionIndex].description = description;
-
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
-
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-}));
+    updateSurveyDescription: (description) =>
+      set((state) => {
+        state.survey.description = description;
+      }),
+  })),
+);

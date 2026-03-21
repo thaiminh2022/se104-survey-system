@@ -8,11 +8,14 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
+  CardAction,
 } from "../ui/card";
 import { FieldSet, FieldGroup, Field, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import SurveyQuestion from "./SurveyQuestion";
+import { useState } from "react";
+import { ToggleDescription } from "./ToggleDescription";
 
 interface SurveySectionProps {
   info: Section;
@@ -23,10 +26,13 @@ export default function SurveySection({
   sectionIdx,
 }: SurveySectionProps) {
   const addSection = useSurveyStore((s) => s.addSection);
+  const deleteSection = useSurveyStore((s) => s.deleteSection);
   const updateSectionTitle = useSurveyStore((s) => s.updateSectionTitle);
   const updateSectionDescription = useSurveyStore(
     (s) => s.updateSectionDescription,
   );
+
+  const [showDesc, setShowDesc] = useState(false);
 
   return (
     <Card className="bg-transparent border-none mt-3">
@@ -47,7 +53,7 @@ export default function SurveySection({
                 />
               </Field>
             </CardTitle>
-            <CardDescription>
+            <CardDescription hidden={!showDesc}>
               <Field>
                 <FieldLabel htmlFor="section-description">
                   Description
@@ -65,6 +71,18 @@ export default function SurveySection({
         </FieldSet>
       </CardHeader>
       <CardContent>
+        <CardAction className="flex justify-between w-full">
+          <ToggleDescription check={showDesc} setCheck={setShowDesc} />
+          <Button
+            type="button"
+            variant={"destructive"}
+            onClick={() => {
+              deleteSection(sectionIdx);
+            }}
+          >
+            Delete Section
+          </Button>
+        </CardAction>
         {info.questions.map((e, i) => {
           const idx = i;
           return (
