@@ -28,6 +28,7 @@ export type Question = {
   description: string;
   question_type: QuestionTypes;
   config: QuestionConfig;
+  required: boolean;
 };
 
 export type QuestionConfig =

@@ -40,6 +40,9 @@ import { useState } from "react";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { ToggleDescription } from "./ToggleDescription";
+import { convertQuestionTypeToName } from "@/lib/utils";
+import { Checkbox } from "../ui/checkbox";
+import { boolean } from "zod";
 
 interface SurveyQuestionProps {
   info: Question;
@@ -59,6 +62,10 @@ export default function SurveyQuestion({
     (s) => s.survey.sections[sIndex].questions[qIndex].question_type,
   );
   const updateQuestionType = useSurveyStore((s) => s.updateQuestionType);
+  const updateQuestionRequired = useSurveyStore(
+    (s) => s.updateQuestionRequired,
+  );
+
   const addQuestion = useSurveyStore((s) => s.addQuestion);
   const deleteQuestion = useSurveyStore((s) => s.deleteQuestion);
 
@@ -113,6 +120,19 @@ export default function SurveyQuestion({
           Add question
         </Button>
         <CardAction className="flex gap-x-2">
+          <Field orientation={"horizontal"}>
+            <FieldLabel htmlFor="required-checkbox">Required</FieldLabel>
+            <Checkbox
+              id="required-checkbox"
+              onCheckedChange={(e) => {
+                if (e === true) {
+                  updateQuestionRequired(sIndex, qIndex, true);
+                } else if (e === false) {
+                  updateQuestionRequired(sIndex, qIndex, false);
+                }
+              }}
+            />
+          </Field>
           <Select
             required
             value={questionType}
@@ -128,7 +148,7 @@ export default function SurveyQuestion({
                 <SelectLabel>Question Type</SelectLabel>
                 {QUESTION_TYPES.map((e, i) => (
                   <SelectItem value={e} key={i}>
-                    {e}
+                    {convertQuestionTypeToName(e)}
                   </SelectItem>
                 ))}
               </SelectGroup>

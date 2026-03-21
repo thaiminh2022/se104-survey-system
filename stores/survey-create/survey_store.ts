@@ -21,6 +21,7 @@ function getDefaultQuestion(): Question {
     description: "",
     question_type: "checkbox",
     config: checkboxConfig,
+    required: false,
   };
 }
 
@@ -53,6 +54,11 @@ type SurveyStore = {
     sIdx: number,
     qIdx: number,
     description: string,
+  ) => void;
+  updateQuestionRequired: (
+    sIdx: number,
+    qIdx: number,
+    newValue: boolean,
   ) => void;
 };
 
@@ -133,5 +139,10 @@ export const useSurveyStore = create<SurveyStore>()(
       set((state) => {
         state.survey.description = description;
       }),
+    updateQuestionRequired: (sIndex, qIndex, newValue) => {
+      set((state) => {
+        state.survey.sections[sIndex].questions[qIndex].required = newValue;
+      });
+    },
   })),
 );
