@@ -13,7 +13,7 @@ import {
 import { FieldSet, FieldGroup, Field, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import SurveyQuestion from "./SurveyQuestion";
+import SurveyQuestion from "./question/SurveyQuestion";
 import { useState } from "react";
 import { ToggleDescription } from "./ToggleDescription";
 
