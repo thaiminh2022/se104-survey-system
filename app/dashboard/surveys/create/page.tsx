@@ -1,22 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import { Input } from "@/components/ui/input";
-import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { submitSurvey } from "@/actions/create_survey";
-import SurveySection from "@/components/survey-create/SurveySection";
-import SurveyHeader from "@/components/survey-create/SurveyHeader";
 import { SiteHeader } from "@/components/dashboard/site-header";
+import SurveyHeader from "@/components/survey-create/SurveyHeader";
+import SurveySection from "@/components/survey-create/SurveySection";
+import { useSurveyStore } from "@/stores/survey-create/survey_store";
 
 export default function Page() {
   const survey = useSurveyStore((s) => s.survey);
