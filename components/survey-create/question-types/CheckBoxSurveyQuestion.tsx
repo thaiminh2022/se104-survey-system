@@ -81,7 +81,7 @@ export function CheckBoxSurveyQuestion({
       {config.options.map((v, i) => {
         const idx = i;
         return (
-          <Field orientation="horizontal">
+          <Field orientation="horizontal" key={i}>
             <IconCheckbox />
             <Input
               key={i}

@@ -38,6 +38,7 @@ export type QuestionConfig =
 
 export type ShortAnswerConfig = {};
 export type MultipleChoiceConfig = {};
+
 export type CheckBoxConfig = {
   haveOther: boolean;
   options: string[];

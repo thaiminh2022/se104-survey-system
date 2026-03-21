@@ -27,6 +27,18 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { CheckBoxSurveyQuestion } from "./question-types/CheckBoxSurveyQuestion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "../ui/popover";
+import { IconDots } from "@tabler/icons-react";
+import { useState } from "react";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 interface SurveyQuestionProps {
   info: Question;
@@ -55,32 +67,11 @@ export default function SurveyQuestion({
     return <>{questionType}</>;
   }
 
+  const [showDesc, setShowDesc] = useState(false);
+
   return (
     <Card className="mt-3">
       <CardHeader>
-        <CardAction>
-          <Select
-            required
-            value={questionType}
-            onValueChange={(e) => {
-              updateQuestionType(sIndex, qIndex, e as QuestionTypes);
-            }}
-          >
-            <SelectTrigger className="w-full max-w-48">
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Question Type</SelectLabel>
-                {QUESTION_TYPES.map((e, i) => (
-                  <SelectItem value={e} key={i}>
-                    {e}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </CardAction>
         <FieldSet className="w-full">
           <FieldGroup>
             <CardTitle>
@@ -97,7 +88,7 @@ export default function SurveyQuestion({
                 />
               </Field>
             </CardTitle>
-            <CardDescription>
+            <CardDescription hidden={!showDesc}>
               <Field>
                 <FieldLabel htmlFor="question-description">
                   Description
@@ -115,10 +106,52 @@ export default function SurveyQuestion({
         </FieldSet>
       </CardHeader>
       <CardContent>{getQuestionComponent()}</CardContent>
-      <CardFooter>
+      <CardFooter className="flex justify-between">
         <Button type="button" onClick={() => addQuestion(sIndex)}>
           Add question
         </Button>
+        <CardAction className="flex gap-x-2">
+          <Select
+            required
+            value={questionType}
+            onValueChange={(e) => {
+              updateQuestionType(sIndex, qIndex, e as QuestionTypes);
+            }}
+          >
+            <SelectTrigger className="w-full max-w-48">
+              <SelectValue placeholder="Select a question type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Question Type</SelectLabel>
+                {QUESTION_TYPES.map((e, i) => (
+                  <SelectItem value={e} key={i}>
+                    {e}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <IconDots />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDesc((prev) => !prev)}
+              >
+                Toggle description
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Switch id="airplane-mode" />
+                <Label htmlFor="airplane-mode">Airplane Mode</Label>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </CardAction>
       </CardFooter>
     </Card>
   );
