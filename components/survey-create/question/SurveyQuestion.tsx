@@ -1,4 +1,3 @@
-import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { Question } from "@/types/survey-create/question-type";
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
@@ -8,23 +7,19 @@ import QuestionHeader from "./QuestionHeader";
 
 interface SurveyQuestionProps {
   info: Question;
-  sIndex: number;
-  qIndex: number;
+  sectionID: string;
 }
 export default function SurveyQuestion({
   info,
-  sIndex,
-  qIndex,
+  sectionID,
 }: SurveyQuestionProps) {
-  const questionType = useSurveyStore(
-    (s) => s.survey.sections[sIndex].questions[qIndex].question_type,
-  );
-
   function getQuestionComponent() {
-    if (questionType == "checkbox") {
-      return <CheckBoxSurveyQuestion sIndex={sIndex} qIndex={qIndex} />;
+    if (info.question_type == "checkbox") {
+      return (
+        <CheckBoxSurveyQuestion questionID={info.id} sectionID={sectionID} />
+      );
     }
-    return <>{questionType}</>;
+    return <>{info.question_type}</>;
   }
 
   const [showDesc, setShowDesc] = useState(false);
@@ -32,21 +27,16 @@ export default function SurveyQuestion({
   return (
     <Card className="mt-3">
       <CardHeader>
-        <QuestionHeader
-          info={info}
-          qIndex={qIndex}
-          showDesc={showDesc}
-          sIndex={sIndex}
-        />
+        <QuestionHeader info={info} showDesc={showDesc} sectionID={sectionID} />
       </CardHeader>
       <CardContent>{getQuestionComponent()}</CardContent>
       <CardFooter className="flex justify-between">
         <QuestionFooter
-          questionType={questionType}
-          qIndex={qIndex}
+          questionType={info.question_type}
           setShowDesc={setShowDesc}
           showDesc={showDesc}
-          sIndex={sIndex}
+          questionID={info.id}
+          sectionID={sectionID}
         />
       </CardFooter>
     </Card>

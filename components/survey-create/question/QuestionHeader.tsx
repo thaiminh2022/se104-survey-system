@@ -1,5 +1,5 @@
-import { CardTitle, CardDescription } from "@/components/ui/card";
-import { FieldSet, FieldGroup, Field, FieldLabel } from "@/components/ui/field";
+import { CardDescription, CardTitle } from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
@@ -7,16 +7,14 @@ import { Question } from "@/types/survey-create/question-type";
 
 interface QuestionHeaderProps {
   info: Question;
-  qIndex: number;
+  sectionID: string;
   showDesc: boolean;
-  sIndex: number;
 }
 
 export default function QuestionHeader({
   info,
-  qIndex,
+  sectionID,
   showDesc,
-  sIndex,
 }: QuestionHeaderProps) {
   const updateQuestionTitle = useSurveyStore((s) => s.updateQuestionTitle);
   const updateQuestionDescription = useSurveyStore(
@@ -34,7 +32,7 @@ export default function QuestionHeader({
               placeholder="Default"
               value={info.title}
               onChange={(e) =>
-                updateQuestionTitle(sIndex, qIndex, e.target.value)
+                updateQuestionTitle(sectionID, info.id, e.target.value)
               }
             />
           </Field>
@@ -46,7 +44,7 @@ export default function QuestionHeader({
               id="question-description"
               value={info.description}
               onChange={(e) =>
-                updateQuestionDescription(sIndex, qIndex, e.target.value)
+                updateQuestionDescription(sectionID, info.id, e.target.value)
               }
             />
           </Field>

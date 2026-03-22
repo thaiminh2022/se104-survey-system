@@ -18,12 +18,14 @@ export type Survey = {
 };
 
 export type Section = {
+  id: string;
   title: string;
   description: string;
   questions: Question[];
 };
 
 export type Question = {
+  id: string;
   title: string;
   description: string;
   question_type: QuestionTypes;

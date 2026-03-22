@@ -14,8 +14,7 @@ export default function Page() {
         <SurveyHeader />
         <div>
           {survey.sections.map((e, i) => {
-            const idx = i;
-            return <SurveySection info={e} sectionIdx={idx} key={i} />;
+            return <SurveySection info={e} key={e.id} />;
           })}
         </div>
       </div>

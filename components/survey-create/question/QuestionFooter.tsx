@@ -1,44 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { CardAction } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
-  PopoverTrigger,
-  PopoverContent,
   Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  SelectTrigger,
-  SelectValue,
+  Select,
   SelectContent,
   SelectGroup,
-  SelectLabel,
   SelectItem,
-  Select,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { convertQuestionTypeToName } from "@/lib/utils";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import {
-  QuestionTypes,
   QUESTION_TYPES,
+  QuestionTypes,
 } from "@/types/survey-create/question-type";
 import { IconDots } from "@tabler/icons-react";
 import { ToggleDescription } from "../ToggleDescription";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface QuestionFooterProps {
-  qIndex: number;
   questionType: QuestionTypes;
   setShowDesc: React.Dispatch<React.SetStateAction<boolean>>;
   showDesc: boolean;
-  sIndex: number;
+
+  questionID: string;
+  sectionID: string;
 }
 
 export default function QuestionFooter({
-  qIndex,
   questionType,
   setShowDesc,
   showDesc,
-  sIndex,
+  questionID,
+  sectionID,
 }: QuestionFooterProps) {
   const updateQuestionType = useSurveyStore((s) => s.updateQuestionType);
   const updateQuestionRequired = useSurveyStore(
@@ -49,7 +50,7 @@ export default function QuestionFooter({
   const deleteQuestion = useSurveyStore((s) => s.deleteQuestion);
   return (
     <>
-      <Button type="button" onClick={() => addQuestion(sIndex)}>
+      <Button type="button" onClick={() => addQuestion(sectionID)}>
         Add question
       </Button>
       <CardAction className="flex gap-x-2">
@@ -59,9 +60,9 @@ export default function QuestionFooter({
             id="required-checkbox"
             onCheckedChange={(e) => {
               if (e === true) {
-                updateQuestionRequired(sIndex, qIndex, true);
+                updateQuestionRequired(sectionID, questionID, true);
               } else if (e === false) {
-                updateQuestionRequired(sIndex, qIndex, false);
+                updateQuestionRequired(sectionID, questionID, false);
               }
             }}
           />
@@ -70,7 +71,7 @@ export default function QuestionFooter({
           required
           value={questionType}
           onValueChange={(e) => {
-            updateQuestionType(sIndex, qIndex, e as QuestionTypes);
+            updateQuestionType(sectionID, questionID, e as QuestionTypes);
           }}
         >
           <SelectTrigger className="w-full max-w-48">
@@ -99,7 +100,7 @@ export default function QuestionFooter({
               variant={"destructive"}
               type="button"
               onClick={() => {
-                deleteQuestion(sIndex, qIndex);
+                deleteQuestion(sectionID, questionID);
               }}
             >
               Delete question

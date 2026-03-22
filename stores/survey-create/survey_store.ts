@@ -1,7 +1,5 @@
 "use client";
 
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
 import {
   CheckBoxConfig,
   Question,
@@ -10,6 +8,8 @@ import {
   Section,
   Survey,
 } from "@/types/survey-create/question-type";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 
 function getDefaultQuestion(): Question {
   const checkboxConfig: CheckBoxConfig = {
@@ -17,6 +17,7 @@ function getDefaultQuestion(): Question {
     options: [],
   };
   return {
+    id: crypto.randomUUID(),
     title: "Title",
     description: "",
     question_type: "checkbox",
@@ -27,6 +28,7 @@ function getDefaultQuestion(): Question {
 
 function getDefaultSection(): Section {
   return {
+    id: crypto.randomUUID(),
     title: "New section",
     description: "",
     questions: [getDefaultQuestion()],
@@ -36,28 +38,36 @@ function getDefaultSection(): Section {
 type SurveyStore = {
   survey: Survey;
   addSection: () => void;
-  deleteSection: (sectionIndex: number) => void;
-  addQuestion: (sectionIndex: number) => void;
-  deleteQuestion: (sectionIndex: number, questionIndex: number) => void;
-  updateQuestionType: (sIdx: number, qIdx: number, type: QuestionTypes) => void;
+  deleteSection: (sectionID: string) => void;
+  addQuestion: (sectionID: string) => void;
+  deleteQuestion: (sectionID: string, questionID: string) => void;
+  updateQuestionType: (
+    sectionID: string,
+    questionID: string,
+    type: QuestionTypes,
+  ) => void;
   updateQuestionConfig: (
-    sIdx: number,
-    qIdx: number,
+    sectionID: string,
+    questionID: string,
     config: QuestionConfig,
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;
-  updateSectionTitle: (sIdx: number, title: string) => void;
-  updateSectionDescription: (sIdx: number, description: string) => void;
-  updateQuestionTitle: (sIdx: number, qIdx: number, title: string) => void;
+  updateSectionTitle: (sectionID: string, title: string) => void;
+  updateSectionDescription: (sectionID: string, description: string) => void;
+  updateQuestionTitle: (
+    sectionID: string,
+    questionID: string,
+    title: string,
+  ) => void;
   updateQuestionDescription: (
-    sIdx: number,
-    qIdx: number,
+    sectionID: string,
+    questionID: string,
     description: string,
   ) => void;
   updateQuestionRequired: (
-    sIdx: number,
-    qIdx: number,
+    sectionID: string,
+    questionID: string,
     newValue: boolean,
   ) => void;
 };
@@ -76,57 +86,97 @@ export const useSurveyStore = create<SurveyStore>()(
         state.survey.sections.push(getDefaultSection());
       }),
 
-    deleteSection: (sIdx) =>
+    deleteSection: (sectionID) =>
       set((state) => {
         if (state.survey.sections.length <= 1) {
           return;
         }
-
-        state.survey.sections.splice(sIdx, 1);
+        state.survey.sections = state.survey.sections.filter(
+          (s) => s.id !== sectionID,
+        );
       }),
 
-    updateSectionTitle: (sIdx, title) =>
+    updateSectionTitle: (sectionID, title) =>
       set((state) => {
-        state.survey.sections[sIdx].title = title;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.title = title;
+        }
       }),
 
-    updateSectionDescription: (sIdx, description) =>
+    updateSectionDescription: (sectionID, description) =>
       set((state) => {
-        state.survey.sections[sIdx].description = description;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.title = description;
+        }
       }),
 
     // --- Question Actions ---
-    addQuestion: (sIdx) =>
+    addQuestion: (sectionID) =>
       set((state) => {
-        state.survey.sections[sIdx].questions.push(getDefaultQuestion());
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.questions.push(getDefaultQuestion());
+        }
       }),
 
-    deleteQuestion: (sIdx, qIdx) =>
+    deleteQuestion: (sectionID, questionID) =>
       set((state) => {
-        if (state.survey.sections[sIdx].questions.length <= 1) {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.questions = section.questions.filter(
+            (q) => q.id !== questionID,
+          );
+        }
+      }),
+
+    updateQuestionType: (sectionID, questionID, type) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
           return;
         }
-        state.survey.sections[sIdx].questions.splice(qIdx, 1);
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.question_type = type;
+        }
       }),
 
-    updateQuestionType: (sIdx, qIdx, type) =>
+    updateQuestionConfig: (sectionID, questionID, config) =>
       set((state) => {
-        state.survey.sections[sIdx].questions[qIdx].question_type = type;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.config = config;
+        }
       }),
 
-    updateQuestionConfig: (sIdx, qIdx, config) =>
+    updateQuestionTitle: (sectionID, questionID, title) =>
       set((state) => {
-        state.survey.sections[sIdx].questions[qIdx].config = config;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.title = title;
+        }
       }),
 
-    updateQuestionTitle: (sIdx, qIdx, title) =>
+    updateQuestionDescription: (sectionID, questionID, description) =>
       set((state) => {
-        state.survey.sections[sIdx].questions[qIdx].title = title;
-      }),
-
-    updateQuestionDescription: (sIdx, qIdx, description) =>
-      set((state) => {
-        state.survey.sections[sIdx].questions[qIdx].description = description;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.description = description;
+        }
       }),
 
     // --- Survey Actions ---
@@ -139,9 +189,17 @@ export const useSurveyStore = create<SurveyStore>()(
       set((state) => {
         state.survey.description = description;
       }),
-    updateQuestionRequired: (sIndex, qIndex, newValue) => {
+
+    updateQuestionRequired: (sectionID, questionID, newValue) => {
       set((state) => {
-        state.survey.sections[sIndex].questions[qIndex].required = newValue;
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.required = newValue;
+        }
       });
     },
   })),
