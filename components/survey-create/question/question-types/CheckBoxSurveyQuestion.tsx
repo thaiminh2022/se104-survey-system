@@ -4,16 +4,16 @@ import { Input } from "@/components/ui/input";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { CheckBoxConfig } from "@/types/survey-create/question-type";
 import { IconCheckbox, IconTrash } from "@tabler/icons-react";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CheckboxSurveyProps {
-  sIndex: number;
-  qIndex: number;
+  sectionID: string;
+  questionID: string;
 }
 
 export function CheckBoxSurveyQuestion({
-  sIndex,
-  qIndex,
+  sectionID,
+  questionID,
 }: CheckboxSurveyProps) {
   const updateQuestionConfig = useSurveyStore((s) => s.updateQuestionConfig);
   const latestOption = useRef<HTMLInputElement>(null);
@@ -72,7 +72,7 @@ export function CheckBoxSurveyQuestion({
       ...newConfig,
       options: cleanOption,
     };
-    updateQuestionConfig(sIndex, qIndex, sendConfig);
+    updateQuestionConfig(sectionID, questionID, sendConfig);
   }
 
   return (
@@ -81,7 +81,7 @@ export function CheckBoxSurveyQuestion({
       {config.options.map((v, i) => {
         const idx = i;
         return (
-          <Field orientation="horizontal">
+          <Field orientation="horizontal" key={i}>
             <IconCheckbox />
             <Input
               key={i}

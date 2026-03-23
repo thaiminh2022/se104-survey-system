@@ -1,32 +1,34 @@
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { Section } from "@/types/survey-create/question-type";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import {
   Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "../ui/card";
-import { FieldSet, FieldGroup, Field, FieldLabel } from "../ui/field";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/field";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import SurveyQuestion from "./SurveyQuestion";
+import SurveyQuestion from "./question/SurveyQuestion";
+import { ToggleDescription } from "./ToggleDescription";
 
 interface SurveySectionProps {
   info: Section;
-  sectionIdx: number;
 }
-export default function SurveySection({
-  info,
-  sectionIdx,
-}: SurveySectionProps) {
+export default function SurveySection({ info }: SurveySectionProps) {
   const addSection = useSurveyStore((s) => s.addSection);
+  const deleteSection = useSurveyStore((s) => s.deleteSection);
   const updateSectionTitle = useSurveyStore((s) => s.updateSectionTitle);
   const updateSectionDescription = useSurveyStore(
     (s) => s.updateSectionDescription,
   );
+
+  const [showDesc, setShowDesc] = useState(false);
 
   return (
     <Card className="bg-transparent border-none mt-3">
@@ -41,13 +43,11 @@ export default function SurveySection({
                   type="text"
                   placeholder="Default"
                   value={info.title}
-                  onChange={(e) =>
-                    updateSectionTitle(sectionIdx, e.target.value)
-                  }
+                  onChange={(e) => updateSectionTitle(info.id, e.target.value)}
                 />
               </Field>
             </CardTitle>
-            <CardDescription>
+            <CardDescription hidden={!showDesc}>
               <Field>
                 <FieldLabel htmlFor="section-description">
                   Description
@@ -56,7 +56,7 @@ export default function SurveySection({
                   id="section-description"
                   value={info.description}
                   onChange={(e) =>
-                    updateSectionDescription(sectionIdx, e.target.value)
+                    updateSectionDescription(info.id, e.target.value)
                   }
                 />
               </Field>
@@ -65,11 +65,20 @@ export default function SurveySection({
         </FieldSet>
       </CardHeader>
       <CardContent>
+        <CardAction className="flex justify-between w-full">
+          <ToggleDescription check={showDesc} setCheck={setShowDesc} />
+          <Button
+            type="button"
+            variant={"destructive"}
+            onClick={() => {
+              deleteSection(info.id);
+            }}
+          >
+            Delete Section
+          </Button>
+        </CardAction>
         {info.questions.map((e, i) => {
-          const idx = i;
-          return (
-            <SurveyQuestion info={e} qIndex={idx} sIndex={sectionIdx} key={i} />
-          );
+          return <SurveyQuestion info={e} key={e.id} sectionID={info.id} />;
         })}
       </CardContent>
       <CardFooter>

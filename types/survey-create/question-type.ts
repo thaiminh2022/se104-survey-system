@@ -18,16 +18,19 @@ export type Survey = {
 };
 
 export type Section = {
+  id: string;
   title: string;
   description: string;
   questions: Question[];
 };
 
 export type Question = {
+  id: string;
   title: string;
   description: string;
   question_type: QuestionTypes;
   config: QuestionConfig;
+  required: boolean;
 };
 
 export type QuestionConfig =
@@ -38,6 +41,7 @@ export type QuestionConfig =
 
 export type ShortAnswerConfig = {};
 export type MultipleChoiceConfig = {};
+
 export type CheckBoxConfig = {
   haveOther: boolean;
   options: string[];

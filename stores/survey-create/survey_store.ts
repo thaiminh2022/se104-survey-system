@@ -1,6 +1,5 @@
 "use client";
 
-import { create } from "zustand";
 import {
   CheckBoxConfig,
   Question,
@@ -9,209 +8,199 @@ import {
   Section,
   Survey,
 } from "@/types/survey-create/question-type";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 
-function getDefaultSection() {
-  const defaultSection: Section = {
-    title: "New section",
-    description: "",
-    questions: [getDefaultQuestion()],
-  };
-  return defaultSection;
-}
-
-function getDefaultQuestion() {
+function getDefaultQuestion(): Question {
   const checkboxConfig: CheckBoxConfig = {
     haveOther: false,
     options: [],
   };
-
-  const defaultQuestion: Question = {
+  return {
+    id: crypto.randomUUID(),
     title: "Title",
     description: "",
     question_type: "checkbox",
     config: checkboxConfig,
+    required: false,
   };
-  return defaultQuestion;
+}
+
+function getDefaultSection(): Section {
+  return {
+    id: crypto.randomUUID(),
+    title: "New section",
+    description: "",
+    questions: [getDefaultQuestion()],
+  };
 }
 
 type SurveyStore = {
   survey: Survey;
   addSection: () => void;
-  addQuestion: (sectionIndex: number) => void;
+  deleteSection: (sectionID: string) => void;
+  addQuestion: (sectionID: string) => void;
+  deleteQuestion: (sectionID: string, questionID: string) => void;
   updateQuestionType: (
-    sectionIndex: number,
-    questionIndex: number,
+    sectionID: string,
+    questionID: string,
     type: QuestionTypes,
   ) => void;
   updateQuestionConfig: (
-    sectionIndex: number,
-    questionIndex: number,
+    sectionID: string,
+    questionID: string,
     config: QuestionConfig,
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;
-  updateSectionTitle: (sectionIndex: number, title: string) => void;
-  updateSectionDescription: (sectionIndex: number, description: string) => void;
+  updateSectionTitle: (sectionID: string, title: string) => void;
+  updateSectionDescription: (sectionID: string, description: string) => void;
   updateQuestionTitle: (
-    sectionIndex: number,
-    questionIndex: number,
+    sectionID: string,
+    questionID: string,
     title: string,
   ) => void;
   updateQuestionDescription: (
-    sectionIndex: number,
-    questionIndex: number,
+    sectionID: string,
+    questionID: string,
     description: string,
+  ) => void;
+  updateQuestionRequired: (
+    sectionID: string,
+    questionID: string,
+    newValue: boolean,
   ) => void;
 };
 
-export const useSurveyStore = create<SurveyStore>((set) => ({
-  survey: {
-    title: "New survey",
-    description: "",
-    sections: [getDefaultSection()],
-  },
-  addSection: () =>
-    set((state) => {
-      return {
-        survey: {
-          ...state.survey,
-          sections: [...state.survey.sections, getDefaultSection()],
-        },
-      };
-    }),
-  addQuestion: (sectionIndex: number) =>
-    set((state) => {
-      const sections = [...state.survey.sections];
-      const updateSection = sections[sectionIndex];
+export const useSurveyStore = create<SurveyStore>()(
+  immer((set) => ({
+    survey: {
+      title: "New survey",
+      description: "",
+      sections: [getDefaultSection()],
+    },
 
-      sections[sectionIndex] = {
-        ...updateSection,
-        questions: [...updateSection.questions, getDefaultQuestion()],
-      };
+    // --- Section Actions ---
+    addSection: () =>
+      set((state) => {
+        state.survey.sections.push(getDefaultSection());
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: sections,
-        },
-      };
-    }),
-  updateQuestionType: (sectionIndex, questionIndex, type) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    deleteSection: (sectionID) =>
+      set((state) => {
+        if (state.survey.sections.length <= 1) {
+          return;
+        }
+        state.survey.sections = state.survey.sections.filter(
+          (s) => s.id !== sectionID,
+        );
+      }),
 
-      updatedQuestions[questionIndex].question_type = type;
+    updateSectionTitle: (sectionID, title) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.title = title;
+        }
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    updateSectionDescription: (sectionID, description) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.title = description;
+        }
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
+    // --- Question Actions ---
+    addQuestion: (sectionID) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.questions.push(getDefaultQuestion());
+        }
+      }),
 
-  updateQuestionConfig: (sectionIndex, questionIndex, config) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    deleteQuestion: (sectionID, questionID) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (section) {
+          section.questions = section.questions.filter(
+            (q) => q.id !== questionID,
+          );
+        }
+      }),
 
-      updatedQuestions[questionIndex].config = config;
+    updateQuestionType: (sectionID, questionID, type) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.question_type = type;
+        }
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    updateQuestionConfig: (sectionID, questionID, config) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.config = config;
+        }
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
+    updateQuestionTitle: (sectionID, questionID, title) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.title = title;
+        }
+      }),
 
-  updateSurveyTitle: (title) =>
-    set((state) => ({
-      survey: {
-        ...state.survey,
-        title,
-      },
-    })),
-  updateSurveyDescription: (description) =>
-    set((state) => ({
-      survey: {
-        ...state.survey,
-        description,
-      },
-    })),
-  updateSectionTitle: (sectionIndex, title) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      updatedSections[sectionIndex].title = title;
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateSectionDescription: (sectionIndex, description) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      updatedSections[sectionIndex].description = description;
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateQuestionTitle: (sectionIndex, questionIndex, title) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
+    updateQuestionDescription: (sectionID, questionID, description) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.description = description;
+        }
+      }),
 
-      updatedQuestions[questionIndex].title = title;
+    // --- Survey Actions ---
+    updateSurveyTitle: (title) =>
+      set((state) => {
+        state.survey.title = title;
+      }),
 
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
+    updateSurveyDescription: (description) =>
+      set((state) => {
+        state.survey.description = description;
+      }),
 
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-  updateQuestionDescription: (sectionIndex, questionIndex, description) =>
-    set((state) => {
-      const updatedSections = [...state.survey.sections];
-      const targetSection = updatedSections[sectionIndex];
-      const updatedQuestions = [...targetSection.questions];
-
-      updatedQuestions[questionIndex].description = description;
-
-      updatedSections[sectionIndex] = {
-        ...targetSection,
-        questions: updatedQuestions,
-      };
-
-      return {
-        survey: {
-          ...state.survey,
-          sections: updatedSections,
-        },
-      };
-    }),
-}));
+    updateQuestionRequired: (sectionID, questionID, newValue) => {
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+        if (!section) {
+          return;
+        }
+        const question = section.questions.find((q) => q.id === questionID);
+        if (question) {
+          question.required = newValue;
+        }
+      });
+    },
+  })),
+);
