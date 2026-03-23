@@ -35,12 +35,32 @@ export type Question = {
 
 export type QuestionConfig =
   | ShortAnswerConfig
-  | ShortAnswerConfig
+  | LongAnswerConfig
   | MultipleChoiceConfig
-  | CheckBoxConfig;
+  | CheckBoxConfig
+  | DropdownAnswerConfig
+  | NumberAnswerConfig
+  | DatetimeAnswerConfig
+  | RatingConfig;
 
 export type ShortAnswerConfig = {};
 export type MultipleChoiceConfig = {};
+export type LongAnswerConfig = {};
+export type DropdownAnswerConfig = {};
+export type RatingConfig = {};
+
+export type NumberAnswerConfig = {
+  isInteger: boolean;
+  isRange: boolean;
+  min: number;
+  max: number;
+};
+
+export type DatetimeAnswerConfig = {
+  date: Date;
+  mode: DateTimeMode;
+};
+export type DateTimeMode = "date" | "time" | "datetime";
 
 export type CheckBoxConfig = {
   haveOther: boolean;

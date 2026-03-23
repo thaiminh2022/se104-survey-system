@@ -2,6 +2,8 @@
 
 import {
   CheckBoxConfig,
+  DatetimeAnswerConfig,
+  NumberAnswerConfig,
   Question,
   QuestionConfig,
   QuestionTypes,
@@ -12,18 +14,49 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 function getDefaultQuestion(): Question {
-  const checkboxConfig: CheckBoxConfig = {
-    haveOther: false,
-    options: [],
-  };
   return {
     id: crypto.randomUUID(),
     title: "Title",
     description: "",
     question_type: "checkbox",
-    config: checkboxConfig,
+    config: getDefaultConfigForQuestionType("checkbox"),
     required: false,
   };
+}
+
+function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfig {
+  switch (t) {
+    case "number":
+      const nConfig: NumberAnswerConfig = {
+        isInteger: true,
+        isRange: false,
+        min: 0,
+        max: 100,
+      };
+      return nConfig;
+    case "short-answer":
+      return {};
+    case "long-answer":
+      return {};
+    case "multiple-choice":
+      return {};
+    case "checkbox":
+      const cbConfig: CheckBoxConfig = {
+        options: [],
+        haveOther: false,
+      };
+      return cbConfig;
+    case "dropdown":
+      return {};
+    case "datetime":
+      const dtConfig: DatetimeAnswerConfig = {
+        date: new Date(),
+        mode: "date",
+      };
+      return dtConfig;
+    case "rating":
+      return {};
+  }
 }
 
 function getDefaultSection(): Section {
@@ -140,6 +173,7 @@ export const useSurveyStore = create<SurveyStore>()(
         const question = section.questions.find((q) => q.id === questionID);
         if (question) {
           question.question_type = type;
+          question.config = getDefaultConfigForQuestionType(type);
         }
       }),
 
@@ -150,6 +184,7 @@ export const useSurveyStore = create<SurveyStore>()(
           return;
         }
         const question = section.questions.find((q) => q.id === questionID);
+
         if (question) {
           question.config = config;
         }

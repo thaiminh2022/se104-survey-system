@@ -2,6 +2,8 @@ import { Question } from "@/types/survey-create/question-type";
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
 import { CheckBoxSurveyQuestion } from "./question-types/CheckBoxSurveyQuestion";
+import DatetimeSurveyQuestion from "./question-types/DatetimeSurveyQuestion";
+import { NumberSurveyQuestion } from "./question-types/NumberSurveyQuestion";
 import QuestionFooter from "./QuestionFooter";
 import QuestionHeader from "./QuestionHeader";
 
@@ -17,6 +19,14 @@ export default function SurveyQuestion({
     if (info.question_type == "checkbox") {
       return (
         <CheckBoxSurveyQuestion questionID={info.id} sectionID={sectionID} />
+      );
+    } else if (info.question_type == "datetime") {
+      return (
+        <DatetimeSurveyQuestion questionID={info.id} sectionID={sectionID} />
+      );
+    } else if (info.question_type === "number") {
+      return (
+        <NumberSurveyQuestion questionID={info.id} sectionID={sectionID} />
       );
     }
     return <>{info.question_type}</>;
