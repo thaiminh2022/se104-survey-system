@@ -6,6 +6,9 @@ import DatetimeSurveyQuestion from "./question-types/DatetimeSurveyQuestion";
 import { NumberSurveyQuestion } from "./question-types/NumberSurveyQuestion";
 import QuestionFooter from "./QuestionFooter";
 import QuestionHeader from "./QuestionHeader";
+import { ShortAnswerSurveyQuestion } from "./question-types/ShortAnswerSurveyQuestion";
+import { LongAnswerSurveyQuestion } from "./question-types/LongAnswerSurveyQuestion";
+import { MultipleChoiceSurveyQuestion } from "./question-types/MultipleChoiceSurveyQuestion";
 
 interface SurveyQuestionProps {
   info: Question;
@@ -28,7 +31,14 @@ export default function SurveyQuestion({
       return (
         <NumberSurveyQuestion questionID={info.id} sectionID={sectionID} />
       );
+    } else if (info.question_type === "short-answer") {
+      return <ShortAnswerSurveyQuestion />;
+    } else if (info.question_type === "long-answer") {
+      return <LongAnswerSurveyQuestion />;
+    } else if (info.question_type === "multiple-choice") {
+      return <MultipleChoiceSurveyQuestion questionID={info.id} sectionID={sectionID} />;
     }
+    
     return <>{info.question_type}</>;
   }
 

@@ -43,9 +43,18 @@ export type QuestionConfig =
   | DatetimeAnswerConfig
   | RatingConfig;
 
-export type ShortAnswerConfig = {};
-export type MultipleChoiceConfig = {};
-export type LongAnswerConfig = {};
+export type ShortAnswerConfig = {
+  placeholder?: string;
+};
+
+export type MultipleChoiceConfig = {
+  options: string[];
+  haveOther?: boolean;
+};
+
+export type LongAnswerConfig = {
+  placeholder?: string;
+};
 export type DropdownAnswerConfig = {};
 export type RatingConfig = {};
 

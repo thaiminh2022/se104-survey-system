@@ -9,6 +9,7 @@ import {
   QuestionTypes,
   Section,
   Survey,
+  MultipleChoiceConfig,
 } from "@/types/survey-create/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -39,7 +40,11 @@ function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfig {
     case "long-answer":
       return {};
     case "multiple-choice":
-      return {};
+      const mcConfig: MultipleChoiceConfig = {
+        options: ["Option 1"],
+        haveOther: false,
+      };
+      return mcConfig;
     case "checkbox":
       const cbConfig: CheckBoxConfig = {
         options: [],
