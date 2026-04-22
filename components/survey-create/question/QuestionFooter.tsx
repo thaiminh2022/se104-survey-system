@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { convertQuestionTypeToName } from "@/lib/utils";
+import { convertQuestionTypeToName } from "@/lib/helper";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import {
   QUESTION_TYPES,

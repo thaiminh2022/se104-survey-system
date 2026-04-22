@@ -3,13 +3,13 @@
 import {
   CheckBoxConfig,
   DatetimeAnswerConfig,
+  MultipleChoiceConfig,
   NumberAnswerConfig,
   Question,
   QuestionConfig,
   QuestionTypes,
   Section,
   Survey,
-  MultipleChoiceConfig,
 } from "@/types/survey-create/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -146,7 +146,7 @@ export const useSurveyStore = create<SurveyStore>()(
       set((state) => {
         const section = state.survey.sections.find((s) => s.id === sectionID);
         if (section) {
-          section.title = description;
+          section.description = description;
         }
       }),
 

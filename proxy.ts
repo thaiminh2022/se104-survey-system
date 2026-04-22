@@ -1,13 +1,12 @@
 import { updateSession } from "@/lib/supabase/proxy";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
+
+const authBypass = false;
 
 export async function proxy(request: NextRequest) {
-  if (
-    process.env.NODE_ENV === "development" &&
-    process.env.AUTH_BYPASS === "true"
-  ) {
-    return NextResponse.next();
-  }
+  // if (process.env.NODE_ENV === "development" && authBypass) {
+  //   return NextResponse.next();
+  // }
 
   return await updateSession(request);
 }
