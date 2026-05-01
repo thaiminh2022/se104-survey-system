@@ -10,7 +10,7 @@ import {
   QuestionTypes,
   Section,
   Survey,
-} from "@/types/survey-create/question-type";
+} from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

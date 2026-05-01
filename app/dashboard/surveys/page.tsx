@@ -1,5 +1,7 @@
-import { SurveySchema } from "@/actions/create_survey";
 import { SiteHeader } from "@/components/dashboard/site-header";
+import ChangeStateSurveyButton from "@/components/dashboard/surveys/ChangeStateSurveyBtn";
+import DeleteSurveyButton from "@/components/dashboard/surveys/DeleteSurveyBtn";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,40 +10,59 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
-import { IconGraph, IconPencil } from "@tabler/icons-react";
+import { getSurveyRowForUser } from "@/lib/actions/read_survey";
+import { IconPencil, IconShare } from "@tabler/icons-react";
 import Link from "next/link";
 
 export default async function Page() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("surveys").select();
-  const surveys = data as SurveySchema[];
+  const surveys = await getSurveyRowForUser();
+  if (!surveys.success) {
+    return <>Cannot fetch surveys {surveys.error}</>;
+  }
 
   return (
     <>
       <SiteHeader header="Surveys" />
       <div className="mx-auto lg:w-1/2 w-3/4">
         <h1 className="text-3xl font-bold my-3">Your surveys</h1>
-        {surveys.map((s, i) => {
+        {surveys.data.map((s, i) => {
           return (
             <Card key={i}>
               <CardHeader>
-                <CardTitle>{s.title}</CardTitle>
+                <div className="flex">
+                  <CardTitle>{s.title}</CardTitle>
+                  <Badge
+                    className="ml-3"
+                    variant={s.state == "draft" ? "secondary" : "default"}
+                  >
+                    {s.state}
+                  </Badge>
+                  <Badge className="ml-3" variant={"link"}>
+                    {new Date(s.created_at).toLocaleDateString()}
+                  </Badge>
+                </div>
                 <CardDescription>{s.description}</CardDescription>
                 <CardAction className="flex gap-x-3">
-                  <Link href="#">
+                  <DeleteSurveyButton surveyId={s.id} />
+
+                  <Link href={`/dashboard/surveys/${s.id}/share`}>
                     <Button
-                      variant={"outline"}
                       className="rounded-md cursor-pointer"
+                      variant="secondary"
                     >
-                      <IconGraph />
+                      <IconShare />
                     </Button>
                   </Link>
-                  <Link href="#">
-                    <Button className="rounded-md cursor-pointer">
+
+                  <Link href={`/dashboard/surveys/${s.id}/edit`}>
+                    <Button
+                      className="rounded-md cursor-pointer"
+                      variant="secondary"
+                    >
                       <IconPencil />
                     </Button>
                   </Link>
+                  <ChangeStateSurveyButton surveyId={s.id} state={s.state} />
                 </CardAction>
               </CardHeader>
             </Card>

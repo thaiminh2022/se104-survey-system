@@ -18,10 +18,7 @@ import {
 } from "@/components/ui/select";
 import { convertQuestionTypeToName } from "@/lib/helper";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import {
-  QUESTION_TYPES,
-  QuestionTypes,
-} from "@/types/survey-create/question-type";
+import { QUESTION_TYPES, QuestionTypes } from "@/types/question-type";
 import { IconDots } from "@tabler/icons-react";
 import { ToggleDescription } from "../ToggleDescription";
 

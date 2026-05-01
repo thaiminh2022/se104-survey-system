@@ -1,4 +1,4 @@
-import { QuestionTypes } from "@/types/survey-create/question-type";
+import { QuestionTypes } from "@/types/question-type";
 
 export function convertQuestionTypeToName(t: QuestionTypes) {
   switch (t) {
@@ -19,4 +19,15 @@ export function convertQuestionTypeToName(t: QuestionTypes) {
     case "rating":
       return "Rating";
   }
+}
+export function getSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "http://localhost:3000";
 }

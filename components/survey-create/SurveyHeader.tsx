@@ -1,4 +1,4 @@
-import { submitSurvey } from "@/actions/create_survey";
+import { submitSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { IconSend } from "@tabler/icons-react";
 import { Button } from "../ui/button";
