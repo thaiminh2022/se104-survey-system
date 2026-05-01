@@ -1,16 +1,14 @@
-import { submitSurvey } from "@/actions/create_survey";
+import { submitSurvey } from "@/lib/actions/create_survey";
+import { useSurveyStore } from "@/stores/survey-create/survey_store";
+import { IconSend } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 import {
   Card,
+  CardAction,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardAction,
 } from "../ui/card";
-import { FieldSet, FieldGroup, Field, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { useSurveyStore } from "@/stores/survey-create/survey_store";
 
 export default function SurveyHeader() {
   const survey = useSurveyStore((s) => s.survey);
@@ -18,48 +16,38 @@ export default function SurveyHeader() {
   const updateSurveyDescription = useSurveyStore(
     (s) => s.updateSurveyDescription,
   );
+
   return (
     <Card>
       <CardHeader>
-        <FieldSet className="w-full">
-          <FieldGroup>
-            <CardTitle>
-              <Field>
-                <FieldLabel htmlFor="survey-title">Survey Title</FieldLabel>
-                <Input
-                  id="survey-title"
-                  type="text"
-                  placeholder="Default"
-                  value={survey.title}
-                  onChange={(e) => updateSurveyTitle(e.target.value)}
-                />
-              </Field>
-            </CardTitle>
-            <CardDescription>
-              <Field>
-                <FieldLabel htmlFor="survey-description">
-                  Description
-                </FieldLabel>
-                <Textarea
-                  id="survey-description"
-                  value={survey.description}
-                  onChange={(e) => updateSurveyDescription(e.target.value)}
-                />
-              </Field>
-            </CardDescription>
-          </FieldGroup>
-        </FieldSet>
+        <CardTitle>
+          <input
+            type="text"
+            className="text-3xl w-full focus:outline-0 border-b-accent border-b-2 focus:border-b-accent-foreground transition-colors"
+            placeholder="Survey title"
+            value={survey.title}
+            onChange={(e) => updateSurveyTitle(e.target.value)}
+          />
+        </CardTitle>
         <CardAction>
           <Button
-            type="button"
-            variant="secondary"
-            className="cursor-pointer"
-            onClick={() => submitSurvey(survey)}
+            className="rounded-md"
+            onClick={async () => {
+              console.log(await submitSurvey(survey));
+            }}
           >
-            Submit
+            <IconSend />
           </Button>
         </CardAction>
       </CardHeader>
+      <CardContent className="flex flex-col gap-y-5">
+        <textarea
+          placeholder="Survey description"
+          className="w-full focus:outline-0 h-5 transitions-color border-b-accent border-b-2 focus:border-b-accent-foreground"
+          value={survey.description}
+          onChange={(e) => updateSurveyDescription(e.target.value)}
+        />
+      </CardContent>
     </Card>
   );
 }
