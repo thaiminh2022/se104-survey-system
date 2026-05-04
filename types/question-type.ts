@@ -55,8 +55,16 @@ export type MultipleChoiceConfig = {
 export type LongAnswerConfig = {
   placeholder?: string;
 };
-export type DropdownAnswerConfig = {};
-export type RatingConfig = {};
+export type DropdownAnswerConfig = {
+  options: string[];
+  placeholder?: string;
+};
+export type RatingConfig = {
+  maxRating: number; 
+  shape: "star" | "heart" | "number" | "circle"; 
+  minLabel?: string; 
+  maxLabel?: string; 
+};
 
 export type NumberAnswerConfig = {
   isInteger: boolean;

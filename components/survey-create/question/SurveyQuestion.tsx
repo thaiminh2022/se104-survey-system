@@ -8,6 +8,8 @@ import { LongAnswerSurveyQuestion } from "./question-types/LongAnswerSurveyQuest
 import { MultipleChoiceSurveyQuestion } from "./question-types/MultipleChoiceSurveyQuestion";
 import { NumberSurveyQuestion } from "./question-types/NumberSurveyQuestion";
 import { ShortAnswerSurveyQuestion } from "./question-types/ShortAnswerSurveyQuestion";
+import { DropdownSurveyQuestion } from "./question-types/DropDownSurveyQuestion";
+import { RatingSurveyQuestion } from "./question-types/RatingSurveyQuestion";
 import QuestionFooter from "./QuestionFooter";
 import QuestionHeader from "./QuestionHeader";
 
@@ -42,6 +44,14 @@ export default function SurveyQuestion({
           questionID={info.id}
           sectionID={sectionID}
         />
+      );
+    } else if (info.question_type === "dropdown") {
+      return (
+        <DropdownSurveyQuestion questionID={info.id} sectionID={sectionID} />
+      );
+    } else if (info.question_type === "rating") {
+      return (
+        <RatingSurveyQuestion questionID={info.id} sectionID={sectionID} />
       );
     }
 
