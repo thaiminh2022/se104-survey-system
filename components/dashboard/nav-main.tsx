@@ -2,7 +2,6 @@
 
 import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -12,15 +11,17 @@ import {
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: Icon;
-  }[];
-}) {
+interface ItemData {
+  title: string;
+  url: string;
+  icon?: Icon;
+}
+
+type Props = {
+  items: ItemData[];
+};
+
+export function NavMain({ items }: Props) {
   const appRouter = useRouter();
   return (
     <SidebarGroup>
