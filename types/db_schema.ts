@@ -80,3 +80,8 @@ export const questionInsertSchema = z.object({
 
 export type QuestionRow = z.infer<typeof questionRowSchema>;
 export type QuestionInsert = z.infer<typeof questionInsertSchema>;
+
+export type AppUserData = {
+  name: string;
+  email: string;
+};

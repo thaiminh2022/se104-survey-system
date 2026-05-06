@@ -3,11 +3,8 @@
 import * as React from "react";
 import {
   IconDashboard,
-  IconDatabase,
   IconFile,
-  IconFileWord,
   IconFolder,
-  IconReport,
   IconSettings,
 } from "@tabler/icons-react";
 
@@ -23,13 +20,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { AppUserData } from "@/types/db_schema";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -50,26 +43,15 @@ const data = {
       icon: IconSettings,
     },
   ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type DataProps = {
+  user: AppUserData;
+};
+
+type Props = DataProps & React.ComponentProps<typeof Sidebar>;
+
+export function AppSidebar({ user, ...props }: Props) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -92,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -35,11 +35,36 @@ export default function ChangeStateSurveyButton({
     }
   }
 
+  function getDescription() {
+    if (state == "draft") {
+      return "Once a survey is published, you can only archive it. Other people cannot participate in archived surveys";
+    } else if (state == "published") {
+      return "Once a survey is archived, other people cannot participate in archived surveys. You can't change this back to published";
+    }
+  }
+
+  function getTitle() {
+    const stateText =
+      state == "draft"
+        ? "Publish"
+        : state == "published"
+          ? "Archive"
+          : "Publish";
+
+    return stateText + " this survey";
+  }
+
   return (
     <ConfirmDialog
-      title="Publish this survey"
-      description="Once a survey is published, you can only archive it. Other people cannot participate in archived surveys"
-      confirmText={"Publish"}
+      title={getTitle()}
+      description={getDescription()}
+      confirmText={
+        state == "draft"
+          ? "Publish"
+          : state == "published"
+            ? "Archive"
+            : "Publish"
+      }
       cancelText="Cancel"
       variant="destructive"
       onConfirm={handleChangeState}
