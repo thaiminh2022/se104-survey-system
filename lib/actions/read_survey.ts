@@ -5,7 +5,7 @@ import { createError, createSuccess } from "@/types/errors";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { CheckBoxQuestionConfig, DatetimeQuestionConfig, DropdownQuestionConfig, LongQuestionConfig, MultipleChoiceQuestionConfig, NumberQuestionConfig, Question, QUESTION_TYPES, QuestionConfigByType, QuestionTypes, RatingQuestionConfig, Section, ShortQuestionConfig, Survey } from "@/types/question-type";
-import { faker, fakerEL } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 
 export async function getSurveyRowForUser() {
@@ -125,7 +125,7 @@ export async function getSurveyById(id: string) {
 
 
   // get questions per section
-  for (let s of sections) {
+  for (const s of sections) {
     const { data: questionsData, error: questionsError } = await supabase
       .from("questions")
       .select("*")
@@ -135,21 +135,12 @@ export async function getSurveyById(id: string) {
       return createError(questionsError, questionsError.message);
     }
     const questionsRows = questionsData as QuestionRow[];
-    const questions:Question[] = questionsRows.map((qData) => {
-      const q: Question = {
-        id: qData.id,
-        title: qData.title,
-        description: qData.description ?? "",
-        question_type: qData.question_type as QuestionTypes,
-        config: JSON.parse(qData.config?.toString() ?? "{}"),
-        required: qData.required,
-      };
-      return q;
-    });
+    const questions:Question[] = questionsRows.map(toQuestion);
     s.questions = questions;
   }
 
   const s: Survey = {
+    id: surveyRow.id,
     title: surveyRow.title,
     state: surveyRow.state,
     description: surveyRow.description ?? "",
@@ -158,13 +149,68 @@ export async function getSurveyById(id: string) {
   return createSuccess(s);
 }
 
+export async function getPublishedSurveyById(id: string) {
+  const supabase = await createClient();
+  const { data: surveyData, error: surveyError } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("id", id)
+    .eq("state", "published")
+    .limit(1)
+    .single();
+
+  if (surveyError) {
+    return createError(surveyError, surveyError.message);
+  }
+
+  const surveyRow = surveyData as SurveyRow;
+  const { data: sectionsData, error: sectionsError } = await supabase
+    .from("sections")
+    .select("*")
+    .eq("survey_id", id)
+    .order("order_index", { ascending: true });
+
+  if (sectionsError) {
+    return createError(sectionsError, sectionsError.message);
+  }
+
+  const sections: Section[] = (sectionsData as SectionRow[]).map((sectionRow) => ({
+    id: sectionRow.id,
+    title: sectionRow.title,
+    description: sectionRow.description ?? "",
+    questions: [],
+  }));
+
+  for (const section of sections) {
+    const { data: questionsData, error: questionsError } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("section_id", section.id)
+      .order("order_index", { ascending: true });
+
+    if (questionsError) {
+      return createError(questionsError, questionsError.message);
+    }
+
+    section.questions = (questionsData as QuestionRow[]).map(toQuestion);
+  }
+
+  return createSuccess<Survey>({
+    id: surveyRow.id,
+    title: surveyRow.title,
+    state: surveyRow.state,
+    description: surveyRow.description ?? "",
+    sections,
+  });
+}
+
 
 // this function is for testing only, it will return a fake survey without checking the user or fetching from db
 export async function getFakeSurveyById(id: string) {
  // u faker-js to generate fake survey data
   // generate sections and questions with faker-js
-  const sections = Array.from({ length: 3 }).map((_, i) => {
-    const questions = Array.from({ length: 5 }).map((_, j) => {
+  const sections = Array.from({ length: 1 }).map((_, i) => {
+    const questions = Array.from({ length: 2 }).map((_, j) => {
       const questionType: QuestionTypes = faker.helpers.arrayElement(QUESTION_TYPES);
       let config: QuestionConfigByType[QuestionTypes] = {};
       switch (questionType) {
@@ -210,10 +256,10 @@ export async function getFakeSurveyById(id: string) {
         id: faker.string.uuid(),
         title: `Question ${j + 1} of Section ${i + 1}: ${faker.lorem.sentence()}`,
         description: `This is the description for question ${j + 1} of section ${i + 1}`,
-        question_type: questionType as any,
+        question_type: questionType,
         config: config,
         required: j % 2 === 0,
-      };
+      } as Question;
       return q;
     });
 
@@ -228,10 +274,38 @@ export async function getFakeSurveyById(id: string) {
 
 
   const survey: Survey = {
+    id,
     title: "Fake Survey",
     description: "This is a fake survey for testing",
     state: "published",
     sections: sections,
   };
   return createSuccess(survey);
+}
+
+function toQuestion(questionRow: QuestionRow): Question {
+  return {
+    id: questionRow.id,
+    title: questionRow.title,
+    description: questionRow.description ?? "",
+    question_type: questionRow.question_type as QuestionTypes,
+    config: parseQuestionConfig(questionRow.config),
+    required: questionRow.required,
+  } as Question;
+}
+
+function parseQuestionConfig(config: unknown): QuestionConfigByType[QuestionTypes] {
+  if (typeof config === "string") {
+    try {
+      return JSON.parse(config) as QuestionConfigByType[QuestionTypes];
+    } catch {
+      return {};
+    }
+  }
+
+  if (config && typeof config === "object") {
+    return config as QuestionConfigByType[QuestionTypes];
+  }
+
+  return {};
 }

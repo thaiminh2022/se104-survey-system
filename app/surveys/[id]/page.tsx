@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SurveyResponseForm from "@/components/surveys/SurveyResponseForm";
-import { getFakeSurveyById } from "@/lib/actions/read_survey";
+import { getFakeSurveyById, getPublishedSurveyById } from "@/lib/actions/read_survey";
 import { IconFileReport } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -19,9 +19,6 @@ export default async function Page(props: Props) {
   if (survey.state == "draft" || survey.state == "archived") {
     return <>You are not allowed to view this survey</>;
   }
-
-  console.log(survey)
-
   return <>
     <SurveyTitle title={survey.title} description={survey.description} />
     <SurveyResponseForm survey={survey} />

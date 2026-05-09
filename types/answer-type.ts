@@ -1,4 +1,4 @@
-import { QuestionConfigByType, QuestionTypes } from "./question-type";
+import { QuestionTypes } from "./question-type";
 
 export type AnswerConfigByType = {
   "short-answer": ShortAnswerConfig;
@@ -14,12 +14,15 @@ export type AnswerConfigByType = {
 
 export type Answer<TType extends QuestionTypes = QuestionTypes> = {
   [K in TType]: {
-    question_id: string;
     answer_type: K;
     config: AnswerConfigByType[K];
   };
 }[TType];
 
+
+export type AnswerForm = {
+  answers: Record<string, Answer>;
+}
 
 type ShortAnswerConfig = {
   answer: string;
@@ -29,9 +32,11 @@ type LongAnswerConfig = {
 }
 type MultipleChoiceConfig = {
   selected_option: string;
+  other?: string,
 };
 type CheckBoxConfig = {
   selected_options: string[];
+  other?: string;
 };
 type DropdownAnswerConfig = {
   selected_option: string;

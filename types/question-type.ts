@@ -14,6 +14,7 @@ export const QUESTION_TYPES = [
 export type QuestionTypes = (typeof QUESTION_TYPES)[number];
 
 export type Survey = {
+  id: string;
   title: string;
   description: string;
   sections: Section[];
@@ -62,8 +63,8 @@ export type MultipleChoiceQuestionConfig = {
   haveOther?: boolean;
 };
 
-export type DropdownQuestionConfig = {};
-export type RatingQuestionConfig = {};
+export type DropdownQuestionConfig = Record<string, never>;
+export type RatingQuestionConfig = Record<string, never>;
 
 export type NumberQuestionConfig = {
   isInteger: boolean;

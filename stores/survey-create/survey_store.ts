@@ -117,6 +117,7 @@ type SurveyStore = {
 export const useSurveyStore = create<SurveyStore>()(
   immer((set) => ({
     survey: {
+      id: crypto.randomUUID(),
       title: "New survey",
       state: "draft",
       description: "",
