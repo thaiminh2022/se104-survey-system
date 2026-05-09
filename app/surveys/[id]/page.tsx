@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getFakeSurveyById, getSurveyById } from "@/lib/actions/read_survey";
-import { Survey } from "@/types/question-type";
-import { IconFileReport, IconReport } from "@tabler/icons-react";
+import SurveyResponseForm from "@/components/surveys/SurveyResponseForm";
+import { getFakeSurveyById } from "@/lib/actions/read_survey";
+import { IconFileReport } from "@tabler/icons-react";
 import Link from "next/link";
 
 type Props = { params: Promise<{ id: string }> };
@@ -22,8 +22,7 @@ export default async function Page(props: Props) {
 
   return <>
     <SurveyTitle title={survey.title} description={survey.description} />
-    {/* Sections */}
-    
+    <SurveyResponseForm survey={survey} />
   </>
 
 }
@@ -41,4 +40,3 @@ function SurveyTitle({title, description}: { title: string, description: string 
     </CardHeader>
   </Card>;
 }
-
