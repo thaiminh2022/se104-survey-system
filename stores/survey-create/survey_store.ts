@@ -6,26 +6,31 @@ import {
   MultipleChoiceConfig,
   NumberAnswerConfig,
   Question,
-  QuestionConfig,
+  QuestionConfigByType,
   QuestionTypes,
   Section,
+  ShortAnswerConfig,
   Survey,
 } from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 function getDefaultQuestion(): Question {
-  return {
+  const config = getDefaultConfigForQuestionType("short-answer") as ShortAnswerConfig;
+  
+  const q: Question = {
     id: crypto.randomUUID(),
-    title: "Title",
+    title: "New question",
     description: "",
-    question_type: "checkbox",
-    config: getDefaultConfigForQuestionType("checkbox"),
+    config: config,
+    question_type: "short-answer",
     required: false,
-  };
+  }
+
+  return q;
 }
 
-function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfig {
+function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType[QuestionTypes] {
   switch (t) {
     case "number":
       const nConfig: NumberAnswerConfig = {
@@ -55,7 +60,6 @@ function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfig {
       return {};
     case "datetime":
       const dtConfig: DatetimeAnswerConfig = {
-        date: new Date(),
         mode: "date",
       };
       return dtConfig;
@@ -87,7 +91,7 @@ type SurveyStore = {
   updateQuestionConfig: (
     sectionID: string,
     questionID: string,
-    config: QuestionConfig,
+    config: QuestionConfigByType[QuestionTypes],
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;

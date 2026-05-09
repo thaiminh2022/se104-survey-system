@@ -16,7 +16,7 @@ import {
 import {
   DatetimeAnswerConfig,
   DateTimeMode,
-} from "@/types/survey-create/question-type";
+} from "@/types/question-type";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -41,29 +41,27 @@ export default function DatetimeSurveyQuestion({
   questionID,
 }: DatetimeSurveyQuestionProps) {
   const [mode, setMode] = useState<DateTimeMode>("date");
-  const [date, setDate] = useState<Date>(new Date());
 
   const updateQuestionConfig = useSurveyStore((s) => s.updateQuestionConfig);
 
   useEffect(() => {
     const config: DatetimeAnswerConfig = {
-      date,
       mode,
     };
     console.log(config);
     updateQuestionConfig(sectionID, questionID, config);
-  }, [date, mode, sectionID, questionID, updateQuestionConfig]);
+  }, [mode, sectionID, questionID, updateQuestionConfig]);
 
   function getPicker() {
     if (mode === "date") {
-      return <DatePickerInput date={date} setDate={setDate} />;
+      return <DatePickerInput date={new Date()} setDate={() => {}} />;
     }
 
     if (mode === "datetime") {
-      return <DatePickerTime date={date} setDate={setDate} />;
+      return <DatePickerTime date={new Date()} setDate={() => {}} />;
     }
 
-    return <TimePicker date={date} setDate={setDate} />;
+    return <TimePicker date={new Date()} setDate={() => {}} />;
   }
 
   return (

@@ -4,7 +4,7 @@ import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Circle, X } from "lucide-react";
-import { MultipleChoiceConfig } from "@/types/survey-create/question-type";
+import { MultipleChoiceConfig } from "@/types/question-type";
 
 interface Props {
   sectionID: string;

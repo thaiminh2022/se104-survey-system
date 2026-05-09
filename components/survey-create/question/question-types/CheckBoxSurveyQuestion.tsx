@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { CheckBoxConfig } from "@/types/survey-create/question-type";
+import { CheckBoxConfig } from "@/types/question-type";
 import { IconCheckbox, IconTrash } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 

@@ -3,6 +3,7 @@
 import { IconTrash } from "@tabler/icons-react";
 import ConfirmDialog from "../../dialog/confirm_dialog";
 import { Button } from "../../ui/button";
+import { deleteSurvey } from "@/lib/actions/read_survey";
 
 type DeleteSurveyButtonProps = {
   surveyId: string;
@@ -11,7 +12,9 @@ type DeleteSurveyButtonProps = {
 export default function DeleteSurveyButton({
   surveyId,
 }: DeleteSurveyButtonProps) {
-  function handleDelete() {}
+  async function handleDelete() {
+    await deleteSurvey(surveyId);
+  }
 
   return (
     <ConfirmDialog

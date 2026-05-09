@@ -1,6 +1,5 @@
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
-import { Section } from "@/types/survey-create/question-type";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -10,6 +9,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import SurveyQuestion from "./question/SurveyQuestion";
+import { Section } from "@/types/question-type";
 
 interface SurveySectionProps {
   info: Section;

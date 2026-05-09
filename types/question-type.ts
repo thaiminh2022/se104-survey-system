@@ -27,26 +27,33 @@ export type Section = {
   questions: Question[];
 };
 
-export type Question = {
-  id: string;
-  title: string;
-  description: string;
-  question_type: QuestionTypes;
-  config: QuestionConfig;
-  required: boolean;
+export type Question<TType extends QuestionTypes = QuestionTypes> = {
+  [K in TType]: {
+    id: string;
+    title: string;
+    description: string;
+    question_type: K;
+    config: QuestionConfigByType[K];
+    required: boolean;
+  };
+}[TType];
+
+
+export type QuestionConfigByType = {
+  "short-answer": ShortAnswerConfig;
+  "long-answer": LongAnswerConfig;
+  "multiple-choice": MultipleChoiceConfig;
+  "checkbox": CheckBoxConfig;
+  "dropdown": DropdownAnswerConfig;
+  "datetime": DatetimeAnswerConfig;
+  "number": NumberAnswerConfig;
+  "rating": RatingConfig;
 };
 
-export type QuestionConfig =
-  | ShortAnswerConfig
-  | LongAnswerConfig
-  | MultipleChoiceConfig
-  | CheckBoxConfig
-  | DropdownAnswerConfig
-  | NumberAnswerConfig
-  | DatetimeAnswerConfig
-  | RatingConfig;
-
 export type ShortAnswerConfig = {
+  placeholder?: string;
+};
+export type LongAnswerConfig = {
   placeholder?: string;
 };
 
@@ -55,9 +62,6 @@ export type MultipleChoiceConfig = {
   haveOther?: boolean;
 };
 
-export type LongAnswerConfig = {
-  placeholder?: string;
-};
 export type DropdownAnswerConfig = {};
 export type RatingConfig = {};
 
@@ -69,7 +73,6 @@ export type NumberAnswerConfig = {
 };
 
 export type DatetimeAnswerConfig = {
-  date: Date;
   mode: DateTimeMode;
 };
 export type DateTimeMode = "date" | "time" | "datetime";

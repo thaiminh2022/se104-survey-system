@@ -1,5 +1,4 @@
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
-import { Question } from "@/types/survey-create/question-type";
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
 import { CheckBoxSurveyQuestion } from "./question-types/CheckBoxSurveyQuestion";
@@ -10,6 +9,7 @@ import { NumberSurveyQuestion } from "./question-types/NumberSurveyQuestion";
 import { ShortAnswerSurveyQuestion } from "./question-types/ShortAnswerSurveyQuestion";
 import QuestionFooter from "./QuestionFooter";
 import QuestionHeader from "./QuestionHeader";
+import { Question } from "@/types/question-type";
 
 interface SurveyQuestionProps {
   info: Question;

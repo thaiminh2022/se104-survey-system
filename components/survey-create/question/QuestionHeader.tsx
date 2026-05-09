@@ -3,7 +3,7 @@ import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { Question } from "@/types/survey-create/question-type";
+import { Question } from "@/types/question-type";
 
 interface QuestionHeaderProps {
   info: Question;

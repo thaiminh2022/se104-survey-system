@@ -3,7 +3,7 @@ import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { NumberAnswerConfig } from "@/types/survey-create/question-type";
+import { NumberAnswerConfig } from "@/types/question-type";
 import { useEffect, useState } from "react";
 
 interface NumberSurveyQuestionProps {
