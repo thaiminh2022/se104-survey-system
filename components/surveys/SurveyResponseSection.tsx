@@ -7,13 +7,12 @@ import {
 } from "@/components/ui/card";
 import type { Section } from "@/types/question-type";
 import { SurveyQuestionField } from "./SurveyQuestionField";
-import type { Answers, AnswerValue } from "./types";
 
 type Props = {
   section: Section;
 };
 
-export function SurveyResponseSection({section }: Props) {
+export function SurveyResponseSection({ section }: Props) {
   return (
     <Card>
       <CardHeader>

@@ -4,13 +4,12 @@ export type AnswerConfigByType = {
   "short-answer": ShortAnswerConfig;
   "long-answer": LongAnswerConfig;
   "multiple-choice": MultipleChoiceConfig;
-  "checkbox": CheckBoxConfig;
-  "dropdown": DropdownAnswerConfig;
-  "datetime": DatetimeAnswerConfig;
-  "number": NumberAnswerConfig;
-  "rating": RatingConfig;
+  checkbox: CheckBoxConfig;
+  dropdown: DropdownAnswerConfig;
+  datetime: DatetimeAnswerConfig;
+  number: NumberAnswerConfig;
+  rating: RatingConfig;
 };
-
 
 export type Answer<TType extends QuestionTypes = QuestionTypes> = {
   [K in TType]: {
@@ -19,30 +18,39 @@ export type Answer<TType extends QuestionTypes = QuestionTypes> = {
   };
 }[TType];
 
-
 export type AnswerForm = {
   answers: Record<string, Answer>;
-}
+};
 
 type ShortAnswerConfig = {
   answer: string;
 };
 type LongAnswerConfig = {
   answer: string;
-}
-type MultipleChoiceConfig = {
-  selected_option: string;
-  other?: string,
 };
-type CheckBoxConfig = {
-  selected_options: string[];
-  other?: string;
-};
+type MultipleChoiceConfig =
+  | {
+      use_other: false;
+      selected_option: string;
+    }
+  | {
+      use_other: true;
+      other_answer: string;
+    };
+type CheckBoxConfig =
+  | {
+      selected_options: string[];
+      use_other: false;
+    }
+  | {
+      use_other: true;
+      other_answer: string;
+    };
 type DropdownAnswerConfig = {
   selected_option: string;
 };
 type DatetimeAnswerConfig = {
-  answer: string; // ISO 8601 format
+  answer: Date;
 };
 type NumberAnswerConfig = {
   answer: number;

@@ -1,11 +1,4 @@
 "use client";
-import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
-import { useActionState, useState } from "react";
-import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
-import {
-  fakeSubmitSurveyResponse,
-  submitSurveyResponse,
-} from "@/lib/actions/submit_survey_response";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,10 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Answer, AnswerForm } from "@/types/answer-type";
 import type { Survey } from "@/types/question-type";
-import { SurveyResponseSection } from "./response/SurveyResponseSection";
-import type { Answers, AnswerValue } from "./response/types";
-import { AnswerForm } from "@/types/answer-type";
+import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { SurveyResponseSection } from "./SurveyResponseSection";
 
 type Props = {
   survey: Survey;
@@ -25,6 +20,11 @@ type Props = {
 
 export default function SurveyResponseForm({ survey }: Props) {
   const [sectionIndex, setSectionIndex] = useState(0);
+  const answerForm = useForm<AnswerForm>({
+    defaultValues: {
+      answers: {},
+    },
+  });
 
   if (survey.sections.length === 0) {
     return (
@@ -55,13 +55,12 @@ export default function SurveyResponseForm({ survey }: Props) {
   const section = survey.sections[sectionIndex];
   const isFirstSection = sectionIndex === 0;
   const isLastSection = sectionIndex === survey.sections.length - 1;
-  const missingRequired = section.questions.some((question) => {
-    // if (!question.required) {
-    //   return false;
-    // }
+  const values = answerForm.watch("answers");
 
-    // return isEmptyAnswer(answers[question.id]);
-    return true; // TODO: implement required question validation
+  const missingRequired = section.questions.some((question) => {
+    const answer = values?.[question.id];
+
+    return question.required && !hasEnteredValue(answer);
   });
 
   function goBack() {
@@ -74,13 +73,9 @@ export default function SurveyResponseForm({ survey }: Props) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  const answerForm = useForm<AnswerForm>({
-    defaultValues: {
-      answers: {},
-    },
-  });
-
-  function onSubmit(data: AnswerForm) {}
+  function onSubmit(data: AnswerForm) {
+    console.log(data);
+  }
 
   return (
     <FormProvider {...answerForm}>
@@ -124,4 +119,36 @@ export default function SurveyResponseForm({ survey }: Props) {
       </form>
     </FormProvider>
   );
+}
+function hasEnteredValue(answer: Answer | undefined) {
+  if (answer == undefined) {
+    return false;
+  }
+
+  switch (answer.answer_type) {
+    case "number":
+      return true;
+    case "short-answer":
+      return answer.config.answer.trim() != "";
+    case "long-answer":
+      return answer.config.answer.trim() != "";
+    case "multiple-choice":
+      if (answer.config.use_other) {
+        return answer.config.other_answer.trim() != "";
+      } else {
+        return answer.config.selected_option.trim() != "";
+      }
+    case "checkbox":
+      if (answer.config.use_other) {
+        return answer.config.other_answer.trim() != "";
+      } else {
+        return answer.config.selected_options.length > 0;
+      }
+    case "dropdown":
+      return answer.config.selected_option.trim() != "";
+    case "datetime":
+      return true;
+    case "rating":
+      return true;
+  }
 }
