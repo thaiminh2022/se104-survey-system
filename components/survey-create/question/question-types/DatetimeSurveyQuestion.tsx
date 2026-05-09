@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DatetimeAnswerConfig,
+  DatetimeQuestionConfig,
   DateTimeMode,
 } from "@/types/question-type";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -45,7 +45,7 @@ export default function DatetimeSurveyQuestion({
   const updateQuestionConfig = useSurveyStore((s) => s.updateQuestionConfig);
 
   useEffect(() => {
-    const config: DatetimeAnswerConfig = {
+    const config: DatetimeQuestionConfig = {
       mode,
     };
     console.log(config);

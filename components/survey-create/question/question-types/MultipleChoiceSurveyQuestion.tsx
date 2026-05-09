@@ -4,7 +4,7 @@ import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Circle, X } from "lucide-react";
-import { MultipleChoiceConfig } from "@/types/question-type";
+import { MultipleChoiceQuestionConfig } from "@/types/question-type";
 
 interface Props {
   sectionID: string;
@@ -21,7 +21,7 @@ export function MultipleChoiceSurveyQuestion({ sectionID, questionID }: Props) {
 
   if (!question) return null;
 
-  const config = question.config as MultipleChoiceConfig;
+  const config = question.config as MultipleChoiceQuestionConfig;
   const options = config.options || ["Option 1"]; // Lấy options, nếu mảng trống thì để 1 cái mặc định
 
   // Hàm xử lý gõ chữ vào đáp án

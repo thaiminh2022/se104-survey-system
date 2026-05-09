@@ -1,22 +1,22 @@
 "use client";
 
 import {
-  CheckBoxConfig,
-  DatetimeAnswerConfig,
-  MultipleChoiceConfig,
-  NumberAnswerConfig,
+  CheckBoxQuestionConfig,
+  DatetimeQuestionConfig,
+  MultipleChoiceQuestionConfig,
+  NumberQuestionConfig,
   Question,
   QuestionConfigByType,
   QuestionTypes,
   Section,
-  ShortAnswerConfig,
+  ShortQuestionConfig,
   Survey,
 } from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 function getDefaultQuestion(): Question {
-  const config = getDefaultConfigForQuestionType("short-answer") as ShortAnswerConfig;
+  const config = getDefaultConfigForQuestionType("short-answer") as ShortQuestionConfig;
   
   const q: Question = {
     id: crypto.randomUUID(),
@@ -33,7 +33,7 @@ function getDefaultQuestion(): Question {
 function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType[QuestionTypes] {
   switch (t) {
     case "number":
-      const nConfig: NumberAnswerConfig = {
+      const nConfig: NumberQuestionConfig = {
         isInteger: true,
         isRange: false,
         min: 0,
@@ -45,13 +45,13 @@ function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType
     case "long-answer":
       return {};
     case "multiple-choice":
-      const mcConfig: MultipleChoiceConfig = {
+      const mcConfig: MultipleChoiceQuestionConfig = {
         options: ["Option 1"],
         haveOther: false,
       };
       return mcConfig;
     case "checkbox":
-      const cbConfig: CheckBoxConfig = {
+      const cbConfig: CheckBoxQuestionConfig = {
         options: [],
         haveOther: false,
       };
@@ -59,7 +59,7 @@ function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType
     case "dropdown":
       return {};
     case "datetime":
-      const dtConfig: DatetimeAnswerConfig = {
+      const dtConfig: DatetimeQuestionConfig = {
         mode: "date",
       };
       return dtConfig;

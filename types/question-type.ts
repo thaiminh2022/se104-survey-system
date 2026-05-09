@@ -40,44 +40,44 @@ export type Question<TType extends QuestionTypes = QuestionTypes> = {
 
 
 export type QuestionConfigByType = {
-  "short-answer": ShortAnswerConfig;
-  "long-answer": LongAnswerConfig;
-  "multiple-choice": MultipleChoiceConfig;
-  "checkbox": CheckBoxConfig;
-  "dropdown": DropdownAnswerConfig;
-  "datetime": DatetimeAnswerConfig;
-  "number": NumberAnswerConfig;
-  "rating": RatingConfig;
+  "short-answer": ShortQuestionConfig;
+  "long-answer": LongQuestionConfig;
+  "multiple-choice": MultipleChoiceQuestionConfig;
+  "checkbox": CheckBoxQuestionConfig;
+  "dropdown": DropdownQuestionConfig;
+  "datetime": DatetimeQuestionConfig;
+  "number": NumberQuestionConfig;
+  "rating": RatingQuestionConfig;
 };
 
-export type ShortAnswerConfig = {
+export type ShortQuestionConfig = {
   placeholder?: string;
 };
-export type LongAnswerConfig = {
+export type LongQuestionConfig = {
   placeholder?: string;
 };
 
-export type MultipleChoiceConfig = {
+export type MultipleChoiceQuestionConfig = {
   options: string[];
   haveOther?: boolean;
 };
 
-export type DropdownAnswerConfig = {};
-export type RatingConfig = {};
+export type DropdownQuestionConfig = {};
+export type RatingQuestionConfig = {};
 
-export type NumberAnswerConfig = {
+export type NumberQuestionConfig = {
   isInteger: boolean;
   isRange: boolean;
   min: number;
   max: number;
 };
 
-export type DatetimeAnswerConfig = {
+export type DatetimeQuestionConfig = {
   mode: DateTimeMode;
 };
 export type DateTimeMode = "date" | "time" | "datetime";
 
-export type CheckBoxConfig = {
+export type CheckBoxQuestionConfig = {
   haveOther: boolean;
   options: string[];
 };

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { CheckBoxConfig } from "@/types/question-type";
+import { CheckBoxQuestionConfig } from "@/types/question-type";
 import { IconCheckbox, IconTrash } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,7 +18,7 @@ export function CheckBoxSurveyQuestion({
   const updateQuestionConfig = useSurveyStore((s) => s.updateQuestionConfig);
   const latestOption = useRef<HTMLInputElement>(null);
   const [shouldFocus, setShouldFocus] = useState(false);
-  const [config, setConfig] = useState<CheckBoxConfig>({
+  const [config, setConfig] = useState<CheckBoxQuestionConfig>({
     haveOther: false,
     options: [],
   });
@@ -66,9 +66,9 @@ export function CheckBoxSurveyQuestion({
     updateConfig(newConfig);
   }
 
-  function updateConfig(newConfig: CheckBoxConfig) {
+  function updateConfig(newConfig: CheckBoxQuestionConfig) {
     const cleanOption = newConfig.options.filter((e) => e.trim() != "");
-    const sendConfig: CheckBoxConfig = {
+    const sendConfig: CheckBoxQuestionConfig = {
       ...newConfig,
       options: cleanOption,
     };

@@ -20,6 +20,8 @@ export default async function Page(props: Props) {
     return <>You are not allowed to view this survey</>;
   }
 
+  console.log(survey)
+
   return <>
     <SurveyTitle title={survey.title} description={survey.description} />
     <SurveyResponseForm survey={survey} />

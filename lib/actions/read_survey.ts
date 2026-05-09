@@ -4,7 +4,7 @@ import { QuestionRow, SectionRow, SurveyRow, SurveyStatus } from "@/types/db_sch
 import { createError, createSuccess } from "@/types/errors";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
-import { Question, QuestionTypes, Section, ShortAnswerConfig, Survey } from "@/types/question-type";
+import { CheckBoxQuestionConfig, DatetimeQuestionConfig, DropdownQuestionConfig, LongQuestionConfig, MultipleChoiceQuestionConfig, NumberQuestionConfig, Question, QUESTION_TYPES, QuestionConfigByType, QuestionTypes, RatingQuestionConfig, Section, ShortQuestionConfig, Survey } from "@/types/question-type";
 import { faker, fakerEL } from '@faker-js/faker';
 
 
@@ -165,12 +165,53 @@ export async function getFakeSurveyById(id: string) {
   // generate sections and questions with faker-js
   const sections = Array.from({ length: 3 }).map((_, i) => {
     const questions = Array.from({ length: 5 }).map((_, j) => {
+      const questionType: QuestionTypes = faker.helpers.arrayElement(QUESTION_TYPES);
+      let config: QuestionConfigByType[QuestionTypes] = {};
+      switch (questionType) {
+        case "number":
+          config = {
+            isInteger: faker.datatype.boolean(),
+            isRange: true,
+            min: faker.number.int({ min: 0, max: 100 }),
+            max: faker.number.int({ min: 101, max: 1000 }),
+          } as NumberQuestionConfig;  
+          break;
+        case "short-answer":
+          config = {placeholder: faker.lorem.sentence()} as ShortQuestionConfig;
+          break;
+        case "long-answer":
+          config = {placeholder: faker.lorem.sentence()} as LongQuestionConfig;
+          break;
+        case "multiple-choice":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.sentence()),
+            haveOther: faker.datatype.boolean(),
+          } as MultipleChoiceQuestionConfig;
+          break;
+        case "checkbox":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.sentence()),
+            haveOther: faker.datatype.boolean(),
+          } as CheckBoxQuestionConfig;
+          break;
+        case "dropdown":
+          config = {} as DropdownQuestionConfig;
+          break;
+        case "datetime":
+          config = {mode: faker.helpers.arrayElement(["date", "time", "datetime"])} as DatetimeQuestionConfig;
+          break;
+        case "rating":
+          config = {} as RatingQuestionConfig;
+          break;
+      
+      }
+
       const q: Question = {
         id: faker.string.uuid(),
         title: `Question ${j + 1} of Section ${i + 1}: ${faker.lorem.sentence()}`,
         description: `This is the description for question ${j + 1} of section ${i + 1}`,
-        question_type: "short-answer",
-        config: {} as ShortAnswerConfig,
+        question_type: questionType as any,
+        config: config,
         required: j % 2 === 0,
       };
       return q;

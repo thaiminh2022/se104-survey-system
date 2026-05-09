@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type {
-  CheckBoxConfig,
-  MultipleChoiceConfig,
-  NumberAnswerConfig,
+  CheckBoxQuestionConfig,
+  MultipleChoiceQuestionConfig,
+  NumberQuestionConfig,
   Question,
   Survey,
 } from "@/types/question-type";
@@ -215,7 +215,7 @@ function QuestionInput({
     case "multiple-choice":
       return (
         <OptionList
-          config={question.config as MultipleChoiceConfig}
+          config={question.config as MultipleChoiceQuestionConfig}
           value={typeof answer === "string" ? answer : ""}
           onChange={onChange}
         />
@@ -223,7 +223,7 @@ function QuestionInput({
     case "checkbox":
       return (
         <CheckboxList
-          config={question.config as CheckBoxConfig}
+          config={question.config as CheckBoxQuestionConfig}
           value={Array.isArray(answer) ? answer : []}
           onChange={onChange}
         />
@@ -251,7 +251,7 @@ function QuestionInput({
         />
       );
     case "number": {
-      const config = question.config as NumberAnswerConfig;
+      const config = question.config as NumberQuestionConfig;
       return (
         <Input
           type="number"
@@ -290,7 +290,7 @@ function OptionList({
   value,
   onChange,
 }: {
-  config: MultipleChoiceConfig;
+  config: MultipleChoiceQuestionConfig;
   value: string;
   onChange: (value: AnswerValue) => void;
 }) {
@@ -325,7 +325,7 @@ function CheckboxList({
   value,
   onChange,
 }: {
-  config: CheckBoxConfig;
+  config: CheckBoxQuestionConfig;
   value: string[];
   onChange: (value: AnswerValue) => void;
 }) {
