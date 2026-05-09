@@ -52,9 +52,16 @@ type DropdownAnswerConfig = {
 type DatetimeAnswerConfig = {
   answer: Date;
 };
-type NumberAnswerConfig = {
-  answer: number;
-};
+type NumberAnswerConfig =
+  | {
+      is_range: false;
+      answer: number;
+    }
+  | {
+      is_range: true;
+      from: number;
+      to: number;
+    };
 type RatingConfig = {
   rating: number; // Assuming a rating scale, e.g., 1-5
 };

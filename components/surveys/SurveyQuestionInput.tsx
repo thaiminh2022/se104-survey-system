@@ -14,9 +14,16 @@ import { IconBackspace } from "@tabler/icons-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Checkbox } from "../ui/checkbox";
-import { Field, FieldGroup, FieldLabel, FieldSet } from "../ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "../ui/field";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Slider } from "../ui/slider";
 
 type Props = {
   question: Question;
@@ -123,7 +130,7 @@ function DateTimeInput({ question }: DateTimeInputProps) {
       onChange={(e) => {
         const date = e.target.valueAsDate;
         if (date == null) return;
-        const answer:   Answer = {
+        const answer: Answer = {
           answer_type: question.question_type,
           config: {
             answer: date,
@@ -139,24 +146,62 @@ interface NumberInputProps {
 }
 function NumberInput({ question }: NumberInputProps) {
   const config = question.config;
+  const isInteger = config.isInteger;
+  const isRange = config.isRange;
   const form = useFormContext<AnswerForm>();
+  const helpMessage = `Input ${isInteger ? "an integer" : "a number"} from ${config.min} to ${config.max}`;
+
+  const [rangeValue, setRangeValue] = useState<number[]>([
+    config.min,
+    config.max,
+  ]);
+
   return (
-    <Input
-      type="number"
-      min={config.min}
-      max={config.max}
-      step={config.isInteger ? 1 : "any"}
-      required={question.required}
-      onChange={(e) => {
-        const answer: Answer = {
-          answer_type: question.question_type,
-          config: {
-            answer: e.target.valueAsNumber,
-          },
-        };
-        form.setValue(`answers.${question.id}`, answer);
-      }}
-    />
+    <>
+      <FieldDescription>{helpMessage}</FieldDescription>
+      <Input
+        hidden={isRange}
+        type="number"
+        min={config.min}
+        max={config.max}
+        step={config.isInteger ? 1 : "any"}
+        required={question.required}
+        onChange={(e) => {
+          const answer: Answer = {
+            answer_type: question.question_type,
+            config: {
+              is_range: false,
+              answer: e.target.valueAsNumber,
+            },
+          };
+          form.setValue(`answers.${question.id}`, answer);
+        }}
+      />
+      <div hidden={!isRange}>
+        <div className="flex items-center justify-between gap-2">
+          <span>{rangeValue.join(", ")}</span>
+        </div>
+        <Slider
+          id="slider-demo-temperature"
+          value={rangeValue}
+          onValueChange={(e) => {
+            setRangeValue(e);
+            const answer: Answer = {
+              answer_type: question.question_type,
+              config: {
+                is_range: true,
+                from: e[0],
+                to: e[1],
+              },
+            };
+            form.setValue(`answers.${question.id}`, answer);
+          }}
+          min={config.min}
+          max={config.max}
+          step={1}
+        />
+      </div>
+    </>
   );
 }
 
