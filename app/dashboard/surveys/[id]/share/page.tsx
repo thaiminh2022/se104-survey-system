@@ -9,7 +9,7 @@ type Props = { params: Promise<{ id: string }> };
 export default async function (props: Props) {
   const params = await props.params;
   const id = params.id;
-  const qrValue = `${getSiteUrl()}/surveys/${id}/start`;
+  const qrValue = `${getSiteUrl()}/surveys/${id}`;
 
   return (
     <>

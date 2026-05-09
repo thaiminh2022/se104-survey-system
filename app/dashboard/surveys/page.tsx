@@ -42,9 +42,8 @@ export default async function Page() {
                   </Badge>
                 </div>
                 <CardDescription>{s.description}</CardDescription>
-                <CardAction className="flex gap-x-3">
+                <CardAction className="flex gap-x-3 flex-wrap">
                   <DeleteSurveyButton surveyId={s.id} />
-
                   <Link href={`/dashboard/surveys/${s.id}/share`}>
                     <Button
                       className="rounded-md cursor-pointer"

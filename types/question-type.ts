@@ -1,3 +1,5 @@
+import { SurveyStatus } from "./db_schema";
+
 export const QUESTION_TYPES = [
   "short-answer",
   "long-answer",
@@ -15,6 +17,7 @@ export type Survey = {
   title: string;
   description: string;
   sections: Section[];
+  state: SurveyStatus;
 };
 
 export type Section = {

@@ -114,6 +114,7 @@ export const useSurveyStore = create<SurveyStore>()(
   immer((set) => ({
     survey: {
       title: "New survey",
+      state: "draft",
       description: "",
       sections: [getDefaultSection()],
     },
