@@ -81,20 +81,19 @@ export const questionInsertSchema = z.object({
 export type QuestionRow = z.infer<typeof questionRowSchema>;
 export type QuestionInsert = z.infer<typeof questionInsertSchema>;
 
-
 export const submissionRowSchema = z.object({
   id: z.uuid(),
   survey_id: z.uuid(),
   user_id: z.uuid(),
   created_at: z.coerce.date(),
-  submmited_at: z.coerce.date(),
+  submitted_at: z.coerce.date(),
 });
 export const submissionInsertSchema = z.object({
   id: z.uuid().optional(),
   survey_id: z.uuid(),
   user_id: z.uuid(),
   created_at: z.coerce.date().optional(),
-  submmited_at: z.coerce.date().optional(),
+  submitted_at: z.coerce.date().optional(),
 });
 
 export type SubmissionRow = z.infer<typeof submissionRowSchema>;
@@ -115,8 +114,7 @@ export const answerInsertSchema = z.object({
   question_id: z.uuid(),
   answer: z.json(),
   created_at: z.coerce.date().optional(),
-  answer_data: z.json().optional(),
-})
+});
 
 export type AnswerRow = z.infer<typeof answerRowSchema>;
 export type AnswerInsert = z.infer<typeof answerInsertSchema>;
@@ -125,4 +123,3 @@ export type AppUserData = {
   name: string;
   email: string;
 };
-

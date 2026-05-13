@@ -2,11 +2,13 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { fakeSubmitSurveyResponse } from "@/lib/actions/submit_survey_response";
 import { Answer, AnswerForm } from "@/types/answer-type";
 import type { Survey } from "@/types/question-type";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
@@ -20,6 +22,8 @@ type Props = {
 
 export default function SurveyResponseForm({ survey }: Props) {
   const [sectionIndex, setSectionIndex] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+
   const answerForm = useForm<AnswerForm>({
     defaultValues: {
       answers: {},
@@ -39,7 +43,7 @@ export default function SurveyResponseForm({ survey }: Props) {
     );
   }
 
-  if (false) {
+  if (submitted || answerForm.formState.isSubmitSuccessful) {
     return (
       <Card className="mt-5">
         <CardHeader>
@@ -73,8 +77,16 @@ export default function SurveyResponseForm({ survey }: Props) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function onSubmit(data: AnswerForm) {
-    console.log(data);
+  async function onSubmit(data: AnswerForm) {
+    const result = await fakeSubmitSurveyResponse(survey.id, data);
+
+    if (result.success) {
+      setSubmitted(true);
+    } else {
+      answerForm.setError("root", {
+        message: result.message,
+      });
+    }
   }
 
   return (
@@ -93,6 +105,13 @@ export default function SurveyResponseForm({ survey }: Props) {
         <SurveyResponseSection section={section} />
 
         <Card>
+          <CardContent>
+            {answerForm.formState.errors.root?.message ? (
+              <p className="text-sm text-destructive">
+                {answerForm.formState.errors.root.message}
+              </p>
+            ) : null}
+          </CardContent>
           <CardFooter className="justify-between gap-3">
             <Button
               type="button"
@@ -104,9 +123,12 @@ export default function SurveyResponseForm({ survey }: Props) {
               Back
             </Button>
             {isLastSection ? (
-              <Button type="submit" disabled={missingRequired}>
+              <Button
+                type="submit"
+                disabled={missingRequired || answerForm.formState.isSubmitting}
+              >
                 <IconCheck />
-                Submit
+                {answerForm.formState.isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             ) : (
               <Button type="button" disabled={missingRequired} onClick={goNext}>
