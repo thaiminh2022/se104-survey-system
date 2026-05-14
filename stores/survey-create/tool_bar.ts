@@ -17,7 +17,6 @@ export const useToolbarStore = create<ToolbarStore>()(
         if (id != s.activeSectionId) {
           s.activeSectionId = id;
           s.activeQuestionId = null;
-          console.log(s.activeSectionId);
         }
       }),
 

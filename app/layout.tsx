@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -43,7 +44,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            {children}
+            <Toaster />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,66 +1,113 @@
 "use client";
 
 import {
-  CheckBoxConfig,
-  DatetimeAnswerConfig,
-  MultipleChoiceConfig,
-  NumberAnswerConfig,
+  DateTimeQuestionConfig,
+  DropdownQuestionConfig,
+  LikertScaleQuestionConfig,
+  MatrixQuestionConfig,
+  NumberQuestionConfig,
   Question,
-  QuestionConfig,
+  QuestionConfigByType,
   QuestionTypes,
+  RankingQuestionConfig,
   Section,
+  SingleChoiceQuestionConfig,
   Survey,
 } from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-function getDefaultQuestion(): Question {
-  return {
+function getDefaultQuestion(type: QuestionTypes = "short-text"): Question {
+  const config = getDefaultConfigForQuestionType(type);
+
+  const q = {
     id: crypto.randomUUID(),
-    title: "Title",
+    title: "New question",
     description: "",
-    question_type: "checkbox",
-    config: getDefaultConfigForQuestionType("checkbox"),
+    config: config,
+    question_type: type,
     required: false,
-  };
+  } as Question;
+
+  return q;
 }
 
-function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfig {
+function getDefaultConfigForQuestionType(
+  t: QuestionTypes,
+): QuestionConfigByType[QuestionTypes] {
   switch (t) {
+    case "single-choice":
+      const scConfig: SingleChoiceQuestionConfig = {
+        options: ["Option 1"],
+        haveOther: false,
+      };
+      return scConfig;
+    case "multiple-choice":
+      return {
+        options: ["Option 1"],
+        haveOther: false,
+      };
+    case "rating-scale":
+      return {
+        min: 0,
+        max: 5,
+        minLabel: "Low",
+        maxLabel: "High",
+      };
+    case "likert-scale":
+      const likertConfig: LikertScaleQuestionConfig = {
+        options: [
+          "Strongly disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly agree",
+        ],
+      };
+      return likertConfig;
+    case "short-text":
+      return {};
+    case "long-text":
+      return {};
+    case "dropdown":
+      const dropdownConfig: DropdownQuestionConfig = {
+        options: ["Option 1"],
+      };
+      return dropdownConfig;
+    case "yes-no":
+      return {
+        yesLabel: "Yes",
+        noLabel: "No",
+      };
+    case "matrix":
+      const matrixConfig: MatrixQuestionConfig = {
+        rows: ["Row 1"],
+        columns: ["Column 1"],
+        multiplePerRow: false,
+      };
+      return matrixConfig;
+    case "ranking":
+      const rankingConfig: RankingQuestionConfig = {
+        options: ["Option 1", "Option 2"],
+      };
+      return rankingConfig;
+    case "date-time":
+      const dtConfig: DateTimeQuestionConfig = {
+        mode: "date",
+      };
+      return dtConfig;
+    case "consent":
+      return {
+        label: "I agree to the terms above.",
+      };
     case "number":
-      const nConfig: NumberAnswerConfig = {
+      const nConfig: NumberQuestionConfig = {
         isInteger: true,
         isRange: false,
         min: 0,
         max: 100,
       };
       return nConfig;
-    case "short-answer":
-      return {};
-    case "long-answer":
-      return {};
-    case "multiple-choice":
-      const mcConfig: MultipleChoiceConfig = {
-        options: ["Option 1"],
-        haveOther: false,
-      };
-      return mcConfig;
-    case "checkbox":
-      const cbConfig: CheckBoxConfig = {
-        options: [],
-        haveOther: false,
-      };
-      return cbConfig;
-    case "dropdown":
-      return {};
-    case "datetime":
-      const dtConfig: DatetimeAnswerConfig = {
-        date: new Date(),
-        mode: "date",
-      };
-      return dtConfig;
-    case "rating":
-      return {};
   }
 }
 
@@ -75,9 +122,9 @@ function getDefaultSection(): Section {
 
 type SurveyStore = {
   survey: Survey;
-  addSection: () => void;
+  addSection: () => string;
   deleteSection: (sectionID: string) => void;
-  addQuestion: (sectionID: string) => void;
+  addQuestion: (sectionID: string, type?: QuestionTypes) => string | null;
   deleteQuestion: (sectionID: string, questionID: string) => void;
   updateQuestionType: (
     sectionID: string,
@@ -87,7 +134,7 @@ type SurveyStore = {
   updateQuestionConfig: (
     sectionID: string,
     questionID: string,
-    config: QuestionConfig,
+    config: QuestionConfigByType[QuestionTypes],
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;
@@ -113,16 +160,23 @@ type SurveyStore = {
 export const useSurveyStore = create<SurveyStore>()(
   immer((set) => ({
     survey: {
+      id: crypto.randomUUID(),
       title: "New survey",
+      state: "draft",
       description: "",
       sections: [getDefaultSection()],
     },
 
     // --- Section Actions ---
-    addSection: () =>
+    addSection: () => {
+      const section = getDefaultSection();
+
       set((state) => {
-        state.survey.sections.push(getDefaultSection());
-      }),
+        state.survey.sections.push(section);
+      });
+
+      return section.id;
+    },
 
     deleteSection: (sectionID) =>
       set((state) => {
@@ -151,13 +205,22 @@ export const useSurveyStore = create<SurveyStore>()(
       }),
 
     // --- Question Actions ---
-    addQuestion: (sectionID) =>
+    addQuestion: (sectionID, type = "short-text") => {
+      const question = getDefaultQuestion(type);
+
+      let added = false;
+
       set((state) => {
         const section = state.survey.sections.find((s) => s.id === sectionID);
+
         if (section) {
-          section.questions.push(getDefaultQuestion());
+          section.questions.push(question);
+          added = true;
         }
-      }),
+      });
+
+      return added ? question.id : null;
+    },
 
     deleteQuestion: (sectionID, questionID) =>
       set((state) => {
