@@ -1,14 +1,19 @@
 import { SurveyStatus } from "./db_schema";
 
 export const QUESTION_TYPES = [
-  "short-answer",
-  "long-answer",
+  "single-choice",
   "multiple-choice",
-  "checkbox",
+  "rating-scale",
+  "likert-scale",
+  "short-text",
+  "long-text",
   "dropdown",
-  "datetime",
+  "yes-no",
+  "matrix",
+  "ranking",
+  "date-time",
+  "consent",
   "number",
-  "rating",
 ] as const;
 
 export type QuestionTypes = (typeof QUESTION_TYPES)[number];
@@ -41,30 +46,80 @@ export type Question<TType extends QuestionTypes = QuestionTypes> = {
 
 
 export type QuestionConfigByType = {
-  "short-answer": ShortQuestionConfig;
-  "long-answer": LongQuestionConfig;
+  "single-choice": SingleChoiceQuestionConfig;
   "multiple-choice": MultipleChoiceQuestionConfig;
-  "checkbox": CheckBoxQuestionConfig;
+  "rating-scale": RatingScaleQuestionConfig;
+  "likert-scale": LikertScaleQuestionConfig;
+  "short-text": ShortTextQuestionConfig;
+  "long-text": LongTextQuestionConfig;
   "dropdown": DropdownQuestionConfig;
-  "datetime": DatetimeQuestionConfig;
+  "yes-no": YesNoQuestionConfig;
+  "matrix": MatrixQuestionConfig;
+  "ranking": RankingQuestionConfig;
+  "date-time": DateTimeQuestionConfig;
+  consent: ConsentQuestionConfig;
   "number": NumberQuestionConfig;
-  "rating": RatingQuestionConfig;
 };
 
-export type ShortQuestionConfig = {
-  placeholder?: string;
-};
-export type LongQuestionConfig = {
-  placeholder?: string;
+export type SingleChoiceQuestionConfig = {
+  options: string[];
+  haveOther?: boolean;
 };
 
 export type MultipleChoiceQuestionConfig = {
   options: string[];
   haveOther?: boolean;
+  minSelected?: number;
+  maxSelected?: number;
 };
 
-export type DropdownQuestionConfig = Record<string, never>;
-export type RatingQuestionConfig = Record<string, never>;
+export type RatingScaleQuestionConfig = {
+  min: 0;
+  max: 5;
+  minLabel?: string;
+  maxLabel?: string;
+};
+
+export type LikertScaleQuestionConfig = {
+  options: string[];
+};
+
+export type ShortTextQuestionConfig = {
+  placeholder?: string;
+  maxLength?: number;
+};
+
+export type LongTextQuestionConfig = {
+  placeholder?: string;
+  maxLength?: number;
+};
+
+export type DropdownQuestionConfig = {
+  options: string[];
+};
+
+export type YesNoQuestionConfig = {
+  yesLabel?: string;
+  noLabel?: string;
+};
+
+export type MatrixQuestionConfig = {
+  rows: string[];
+  columns: string[];
+  multiplePerRow?: boolean;
+};
+
+export type RankingQuestionConfig = {
+  options: string[];
+};
+
+export type DateTimeQuestionConfig = {
+  mode: DateTimeMode;
+};
+
+export type ConsentQuestionConfig = {
+  label: string;
+};
 
 export type NumberQuestionConfig = {
   isInteger: boolean;
@@ -72,13 +127,4 @@ export type NumberQuestionConfig = {
   min: number;
   max: number;
 };
-
-export type DatetimeQuestionConfig = {
-  mode: DateTimeMode;
-};
 export type DateTimeMode = "date" | "time" | "datetime";
-
-export type CheckBoxQuestionConfig = {
-  haveOther: boolean;
-  options: string[];
-};

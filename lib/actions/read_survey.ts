@@ -4,7 +4,27 @@ import { QuestionRow, SectionRow, SurveyRow, SurveyStatus } from "@/types/db_sch
 import { createError, createSuccess } from "@/types/errors";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
-import { CheckBoxQuestionConfig, DatetimeQuestionConfig, DropdownQuestionConfig, LongQuestionConfig, MultipleChoiceQuestionConfig, NumberQuestionConfig, Question, QUESTION_TYPES, QuestionConfigByType, QuestionTypes, RatingQuestionConfig, Section, ShortQuestionConfig, Survey } from "@/types/question-type";
+import {
+  ConsentQuestionConfig,
+  DateTimeQuestionConfig,
+  DropdownQuestionConfig,
+  LikertScaleQuestionConfig,
+  LongTextQuestionConfig,
+  MatrixQuestionConfig,
+  MultipleChoiceQuestionConfig,
+  NumberQuestionConfig,
+  Question,
+  QUESTION_TYPES,
+  QuestionConfigByType,
+  QuestionTypes,
+  RankingQuestionConfig,
+  RatingScaleQuestionConfig,
+  Section,
+  ShortTextQuestionConfig,
+  SingleChoiceQuestionConfig,
+  Survey,
+  YesNoQuestionConfig,
+} from "@/types/question-type";
 import { faker } from '@faker-js/faker';
 
 
@@ -214,6 +234,76 @@ export async function getFakeSurveyById(id: string) {
       const questionType: QuestionTypes = faker.helpers.arrayElement(QUESTION_TYPES);
       let config: QuestionConfigByType[QuestionTypes] = {};
       switch (questionType) {
+        case "single-choice":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.words(3)),
+            haveOther: faker.datatype.boolean(),
+          } as SingleChoiceQuestionConfig;
+          break;
+        case "multiple-choice":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.words(3)),
+            haveOther: faker.datatype.boolean(),
+          } as MultipleChoiceQuestionConfig;
+          break;
+        case "rating-scale":
+          config = {
+            min: 0,
+            max: 5,
+            minLabel: "Low",
+            maxLabel: "High",
+          } as RatingScaleQuestionConfig;
+          break;
+        case "likert-scale":
+          config = {
+            options: [
+              "Strongly disagree",
+              "Disagree",
+              "Neutral",
+              "Agree",
+              "Strongly agree",
+            ],
+          } as LikertScaleQuestionConfig;
+          break;
+        case "short-text":
+          config = { placeholder: faker.lorem.sentence() } as ShortTextQuestionConfig;
+          break;
+        case "long-text":
+          config = { placeholder: faker.lorem.sentence() } as LongTextQuestionConfig;
+          break;
+        case "dropdown":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.words(3)),
+          } as DropdownQuestionConfig;
+          break;
+        case "yes-no":
+          config = {
+            yesLabel: "Yes",
+            noLabel: "No",
+          } as YesNoQuestionConfig;
+          break;
+        case "matrix":
+          config = {
+            rows: Array.from({ length: 3 }).map(() => faker.lorem.words(2)),
+            columns: Array.from({ length: 4 }).map(() => faker.lorem.words(2)),
+            multiplePerRow: faker.datatype.boolean(),
+          } as MatrixQuestionConfig;
+          break;
+        case "ranking":
+          config = {
+            options: Array.from({ length: 4 }).map(() => faker.lorem.words(3)),
+          } as RankingQuestionConfig;
+          break;
+        case "date-time":
+          config = {
+            mode: faker.helpers.arrayElement(["date", "time", "datetime"]),
+          } as DateTimeQuestionConfig;
+          break;
+        case "consent":
+          config = {
+            label: "I agree to participate in this survey.",
+          } as ConsentQuestionConfig;
+          break;
         case "number":
           config = {
             isInteger: faker.datatype.boolean(),
@@ -221,33 +311,6 @@ export async function getFakeSurveyById(id: string) {
             min: faker.number.int({ min: 0, max: 100 }),
             max: faker.number.int({ min: 101, max: 1000 }),
           } as NumberQuestionConfig;  
-          break;
-        case "short-answer":
-          config = {placeholder: faker.lorem.sentence()} as ShortQuestionConfig;
-          break;
-        case "long-answer":
-          config = {placeholder: faker.lorem.sentence()} as LongQuestionConfig;
-          break;
-        case "multiple-choice":
-          config = {
-            options: Array.from({ length: 4 }).map(() => faker.lorem.sentence()),
-            haveOther: faker.datatype.boolean(),
-          } as MultipleChoiceQuestionConfig;
-          break;
-        case "checkbox":
-          config = {
-            options: Array.from({ length: 4 }).map(() => faker.lorem.sentence()),
-            haveOther: faker.datatype.boolean(),
-          } as CheckBoxQuestionConfig;
-          break;
-        case "dropdown":
-          config = {} as DropdownQuestionConfig;
-          break;
-        case "datetime":
-          config = {mode: faker.helpers.arrayElement(["date", "time", "datetime"])} as DatetimeQuestionConfig;
-          break;
-        case "rating":
-          config = {} as RatingQuestionConfig;
           break;
       
       }

@@ -6,15 +6,15 @@ import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { NumberQuestionConfig } from "@/types/question-type";
 import { useEffect, useState } from "react";
 
-interface NumberSurveyQuestionProps {
+interface NumberQuestionProps {
   questionID: string;
   sectionID: string;
 }
 
-export function NumberSurveyQuestion({
+export function NumberQuestion({
   questionID,
   sectionID,
-}: NumberSurveyQuestionProps) {
+}: NumberQuestionProps) {
   const [isInteger, setIsInteger] = useState(true);
   const [isRange, setIsRange] = useState(false);
   const [min, setMin] = useState(0);
@@ -76,7 +76,7 @@ export function NumberSurveyQuestion({
           <FieldLabel htmlFor="max-input">Max</FieldLabel>
           <Input
             id="max-input"
-            type="num  ber"
+            type="number"
             value={max}
             onChange={(e) => {
               const n = e.target.valueAsNumber;

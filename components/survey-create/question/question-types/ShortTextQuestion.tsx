@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 
-export function ShortAnswerSurveyQuestion() {
+export function ShortTextQuestion() {
   return (
     <div className="mt-2 w-1/2">
       <Input

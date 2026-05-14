@@ -1,6 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 
-export function LongAnswerSurveyQuestion() {
+export function LongTextQuestion() {
   return (
     <div className="mt-2 w-full">
       <Textarea

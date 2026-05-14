@@ -1,15 +1,22 @@
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
+import { Question } from "@/types/question-type";
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
-import { CheckBoxSurveyQuestion } from "./question-types/CheckBoxSurveyQuestion";
-import DatetimeSurveyQuestion from "./question-types/DatetimeSurveyQuestion";
-import { LongAnswerSurveyQuestion } from "./question-types/LongAnswerSurveyQuestion";
-import { MultipleChoiceSurveyQuestion } from "./question-types/MultipleChoiceSurveyQuestion";
-import { NumberSurveyQuestion } from "./question-types/NumberSurveyQuestion";
-import { ShortAnswerSurveyQuestion } from "./question-types/ShortAnswerSurveyQuestion";
+import { ConsentQuestion } from "./question-types/ConsentQuestion";
+import DateTimeQuestion from "./question-types/DateTimeQuestion";
+import { DropdownQuestion } from "./question-types/DropdownQuestion";
+import { LikertScaleQuestion } from "./question-types/LikertScaleQuestion";
+import { LongTextQuestion } from "./question-types/LongTextQuestion";
+import { MatrixQuestion } from "./question-types/MatrixQuestion";
+import { MultipleChoiceQuestion } from "./question-types/MultipleChoiceQuestion";
+import { NumberQuestion } from "./question-types/NumberQuestion";
+import { RankingQuestion } from "./question-types/RankingQuestion";
+import { RatingScaleQuestion } from "./question-types/RatingScaleQuestion";
+import { ShortTextQuestion } from "./question-types/ShortTextQuestion";
+import { SingleChoiceQuestion } from "./question-types/SingleChoiceQuestion";
+import { YesNoQuestion } from "./question-types/YesNoQuestion";
 import QuestionFooter from "./QuestionFooter";
 import QuestionHeader from "./QuestionHeader";
-import { Question } from "@/types/question-type";
 
 interface SurveyQuestionProps {
   info: Question;
@@ -20,32 +27,34 @@ export default function SurveyQuestion({
   sectionID,
 }: SurveyQuestionProps) {
   function getQuestionComponent() {
-    if (info.question_type == "checkbox") {
-      return (
-        <CheckBoxSurveyQuestion questionID={info.id} sectionID={sectionID} />
-      );
-    } else if (info.question_type == "datetime") {
-      return (
-        <DatetimeSurveyQuestion questionID={info.id} sectionID={sectionID} />
-      );
-    } else if (info.question_type === "number") {
-      return (
-        <NumberSurveyQuestion questionID={info.id} sectionID={sectionID} />
-      );
-    } else if (info.question_type === "short-answer") {
-      return <ShortAnswerSurveyQuestion />;
-    } else if (info.question_type === "long-answer") {
-      return <LongAnswerSurveyQuestion />;
-    } else if (info.question_type === "multiple-choice") {
-      return (
-        <MultipleChoiceSurveyQuestion
-          questionID={info.id}
-          sectionID={sectionID}
-        />
-      );
+    switch (info.question_type) {
+      case "single-choice":
+        return <SingleChoiceQuestion questionID={info.id} sectionID={sectionID} />;
+      case "multiple-choice":
+        return <MultipleChoiceQuestion questionID={info.id} sectionID={sectionID} />;
+      case "rating-scale":
+        return <RatingScaleQuestion questionID={info.id} sectionID={sectionID} />;
+      case "likert-scale":
+        return <LikertScaleQuestion questionID={info.id} sectionID={sectionID} />;
+      case "short-text":
+        return <ShortTextQuestion />;
+      case "long-text":
+        return <LongTextQuestion />;
+      case "dropdown":
+        return <DropdownQuestion questionID={info.id} sectionID={sectionID} />;
+      case "yes-no":
+        return <YesNoQuestion questionID={info.id} sectionID={sectionID} />;
+      case "matrix":
+        return <MatrixQuestion questionID={info.id} sectionID={sectionID} />;
+      case "ranking":
+        return <RankingQuestion questionID={info.id} sectionID={sectionID} />;
+      case "date-time":
+        return <DateTimeQuestion questionID={info.id} sectionID={sectionID} />;
+      case "consent":
+        return <ConsentQuestion questionID={info.id} sectionID={sectionID} />;
+      case "number":
+        return <NumberQuestion questionID={info.id} sectionID={sectionID} />;
     }
-
-    return <>{info.question_type}</>;
   }
 
   const [showDesc, setShowDesc] = useState(false);

@@ -1,5 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -7,23 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Answer, AnswerForm } from "@/types/answer-type";
 import type { Question } from "@/types/question-type";
 import { IconBackspace } from "@tabler/icons-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { Checkbox } from "../ui/checkbox";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "../ui/field";
-import { Label } from "../ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Slider } from "../ui/slider";
 
 type Props = {
   question: Question;
@@ -31,126 +31,472 @@ type Props = {
 
 export function SurveyQuestionInput({ question }: Props) {
   switch (question.question_type) {
-    case "short-answer":
-      return <ShortAnswerInput question={question} />;
-    case "long-answer":
-      return <LongAnswerInput question={question} />;
+    case "single-choice":
+      return <SingleChoiceInput question={question} />;
     case "multiple-choice":
       return <MultipleChoiceInput question={question} />;
-    case "checkbox":
-      return <CheckboxInput question={question} />;
+    case "rating-scale":
+      return <RatingScaleInput question={question} />;
+    case "likert-scale":
+      return <LikertScaleInput question={question} />;
+    case "short-text":
+      return <ShortTextInput question={question} />;
+    case "long-text":
+      return <LongTextInput question={question} />;
     case "dropdown":
       return <DropDownInput question={question} />;
-    case "datetime":
+    case "yes-no":
+      return <YesNoInput question={question} />;
+    case "matrix":
+      return <MatrixInput question={question} />;
+    case "ranking":
+      return <RankingInput question={question} />;
+    case "date-time":
       return <DateTimeInput question={question} />;
+    case "consent":
+      return <ConsentInput question={question} />;
     case "number":
       return <NumberInput question={question} />;
-    case "rating":
-      return <RatingInput question={question} />;
   }
 }
-interface ShortAnswerInputProps {
-  question: Question<"short-answer">;
+
+function useAnswerWriter() {
+  const form = useFormContext<AnswerForm>();
+
+  return (questionId: string, answer: Answer) => {
+    form.setValue(`answers.${questionId}`, answer, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 }
 
-function ShortAnswerInput({ question }: ShortAnswerInputProps) {
-  const form = useFormContext<AnswerForm>();
+function ShortTextInput({ question }: { question: Question<"short-text"> }) {
+  const setAnswer = useAnswerWriter();
 
   return (
     <Input
       placeholder={question.config.placeholder}
+      maxLength={question.config.maxLength}
       required={question.required}
-      onChange={(e) => {
-        const answer: Answer = {
-          answer_type: question.question_type,
-          config: {
-            answer: e.target.value,
-          },
-        };
-        form.setValue(`answers.${question.id}`, answer);
-      }}
+      onChange={(event) =>
+        setAnswer(question.id, {
+          answer_type: "short-text",
+          config: { text: event.target.value },
+        })
+      }
     />
   );
 }
 
-interface LongAnswerInputProps {
-  question: Question<"long-answer">;
-}
-
-function LongAnswerInput({ question }: LongAnswerInputProps) {
-  const form = useFormContext<AnswerForm>();
+function LongTextInput({ question }: { question: Question<"long-text"> }) {
+  const setAnswer = useAnswerWriter();
 
   return (
     <Textarea
       placeholder={question.config.placeholder ?? "Your answer"}
+      maxLength={question.config.maxLength}
       required={question.required}
-      onChange={(e) => {
-        const answer: Answer = {
-          answer_type: question.question_type,
-          config: {
-            answer: e.target.value,
-          },
-        };
-        form.setValue(`answers.${question.id}`, answer);
-      }}
+      onChange={(event) =>
+        setAnswer(question.id, {
+          answer_type: "long-text",
+          config: { text: event.target.value },
+        })
+      }
     />
   );
 }
-interface DropDownInputProps {
-  question: Question<"dropdown">;
-}
-function DropDownInput({ question }: DropDownInputProps) {
+
+function SingleChoiceInput({
+  question,
+}: {
+  question: Question<"single-choice">;
+}) {
+  const setAnswer = useAnswerWriter();
+  const [usingOther, setUsingOther] = useState(false);
+
   return (
-    <Select required={question.required}>
+    <div className="space-y-3">
+      <RadioGroup
+        onValueChange={(value) => {
+          setUsingOther(false);
+          setAnswer(question.id, {
+            answer_type: "single-choice",
+            config: { use_other: false, selected_option: value },
+          });
+        }}
+      >
+        {question.config.options.map((option, index) => {
+          const identifier = `${question.id}-${option}-${index}`;
+          return (
+            <div className="flex items-center gap-3" key={identifier}>
+              <RadioGroupItem value={option} id={identifier} />
+              <Label htmlFor={identifier}>{option}</Label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+      {question.config.haveOther ? (
+        <Input
+          type="text"
+          placeholder="Other"
+          onFocus={() => setUsingOther(true)}
+          onChange={(event) => {
+            setUsingOther(true);
+            setAnswer(question.id, {
+              answer_type: "single-choice",
+              config: { use_other: true, other_answer: event.target.value },
+            });
+          }}
+          className={usingOther ? "border-primary" : undefined}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function MultipleChoiceInput({
+  question,
+}: {
+  question: Question<"multiple-choice">;
+}) {
+  const setAnswer = useAnswerWriter();
+  const [selected, setSelected] = useState<string[]>([]);
+
+  function updateSelected(option: string, checked: boolean) {
+    const next = checked
+      ? [...selected, option]
+      : selected.filter((value) => value !== option);
+    setSelected(next);
+    setAnswer(question.id, {
+      answer_type: "multiple-choice",
+      config: { use_other: false, selected_options: next },
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      <FieldSet>
+        <FieldGroup className="gap-3">
+          {question.config.options.map((option, index) => {
+            const identifier = `${question.id}-${option}-${index}`;
+            return (
+              <Field orientation="horizontal" key={identifier}>
+                <Checkbox
+                  id={identifier}
+                  checked={selected.includes(option)}
+                  onCheckedChange={(checked) =>
+                    updateSelected(option, checked === true)
+                  }
+                />
+                <FieldLabel htmlFor={identifier} className="font-normal">
+                  {option}
+                </FieldLabel>
+              </Field>
+            );
+          })}
+        </FieldGroup>
+      </FieldSet>
+      {question.config.haveOther ? (
+        <Input
+          type="text"
+          placeholder="Other"
+          onChange={(event) =>
+            setAnswer(question.id, {
+              answer_type: "multiple-choice",
+              config: { use_other: true, other_answer: event.target.value },
+            })
+          }
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function RatingScaleInput({
+  question,
+}: {
+  question: Question<"rating-scale">;
+}) {
+  const setAnswer = useAnswerWriter();
+  const form = useFormContext<AnswerForm>();
+  const [ratingValue, setRatingValue] = useState<number | undefined>(undefined);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {[0, 1, 2, 3, 4, 5].map((rating) => (
+          <Button
+            key={rating}
+            type="button"
+            size="icon"
+            variant={ratingValue === rating ? "default" : "outline"}
+            onClick={() => {
+              setRatingValue(rating);
+              setAnswer(question.id, {
+                answer_type: "rating-scale",
+                config: { rating },
+              });
+            }}
+          >
+            {rating}
+          </Button>
+        ))}
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={() => {
+            setRatingValue(undefined);
+            form.resetField(`answers.${question.id}`);
+          }}
+        >
+          <IconBackspace />
+        </Button>
+      </div>
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>{question.config.minLabel}</span>
+        <span>{question.config.maxLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+function LikertScaleInput({
+  question,
+}: {
+  question: Question<"likert-scale">;
+}) {
+  const setAnswer = useAnswerWriter();
+
+  return (
+    <RadioGroup
+      onValueChange={(value) =>
+        setAnswer(question.id, {
+          answer_type: "likert-scale",
+          config: { selected_option: value },
+        })
+      }
+    >
+      {question.config.options.map((option, index) => {
+        const identifier = `${question.id}-${option}-${index}`;
+        return (
+          <div className="flex items-center gap-3" key={identifier}>
+            <RadioGroupItem value={option} id={identifier} />
+            <Label htmlFor={identifier}>{option}</Label>
+          </div>
+        );
+      })}
+    </RadioGroup>
+  );
+}
+
+function DropDownInput({ question }: { question: Question<"dropdown"> }) {
+  const setAnswer = useAnswerWriter();
+
+  return (
+    <Select
+      required={question.required}
+      onValueChange={(value) =>
+        setAnswer(question.id, {
+          answer_type: "dropdown",
+          config: { selected_option: value },
+        })
+      }
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select an option" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="option-1">Option 1</SelectItem>
+        {question.config.options.map((option) => (
+          <SelectItem value={option} key={option}>
+            {option}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
 }
 
-interface DateTimeInputProps {
-  question: Question<"datetime">;
+function YesNoInput({ question }: { question: Question<"yes-no"> }) {
+  const setAnswer = useAnswerWriter();
+
+  return (
+    <RadioGroup
+      onValueChange={(value) =>
+        setAnswer(question.id, {
+          answer_type: "yes-no",
+          config: { value: value === "yes" },
+        })
+      }
+    >
+      <div className="flex items-center gap-3">
+        <RadioGroupItem value="yes" id={`${question.id}-yes`} />
+        <Label htmlFor={`${question.id}-yes`}>
+          {question.config.yesLabel ?? "Yes"}
+        </Label>
+      </div>
+      <div className="flex items-center gap-3">
+        <RadioGroupItem value="no" id={`${question.id}-no`} />
+        <Label htmlFor={`${question.id}-no`}>
+          {question.config.noLabel ?? "No"}
+        </Label>
+      </div>
+    </RadioGroup>
+  );
 }
 
-function DateTimeInput({ question }: DateTimeInputProps) {
-  const dateTimeConfig = question.config;
-  const mode = dateTimeConfig.mode;
-  const form = useFormContext<AnswerForm>();
+function MatrixInput({ question }: { question: Question<"matrix"> }) {
+  const setAnswer = useAnswerWriter();
+  const [rows, setRows] = useState<Record<string, string | string[]>>({});
+
+  function updateRow(row: string, value: string, checked?: boolean) {
+    const next = { ...rows };
+    if (question.config.multiplePerRow) {
+      const current = Array.isArray(next[row]) ? next[row] : [];
+      next[row] = checked
+        ? [...current, value]
+        : current.filter((item) => item !== value);
+    } else {
+      next[row] = value;
+    }
+    setRows(next);
+    setAnswer(question.id, {
+      answer_type: "matrix",
+      config: { rows: next },
+    });
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[520px] text-sm">
+        <thead>
+          <tr>
+            <th className="py-2 text-left font-medium"></th>
+            {question.config.columns.map((column) => (
+              <th className="px-3 py-2 text-center font-medium" key={column}>
+                {column}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {question.config.rows.map((row) => (
+            <tr className="border-t" key={row}>
+              <td className="py-3 pr-3 font-medium">{row}</td>
+              {question.config.columns.map((column) => (
+                <td className="px-3 py-3 text-center" key={column}>
+                  {question.config.multiplePerRow ? (
+                    <Checkbox
+                      checked={
+                        Array.isArray(rows[row]) && rows[row].includes(column)
+                      }
+                      onCheckedChange={(checked) =>
+                        updateRow(row, column, checked === true)
+                      }
+                    />
+                  ) : (
+                    <RadioGroup
+                      value={typeof rows[row] === "string" ? rows[row] : ""}
+                      onValueChange={(value) => updateRow(row, value)}
+                    >
+                      <RadioGroupItem value={column} />
+                    </RadioGroup>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function RankingInput({ question }: { question: Question<"ranking"> }) {
+  const setAnswer = useAnswerWriter();
+  const [rankedOptions, setRankedOptions] = useState<string[]>([]);
+
+  function updateRank(index: number, value: string) {
+    const next = [...rankedOptions];
+    next[index] = value;
+    setRankedOptions(next);
+    setAnswer(question.id, {
+      answer_type: "ranking",
+      config: { ranked_options: next.filter(Boolean) },
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      {question.config.options.map((_, index) => (
+        <div className="flex items-center gap-3" key={index}>
+          <span className="w-8 text-sm text-muted-foreground">#{index + 1}</span>
+          <Select onValueChange={(value) => updateRank(index, value)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select item" />
+            </SelectTrigger>
+            <SelectContent>
+              {question.config.options.map((option) => (
+                <SelectItem
+                  value={option}
+                  key={option}
+                  disabled={rankedOptions.includes(option)}
+                >
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DateTimeInput({ question }: { question: Question<"date-time"> }) {
+  const setAnswer = useAnswerWriter();
+  const mode = question.config.mode;
 
   return (
     <Input
-      type={
-        mode === "date" ? "date" : mode === "time" ? "time" : "datetime-local"
-      }
+      type={mode === "date" ? "date" : mode === "time" ? "time" : "datetime-local"}
       required={question.required}
-      onChange={(e) => {
-        const date = e.target.valueAsDate;
-        if (date == null) return;
-        const answer: Answer = {
-          answer_type: question.question_type,
-          config: {
-            answer: date,
-          },
-        };
-        form.setValue(`answers.${question.id}`, answer);
-      }}
+      onChange={(event) =>
+        setAnswer(question.id, {
+          answer_type: "date-time",
+          config: { value: event.target.value },
+        })
+      }
     />
   );
 }
-interface NumberInputProps {
-  question: Question<"number">;
-}
-function NumberInput({ question }: NumberInputProps) {
-  const config = question.config;
-  const isInteger = config.isInteger;
-  const isRange = config.isRange;
-  const form = useFormContext<AnswerForm>();
-  const helpMessage = `Input ${isInteger ? "an integer" : "a number"} from ${config.min} to ${config.max}`;
 
+function ConsentInput({ question }: { question: Question<"consent"> }) {
+  const setAnswer = useAnswerWriter();
+
+  return (
+    <Field orientation="horizontal">
+      <Checkbox
+        id={`${question.id}-consent`}
+        required={question.required}
+        onCheckedChange={(checked) =>
+          setAnswer(question.id, {
+            answer_type: "consent",
+            config: { accepted: checked === true },
+          })
+        }
+      />
+      <FieldLabel htmlFor={`${question.id}-consent`} className="font-normal">
+        {question.config.label}
+      </FieldLabel>
+    </Field>
+  );
+}
+
+function NumberInput({ question }: { question: Question<"number"> }) {
+  const config = question.config;
+  const setAnswer = useAnswerWriter();
+  const helpMessage = `Input ${config.isInteger ? "an integer" : "a number"} from ${config.min} to ${config.max}`;
   const [rangeValue, setRangeValue] = useState<number[]>([
     config.min,
     config.max,
@@ -160,200 +506,44 @@ function NumberInput({ question }: NumberInputProps) {
     <>
       <FieldDescription>{helpMessage}</FieldDescription>
       <Input
-        hidden={isRange}
+        hidden={config.isRange}
         type="number"
         min={config.min}
         max={config.max}
         step={config.isInteger ? 1 : "any"}
         required={question.required}
-        onChange={(e) => {
-          const answer: Answer = {
-            answer_type: question.question_type,
+        onChange={(event) =>
+          setAnswer(question.id, {
+            answer_type: "number",
             config: {
               is_range: false,
-              answer: e.target.valueAsNumber,
+              answer: event.target.valueAsNumber,
             },
-          };
-          form.setValue(`answers.${question.id}`, answer);
-        }}
+          })
+        }
       />
-      <div hidden={!isRange}>
-        <div className="flex items-center justify-between gap-2">
-          <span>{rangeValue.join(", ")}</span>
+      <div hidden={!config.isRange} className="space-y-2">
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>{rangeValue.join(" - ")}</span>
         </div>
         <Slider
-          id="slider-demo-temperature"
           value={rangeValue}
-          onValueChange={(e) => {
-            setRangeValue(e);
-            const answer: Answer = {
-              answer_type: question.question_type,
+          onValueChange={(value) => {
+            setRangeValue(value);
+            setAnswer(question.id, {
+              answer_type: "number",
               config: {
                 is_range: true,
-                from: e[0],
-                to: e[1],
+                from: value[0],
+                to: value[1],
               },
-            };
-            form.setValue(`answers.${question.id}`, answer);
+            });
           }}
           min={config.min}
           max={config.max}
-          step={1}
+          step={config.isInteger ? 1 : 0.1}
         />
       </div>
     </>
-  );
-}
-
-interface MultipleChoiceInputProps {
-  question: Question<"multiple-choice">;
-}
-function MultipleChoiceInput({ question }: MultipleChoiceInputProps) {
-  const haveOther = question.config.haveOther ?? false;
-  const form = useFormContext<AnswerForm>();
-
-  return (
-    <>
-      <RadioGroup
-        defaultValue="comfortable"
-        className="w-fit"
-        onValueChange={(e) => {
-          const answer: Answer = {
-            answer_type: question.question_type,
-            config: {
-              selected_option: e,
-              use_other: false,
-            },
-          };
-          form.setValue(`answers.${question.id}`, answer);
-        }}
-      >
-        {question.config.options.map((op, index) => {
-          const identifier = question.id + op + index;
-          return (
-            <div className="flex items-center gap-3" key={identifier}>
-              <RadioGroupItem value={op} id={identifier} />
-              <Label htmlFor={identifier}>{op}</Label>
-            </div>
-          );
-        })}
-      </RadioGroup>
-      <Input
-        type="text"
-        hidden={!haveOther}
-        placeholder="Other"
-        onChange={(e) => {
-          const answer: Answer = {
-            answer_type: question.question_type,
-            config: { use_other: true, other_answer: e.target.value },
-          };
-          form.setValue(`answers.${question.id}`, answer);
-        }}
-      />
-    </>
-  );
-}
-
-interface CheckboxInputProps {
-  question: Question<"checkbox">;
-}
-function CheckboxInput({ question }: CheckboxInputProps) {
-  const haveOther = question.config.haveOther ?? false;
-  const [selected, setSelected] = useState<string[]>([]);
-
-  function toggleItem(id: string, checked: boolean) {
-    setSelected((current) =>
-      checked ? [...current, id] : current.filter((value) => value !== id),
-    );
-  }
-  const form = useFormContext<AnswerForm>();
-
-  return (
-    <>
-      <FieldSet>
-        <FieldGroup className="gap-3">
-          {question.config.options.map((op, index) => {
-            const identifier = question.id + op + index;
-            return (
-              <Field orientation="horizontal" key={identifier}>
-                <Checkbox
-                  id={identifier}
-                  checked={selected.includes(op)}
-                  onCheckedChange={(e) => {
-                    toggleItem(op, e === true);
-                    const answer: Answer = {
-                      answer_type: question.question_type,
-                      config: {
-                        use_other: false,
-                        selected_options: selected,
-                      },
-                    };
-                    form.setValue(`answers.${question.id}`, answer);
-                  }}
-                />
-                <FieldLabel htmlFor={identifier} className="font-normal">
-                  {op}
-                </FieldLabel>
-              </Field>
-            );
-          })}
-        </FieldGroup>
-      </FieldSet>
-      <Input
-        type="text"
-        hidden={!haveOther}
-        placeholder="Other"
-        onChange={(e) => {
-          const answer: Answer = {
-            answer_type: question.question_type,
-            config: { use_other: true, other_answer: e.target.value },
-          };
-          form.setValue(`answers.${question.id}`, answer);
-        }}
-      />
-    </>
-  );
-}
-
-interface RatingInputProps {
-  question: Question<"rating">;
-}
-
-function RatingInput({ question }: RatingInputProps) {
-  const form = useFormContext<AnswerForm>();
-  const [rate, selectedRate] = useState<undefined | number>(undefined);
-  return (
-    <div className="flex flex-wrap gap-2">
-      {[1, 2, 3, 4, 5].map((rating) => (
-        <Button
-          key={rating}
-          type="button"
-          size="icon"
-          variant={rating <= (rate ?? -1) ? "default" : "outline"}
-          className="cursor-pointer"
-          onClick={() => {
-            const answer: Answer = {
-              answer_type: question.question_type,
-              config: {
-                rating: rating,
-              },
-            };
-            selectedRate(rating);
-            form.setValue(`answers.${question.id}`, answer);
-          }}
-        >
-          {rating}
-        </Button>
-      ))}
-      <Button
-        variant={"destructive"}
-        onClick={() => {
-          selectedRate(undefined);
-          form.resetField(`answers.${question.id}`);
-        }}
-      >
-        <IconBackspace />
-      </Button>
-    </div>
   );
 }

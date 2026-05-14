@@ -1,29 +1,32 @@
 "use client";
 
 import {
-  CheckBoxQuestionConfig,
-  DatetimeQuestionConfig,
-  MultipleChoiceQuestionConfig,
+  DateTimeQuestionConfig,
+  DropdownQuestionConfig,
+  LikertScaleQuestionConfig,
+  MatrixQuestionConfig,
   NumberQuestionConfig,
   Question,
   QuestionConfigByType,
   QuestionTypes,
+  RankingQuestionConfig,
   Section,
-  ShortQuestionConfig,
+  ShortTextQuestionConfig,
+  SingleChoiceQuestionConfig,
   Survey,
 } from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 function getDefaultQuestion(): Question {
-  const config = getDefaultConfigForQuestionType("short-answer") as ShortQuestionConfig;
+  const config = getDefaultConfigForQuestionType("short-text") as ShortTextQuestionConfig;
   
   const q: Question = {
     id: crypto.randomUUID(),
     title: "New question",
     description: "",
     config: config,
-    question_type: "short-answer",
+    question_type: "short-text",
     required: false,
   }
 
@@ -32,6 +35,70 @@ function getDefaultQuestion(): Question {
 
 function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType[QuestionTypes] {
   switch (t) {
+    case "single-choice":
+      const scConfig: SingleChoiceQuestionConfig = {
+        options: ["Option 1"],
+        haveOther: false,
+      };
+      return scConfig;
+    case "multiple-choice":
+      return {
+        options: ["Option 1"],
+        haveOther: false,
+      };
+    case "rating-scale":
+      return {
+        min: 0,
+        max: 5,
+        minLabel: "Low",
+        maxLabel: "High",
+      };
+    case "likert-scale":
+      const likertConfig: LikertScaleQuestionConfig = {
+        options: [
+          "Strongly disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly agree",
+        ],
+      };
+      return likertConfig;
+    case "short-text":
+      return {};
+    case "long-text":
+      return {};
+    case "dropdown":
+      const dropdownConfig: DropdownQuestionConfig = {
+        options: ["Option 1"],
+      };
+      return dropdownConfig;
+    case "yes-no":
+      return {
+        yesLabel: "Yes",
+        noLabel: "No",
+      };
+    case "matrix":
+      const matrixConfig: MatrixQuestionConfig = {
+        rows: ["Row 1"],
+        columns: ["Column 1"],
+        multiplePerRow: false,
+      };
+      return matrixConfig;
+    case "ranking":
+      const rankingConfig: RankingQuestionConfig = {
+        options: ["Option 1", "Option 2"],
+      };
+      return rankingConfig;
+    case "date-time":
+      const dtConfig: DateTimeQuestionConfig = {
+        mode: "date",
+      };
+      return dtConfig;
+    case "consent":
+      return {
+        label: "I agree to the terms above.",
+      };
     case "number":
       const nConfig: NumberQuestionConfig = {
         isInteger: true,
@@ -40,31 +107,6 @@ function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType
         max: 100,
       };
       return nConfig;
-    case "short-answer":
-      return {};
-    case "long-answer":
-      return {};
-    case "multiple-choice":
-      const mcConfig: MultipleChoiceQuestionConfig = {
-        options: ["Option 1"],
-        haveOther: false,
-      };
-      return mcConfig;
-    case "checkbox":
-      const cbConfig: CheckBoxQuestionConfig = {
-        options: [],
-        haveOther: false,
-      };
-      return cbConfig;
-    case "dropdown":
-      return {};
-    case "datetime":
-      const dtConfig: DatetimeQuestionConfig = {
-        mode: "date",
-      };
-      return dtConfig;
-    case "rating":
-      return {};
   }
 }
 

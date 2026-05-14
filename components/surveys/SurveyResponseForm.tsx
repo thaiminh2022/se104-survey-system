@@ -148,29 +148,39 @@ function hasEnteredValue(answer: Answer | undefined) {
   }
 
   switch (answer.answer_type) {
-    case "number":
-      return true;
-    case "short-answer":
-      return answer.config.answer.trim() != "";
-    case "long-answer":
-      return answer.config.answer.trim() != "";
+    case "single-choice":
+      if (answer.config.use_other) {
+        return answer.config.other_answer.trim() != "";
+      }
+      return answer.config.selected_option.trim() != "";
     case "multiple-choice":
       if (answer.config.use_other) {
         return answer.config.other_answer.trim() != "";
-      } else {
-        return answer.config.selected_option.trim() != "";
       }
-    case "checkbox":
-      if (answer.config.use_other) {
-        return answer.config.other_answer.trim() != "";
-      } else {
-        return answer.config.selected_options.length > 0;
-      }
+      return answer.config.selected_options.length > 0;
+    case "rating-scale":
+      return answer.config.rating >= 0 && answer.config.rating <= 5;
+    case "likert-scale":
+      return answer.config.selected_option.trim() != "";
+    case "short-text":
+      return answer.config.text.trim() != "";
+    case "long-text":
+      return answer.config.text.trim() != "";
     case "dropdown":
       return answer.config.selected_option.trim() != "";
-    case "datetime":
-      return true;
-    case "rating":
+    case "yes-no":
+      return typeof answer.config.value === "boolean";
+    case "matrix":
+      return Object.values(answer.config.rows).some((value) =>
+        Array.isArray(value) ? value.length > 0 : value.trim() != "",
+      );
+    case "ranking":
+      return answer.config.ranked_options.length > 0;
+    case "date-time":
+      return answer.config.value.trim() != "";
+    case "consent":
+      return answer.config.accepted;
+    case "number":
       return true;
   }
 }

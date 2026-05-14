@@ -2,22 +2,32 @@ import { QuestionTypes } from "@/types/question-type";
 
 export function convertQuestionTypeToName(t: QuestionTypes) {
   switch (t) {
-    case "number":
-      return "Number";
-    case "short-answer":
-      return "Short Answer";
-    case "long-answer":
-      return "Long Answer";
+    case "single-choice":
+      return "Single Choice";
     case "multiple-choice":
       return "Multiple Choice";
-    case "checkbox":
-      return "Checkbox";
+    case "rating-scale":
+      return "Rating Scale";
+    case "likert-scale":
+      return "Likert Scale";
+    case "short-text":
+      return "Short Text";
+    case "long-text":
+      return "Long Text";
     case "dropdown":
-      return "Drop down";
-    case "datetime":
-      return "Date Time";
-    case "rating":
-      return "Rating";
+      return "Dropdown";
+    case "yes-no":
+      return "Yes / No";
+    case "matrix":
+      return "Matrix";
+    case "ranking":
+      return "Ranking";
+    case "date-time":
+      return "Date / Time";
+    case "consent":
+      return "Consent / Agreement";
+    case "number":
+      return "Number";
   }
 }
 export function getSiteUrl() {

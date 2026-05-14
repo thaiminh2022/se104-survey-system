@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DatetimeQuestionConfig,
+  DateTimeQuestionConfig,
   DateTimeMode,
 } from "@/types/question-type";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -31,24 +31,23 @@ import {
 } from "@/components/ui/input-group";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 
-interface DatetimeSurveyQuestionProps {
+interface DateTimeQuestionProps {
   questionID: string;
   sectionID: string;
 }
 
-export default function DatetimeSurveyQuestion({
+export default function DateTimeQuestion({
   sectionID,
   questionID,
-}: DatetimeSurveyQuestionProps) {
+}: DateTimeQuestionProps) {
   const [mode, setMode] = useState<DateTimeMode>("date");
 
   const updateQuestionConfig = useSurveyStore((s) => s.updateQuestionConfig);
 
   useEffect(() => {
-    const config: DatetimeQuestionConfig = {
+    const config: DateTimeQuestionConfig = {
       mode,
     };
-    console.log(config);
     updateQuestionConfig(sectionID, questionID, config);
   }, [mode, sectionID, questionID, updateQuestionConfig]);
 
