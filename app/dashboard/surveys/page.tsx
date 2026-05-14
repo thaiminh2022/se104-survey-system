@@ -27,7 +27,7 @@ export default async function Page() {
         <h1 className="text-3xl font-bold my-3">Your surveys</h1>
         {surveys.data.map((s, i) => {
           return (
-            <Card key={i}>
+            <Card key={i} className="mt-3">
               <CardHeader>
                 <div className="flex">
                   <CardTitle>{s.title}</CardTitle>
