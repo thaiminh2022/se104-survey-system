@@ -1,25 +1,55 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { convertQuestionTypeToName } from "@/lib/helper";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { QUESTION_TYPES, QuestionTypes } from "@/types/question-type";
-import { IconDots, IconPlus, IconTrash } from "@tabler/icons-react";
+import { QuestionTypes } from "@/types/question-type";
+import {
+  IconChevronDown,
+  IconDots,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import { ToggleDescription } from "../ToggleDescription";
+
+const QUESTION_TYPE_GROUPS: { label: string; types: QuestionTypes[] }[] = [
+  {
+    label: "Choice",
+    types: [
+      "single-choice",
+      "multiple-choice",
+      "dropdown",
+      "yes-no",
+      "ranking",
+    ],
+  },
+  {
+    label: "Scale",
+    types: ["rating-scale", "likert-scale", "matrix"],
+  },
+  {
+    label: "Text",
+    types: ["short-text", "long-text"],
+  },
+  {
+    label: "Special",
+    types: ["date-time", "consent", "number"],
+  },
+];
 
 interface QuestionFooterProps {
   questionType: QuestionTypes;
@@ -59,7 +89,7 @@ export default function QuestionFooter({
         Add question
       </Button>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center gap-3">
         <Field orientation="horizontal" className="gap-2">
           <Checkbox
             id={`required-checkbox-${questionID}`}
@@ -73,31 +103,53 @@ export default function QuestionFooter({
           </FieldLabel>
         </Field>
 
-        <Select
-          required
-          value={questionType}
-          onValueChange={(value) =>
-            updateQuestionType(sectionID, questionID, value as QuestionTypes)
-          }
-        >
-          <SelectTrigger className="w-52 rounded-md">
-            <SelectValue placeholder="Select a question type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Question Type</SelectLabel>
-              {QUESTION_TYPES.map((type) => (
-                <SelectItem value={type} key={type}>
-                  {convertQuestionTypeToName(type)}
-                </SelectItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-52 justify-between rounded-md"
+            >
+              <span className="truncate">
+                {convertQuestionTypeToName(questionType)}
+              </span>
+              <IconChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-60" align="end">
+            <DropdownMenuRadioGroup
+              value={questionType}
+              onValueChange={(value) =>
+                updateQuestionType(
+                  sectionID,
+                  questionID,
+                  value as QuestionTypes,
+                )
+              }
+            >
+              {QUESTION_TYPE_GROUPS.map((group, index) => (
+                <div key={group.label}>
+                  {index > 0 ? <DropdownMenuSeparator /> : null}
+                  <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                  {group.types.map((type) => (
+                    <DropdownMenuRadioItem value={type} key={type}>
+                      {convertQuestionTypeToName(type)}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </div>
               ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" size="icon" className="rounded-md">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="rounded-md"
+            >
               <IconDots />
             </Button>
           </PopoverTrigger>

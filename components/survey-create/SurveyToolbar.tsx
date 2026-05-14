@@ -1,6 +1,6 @@
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
-import { IconNewSection, IconPlus, IconTextCaption } from "@tabler/icons-react";
+import { IconNewSection, IconPlus } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
@@ -38,11 +38,6 @@ export default function SurveyToolbar() {
         >
           <IconNewSection />
           <span className="hidden sm:inline">Section</span>
-        </Button>
-
-        <Button type="button" className="rounded-md" variant="outline" disabled>
-          <IconTextCaption />
-          <span className="hidden sm:inline">Text</span>
         </Button>
       </CardContent>
     </Card>
