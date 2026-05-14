@@ -14,6 +14,7 @@ import type { Survey } from "@/types/question-type";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { SurveyResponseSection } from "./SurveyResponseSection";
 
 type Props = {
@@ -86,6 +87,7 @@ export default function SurveyResponseForm({ survey }: Props) {
       answerForm.setError("root", {
         message: result.message,
       });
+      toast.error("Error when submitting form: " + result.message);
     }
   }
 
