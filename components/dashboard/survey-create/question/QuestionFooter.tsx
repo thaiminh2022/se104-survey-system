@@ -1,55 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { convertQuestionTypeToName } from "@/lib/helper";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { QuestionTypes } from "@/types/question-type";
-import {
-  IconChevronDown,
-  IconDots,
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconDots, IconPlus, IconTrash } from "@tabler/icons-react";
 import { ToggleDescription } from "../ToggleDescription";
-
-const QUESTION_TYPE_GROUPS: { label: string; types: QuestionTypes[] }[] = [
-  {
-    label: "Choice",
-    types: [
-      "single-choice",
-      "multiple-choice",
-      "dropdown",
-      "yes-no",
-      "ranking",
-    ],
-  },
-  {
-    label: "Scale",
-    types: ["rating-scale", "likert-scale", "matrix"],
-  },
-  {
-    label: "Text",
-    types: ["short-text", "long-text"],
-  },
-  {
-    label: "Special",
-    types: ["date-time", "consent", "number"],
-  },
-];
+import { QuestionTypeDropdown } from "./QuestionTypeDropdown";
 
 interface QuestionFooterProps {
   questionType: QuestionTypes;
@@ -103,44 +64,12 @@ export default function QuestionFooter({
           </FieldLabel>
         </Field>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-52 justify-between rounded-md"
-            >
-              <span className="truncate">
-                {convertQuestionTypeToName(questionType)}
-              </span>
-              <IconChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-60" align="end">
-            <DropdownMenuRadioGroup
-              value={questionType}
-              onValueChange={(value) =>
-                updateQuestionType(
-                  sectionID,
-                  questionID,
-                  value as QuestionTypes,
-                )
-              }
-            >
-              {QUESTION_TYPE_GROUPS.map((group, index) => (
-                <div key={group.label}>
-                  {index > 0 ? <DropdownMenuSeparator /> : null}
-                  <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
-                  {group.types.map((type) => (
-                    <DropdownMenuRadioItem value={type} key={type}>
-                      {convertQuestionTypeToName(type)}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </div>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <QuestionTypeDropdown
+          value={questionType}
+          onValueChange={(type) =>
+            updateQuestionType(sectionID, questionID, type)
+          }
+        />
 
         <Popover>
           <PopoverTrigger asChild>

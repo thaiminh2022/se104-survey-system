@@ -1,24 +1,46 @@
+"use client";
+
 import { submitSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { IconDeviceFloppy, IconSend } from "@tabler/icons-react";
-import { Button } from "../ui/button";
+import { IconDeviceFloppy, IconLoader2, IconSend } from "@tabler/icons-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "../../ui/button";
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+} from "../../ui/card";
+import { Field, FieldGroup, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
+import { Textarea } from "../../ui/textarea";
 
 export default function SurveyHeader() {
+  const [submittingAction, setSubmittingAction] = useState<
+    "draft" | "publish" | null
+  >(null);
   const survey = useSurveyStore((s) => s.survey);
   const updateSurveyTitle = useSurveyStore((s) => s.updateSurveyTitle);
   const updateSurveyDescription = useSurveyStore(
     (s) => s.updateSurveyDescription,
   );
+  const isSubmitting = submittingAction != null;
+
+  async function handleSubmit(isDraft: boolean) {
+    setSubmittingAction(isDraft ? "draft" : "publish");
+    try {
+      const result = await submitSurvey(survey, isDraft);
+      if (!result.success) {
+        toast.error(`Survey creation error: ${result.message}`);
+      } else {
+        toast.info(`Survey saved as: ${isDraft ? "Draft" : "Published"}`);
+      }
+    } finally {
+      setSubmittingAction(null);
+    }
+  }
 
   return (
     <Card className="rounded-lg border-l-4 border-l-primary shadow-sm">
@@ -36,18 +58,30 @@ export default function SurveyHeader() {
           />
         </CardTitle>
         <CardAction className="flex gap-2">
-          <Button variant="outline" className="rounded-md" disabled>
-            <IconDeviceFloppy />
-            Draft
+          <Button
+            variant="outline"
+            className="rounded-md"
+            disabled={isSubmitting}
+            onClick={() => handleSubmit(true)}
+          >
+            {submittingAction === "draft" ? (
+              <IconLoader2 className="animate-spin" />
+            ) : (
+              <IconDeviceFloppy />
+            )}
+            {submittingAction === "draft" ? "Saving..." : "Draft"}
           </Button>
           <Button
             className="rounded-md"
-            onClick={async () => {
-              console.log(await submitSurvey(survey));
-            }}
+            disabled={isSubmitting}
+            onClick={() => handleSubmit(false)}
           >
-            <IconSend />
-            Publish
+            {submittingAction === "publish" ? (
+              <IconLoader2 className="animate-spin" />
+            ) : (
+              <IconSend />
+            )}
+            {submittingAction === "publish" ? "Publishing..." : "Publish"}
           </Button>
         </CardAction>
       </CardHeader>

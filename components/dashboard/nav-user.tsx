@@ -1,10 +1,8 @@
 "use client";
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
 
@@ -24,8 +22,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { AppUserData } from "@/types/db_schema";
 import { createClient } from "@/lib/supabase/client";
+import { AppUserData } from "@/types/db_schema";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -80,7 +78,11 @@ export function NavUser({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  router.push("/me");
+                }}
+              >
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>

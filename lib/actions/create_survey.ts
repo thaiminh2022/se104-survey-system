@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 
-export async function submitSurvey(s: Survey) {
+export async function submitSurvey(s: Survey, isDraft: boolean) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
@@ -20,7 +20,7 @@ export async function submitSurvey(s: Survey) {
     user_id: userId,
     title: s.title,
     description: s.description,
-    state: "draft",
+    state: isDraft ? "draft" : "published",
   };
 
   const surveyInsertRes = await supabase

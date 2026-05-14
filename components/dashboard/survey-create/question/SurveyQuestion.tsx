@@ -1,7 +1,7 @@
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
 import { Question } from "@/types/question-type";
 import { useState } from "react";
-import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "../../../ui/card";
 import { ConsentQuestion } from "./question-types/ConsentQuestion";
 import DateTimeQuestion from "./question-types/DateTimeQuestion";
 import { DropdownQuestion } from "./question-types/DropdownQuestion";
@@ -31,13 +31,21 @@ export default function SurveyQuestion({
   function getQuestionComponent() {
     switch (info.question_type) {
       case "single-choice":
-        return <SingleChoiceQuestion questionID={info.id} sectionID={sectionID} />;
+        return (
+          <SingleChoiceQuestion questionID={info.id} sectionID={sectionID} />
+        );
       case "multiple-choice":
-        return <MultipleChoiceQuestion questionID={info.id} sectionID={sectionID} />;
+        return (
+          <MultipleChoiceQuestion questionID={info.id} sectionID={sectionID} />
+        );
       case "rating-scale":
-        return <RatingScaleQuestion questionID={info.id} sectionID={sectionID} />;
+        return (
+          <RatingScaleQuestion questionID={info.id} sectionID={sectionID} />
+        );
       case "likert-scale":
-        return <LikertScaleQuestion questionID={info.id} sectionID={sectionID} />;
+        return (
+          <LikertScaleQuestion questionID={info.id} sectionID={sectionID} />
+        );
       case "short-text":
         return <ShortTextQuestion />;
       case "long-text":
@@ -88,10 +96,7 @@ export default function SurveyQuestion({
         <CardContent className="pt-0">{getQuestionComponent()}</CardContent>
       ) : null}
 
-      <CardFooter
-        className="border-t bg-muted/20 py-3"
-        hidden={!isActive}
-      >
+      <CardFooter className="border-t bg-muted/20 py-3" hidden={!isActive}>
         <QuestionFooter
           questionType={info.question_type}
           setShowDesc={setShowDesc}

@@ -11,29 +11,30 @@ import {
   QuestionTypes,
   RankingQuestionConfig,
   Section,
-  ShortTextQuestionConfig,
   SingleChoiceQuestionConfig,
   Survey,
 } from "@/types/question-type";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-function getDefaultQuestion(): Question {
-  const config = getDefaultConfigForQuestionType("short-text") as ShortTextQuestionConfig;
-  
-  const q: Question = {
+function getDefaultQuestion(type: QuestionTypes = "short-text"): Question {
+  const config = getDefaultConfigForQuestionType(type);
+
+  const q = {
     id: crypto.randomUUID(),
     title: "New question",
     description: "",
     config: config,
-    question_type: "short-text",
+    question_type: type,
     required: false,
-  }
+  } as Question;
 
   return q;
 }
 
-function getDefaultConfigForQuestionType(t: QuestionTypes): QuestionConfigByType[QuestionTypes] {
+function getDefaultConfigForQuestionType(
+  t: QuestionTypes,
+): QuestionConfigByType[QuestionTypes] {
   switch (t) {
     case "single-choice":
       const scConfig: SingleChoiceQuestionConfig = {
@@ -121,9 +122,9 @@ function getDefaultSection(): Section {
 
 type SurveyStore = {
   survey: Survey;
-  addSection: () => void;
+  addSection: () => string;
   deleteSection: (sectionID: string) => void;
-  addQuestion: (sectionID: string) => void;
+  addQuestion: (sectionID: string, type?: QuestionTypes) => string | null;
   deleteQuestion: (sectionID: string, questionID: string) => void;
   updateQuestionType: (
     sectionID: string,
@@ -167,10 +168,15 @@ export const useSurveyStore = create<SurveyStore>()(
     },
 
     // --- Section Actions ---
-    addSection: () =>
+    addSection: () => {
+      const section = getDefaultSection();
+
       set((state) => {
-        state.survey.sections.push(getDefaultSection());
-      }),
+        state.survey.sections.push(section);
+      });
+
+      return section.id;
+    },
 
     deleteSection: (sectionID) =>
       set((state) => {
@@ -199,13 +205,22 @@ export const useSurveyStore = create<SurveyStore>()(
       }),
 
     // --- Question Actions ---
-    addQuestion: (sectionID) =>
+    addQuestion: (sectionID, type = "short-text") => {
+      const question = getDefaultQuestion(type);
+
+      let added = false;
+
       set((state) => {
         const section = state.survey.sections.find((s) => s.id === sectionID);
+
         if (section) {
-          section.questions.push(getDefaultQuestion());
+          section.questions.push(question);
+          added = true;
         }
-      }),
+      });
+
+      return added ? question.id : null;
+    },
 
     deleteQuestion: (sectionID, questionID) =>
       set((state) => {

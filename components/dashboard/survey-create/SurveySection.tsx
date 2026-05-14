@@ -2,17 +2,17 @@ import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
 import { Section } from "@/types/question-type";
 import { IconTrash } from "@tabler/icons-react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Field, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+} from "../../ui/card";
+import { Field, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
+import { Textarea } from "../../ui/textarea";
 import SurveyQuestion from "./question/SurveyQuestion";
 
 interface SurveySectionProps {

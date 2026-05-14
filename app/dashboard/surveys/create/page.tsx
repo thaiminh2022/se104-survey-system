@@ -1,9 +1,9 @@
 "use client";
 
 import { SiteHeader } from "@/components/dashboard/site-header";
-import SurveyHeader from "@/components/survey-create/SurveyHeader";
-import SurveySection from "@/components/survey-create/SurveySection";
-import SurveyToolbar from "@/components/survey-create/SurveyToolbar";
+import SurveyHeader from "@/components/dashboard/survey-create/SurveyHeader";
+import SurveySection from "@/components/dashboard/survey-create/SurveySection";
+import SurveyToolbar from "@/components/dashboard/survey-create/SurveyToolbar";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 
 export default function Page() {

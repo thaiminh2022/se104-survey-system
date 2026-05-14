@@ -1,5 +1,5 @@
-import { Field, FieldLabel } from "../ui/field";
-import { Switch } from "../ui/switch";
+import { Field, FieldLabel } from "../../ui/field";
+import { Switch } from "../../ui/switch";
 
 interface ToggleDescriptionProps {
   setCheck: (state: boolean) => void;
