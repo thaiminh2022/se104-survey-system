@@ -7,13 +7,13 @@ interface ToggleDescriptionProps {
 }
 export function ToggleDescription({ check, setCheck }: ToggleDescriptionProps) {
   return (
-    <Field orientation={"horizontal"}>
+    <Field orientation="horizontal" className="justify-between gap-3">
+      <FieldLabel htmlFor="show-desc">Description</FieldLabel>
       <Switch
         id="show-desc"
         onCheckedChange={(e) => setCheck(e)}
         checked={check}
       />
-      <FieldLabel htmlFor="show-desc">Show description</FieldLabel>
     </Field>
   );
 }

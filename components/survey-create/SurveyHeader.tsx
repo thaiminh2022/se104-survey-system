@@ -1,6 +1,6 @@
 import { submitSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
-import { IconSend } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconSend } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -9,6 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { Field, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 export default function SurveyHeader() {
   const survey = useSurveyStore((s) => s.survey);
@@ -18,18 +21,25 @@ export default function SurveyHeader() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <input
+    <Card className="rounded-lg border-l-4 border-l-primary shadow-sm">
+      <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
+        <CardTitle className="space-y-1">
+          <span className="text-sm font-medium text-muted-foreground">
+            Survey
+          </span>
+          <Input
             type="text"
-            className="text-3xl w-full focus:outline-0 border-b-accent border-b-2 focus:border-b-accent-foreground transition-colors"
+            className="h-auto rounded-none border-x-0 border-t-0 bg-transparent px-0 py-1 text-3xl font-semibold shadow-none focus-visible:ring-0"
             placeholder="Survey title"
             value={survey.title}
-            onChange={(e) => updateSurveyTitle(e.target.value)}
+            onChange={(event) => updateSurveyTitle(event.target.value)}
           />
         </CardTitle>
-        <CardAction>
+        <CardAction className="flex gap-2">
+          <Button variant="outline" className="rounded-md" disabled>
+            <IconDeviceFloppy />
+            Draft
+          </Button>
           <Button
             className="rounded-md"
             onClick={async () => {
@@ -37,16 +47,21 @@ export default function SurveyHeader() {
             }}
           >
             <IconSend />
+            Publish
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-y-5">
-        <textarea
-          placeholder="Survey description"
-          className="w-full focus:outline-0 h-5 transitions-color border-b-accent border-b-2 focus:border-b-accent-foreground"
-          value={survey.description}
-          onChange={(e) => updateSurveyDescription(e.target.value)}
-        />
+      <CardContent>
+        <FieldGroup>
+          <Field>
+            <FieldLabel>Intro description</FieldLabel>
+            <Textarea
+              placeholder="Tell respondents what this survey is about."
+              value={survey.description}
+              onChange={(event) => updateSurveyDescription(event.target.value)}
+            />
+          </Field>
+        </FieldGroup>
       </CardContent>
     </Card>
   );

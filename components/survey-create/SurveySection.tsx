@@ -1,5 +1,7 @@
 import { useSurveyStore } from "@/stores/survey-create/survey_store";
 import { useToolbarStore } from "@/stores/survey-create/tool_bar";
+import { Section } from "@/types/question-type";
+import { IconTrash } from "@tabler/icons-react";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -8,62 +10,90 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { Field, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import SurveyQuestion from "./question/SurveyQuestion";
-import { Section } from "@/types/question-type";
 
 interface SurveySectionProps {
   info: Section;
+  index: number;
 }
-export default function SurveySection({ info }: SurveySectionProps) {
+
+export default function SurveySection({ info, index }: SurveySectionProps) {
   const deleteSection = useSurveyStore((s) => s.deleteSection);
   const updateSectionTitle = useSurveyStore((s) => s.updateSectionTitle);
   const updateSectionDescription = useSurveyStore(
     (s) => s.updateSectionDescription,
   );
-
   const setActiveSectionId = useToolbarStore((s) => s.setActiveSectionId);
+  const activeSectionId = useToolbarStore((s) => s.activeSectionId);
+  const isActive = activeSectionId === info.id;
 
   return (
-    <div
-      onFocus={(e) => {
-        setActiveSectionId(info.id);
-      }}
+    <section
+      className="space-y-3"
+      onFocus={() => setActiveSectionId(info.id)}
+      onClick={() => setActiveSectionId(info.id)}
     >
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <input
+      <Card
+        className={[
+          "rounded-lg shadow-sm transition-colors",
+          isActive ? "ring-primary/40" : "",
+        ].join(" ")}
+      >
+        <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
+          <CardTitle className="space-y-1">
+            <span className="text-sm font-medium text-muted-foreground">
+              Section {index + 1}
+            </span>
+            <Input
               type="text"
-              className="text-xl w-full focus:outline-0 border-b-accent border-b-2 focus:border-b-accent-foreground transition-colors"
-              placeholder="Survey title"
+              className="h-auto rounded-none border-x-0 border-t-0 bg-transparent px-0 py-1 text-xl font-semibold shadow-none focus-visible:ring-0"
+              placeholder="Section title"
               value={info.title}
-              onChange={(e) => updateSectionTitle(info.id, e.target.value)}
+              onChange={(event) =>
+                updateSectionTitle(info.id, event.target.value)
+              }
             />
           </CardTitle>
           <CardAction>
             <Button
+              type="button"
+              size="icon"
+              variant="destructive"
               className="rounded-md"
-              variant={"destructive"}
               onClick={() => deleteSection(info.id)}
+              aria-label="Delete section"
             >
-              Delete
+              <IconTrash />
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-y-5">
-          <textarea
-            placeholder="Section description"
-            className="w-full focus:outline-0 h-5 transitions-color border-b-accent border-b-2 focus:border-b-accent-foreground"
-            value={info.description}
-            onChange={(e) => updateSectionDescription(info.id, e.target.value)}
-          />
+        <CardContent>
+          <Field>
+            <FieldLabel>Section description</FieldLabel>
+            <Textarea
+              placeholder="Optional context for this section."
+              value={info.description}
+              onChange={(event) =>
+                updateSectionDescription(info.id, event.target.value)
+              }
+            />
+          </Field>
         </CardContent>
       </Card>
-      <div className="flex flex-col gap-y-5">
-        {info.questions.map((e, i) => {
-          return <SurveyQuestion info={e} key={i} sectionID={info.id} />;
-        })}
+
+      <div className="space-y-3">
+        {info.questions.map((question, questionIndex) => (
+          <SurveyQuestion
+            info={question}
+            key={question.id}
+            sectionID={info.id}
+            index={questionIndex}
+          />
+        ))}
       </div>
-    </div>
+    </section>
   );
 }

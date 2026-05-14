@@ -21,10 +21,12 @@ import QuestionHeader from "./QuestionHeader";
 interface SurveyQuestionProps {
   info: Question;
   sectionID: string;
+  index: number;
 }
 export default function SurveyQuestion({
   info,
   sectionID,
+  index,
 }: SurveyQuestionProps) {
   function getQuestionComponent() {
     switch (info.question_type) {
@@ -63,21 +65,28 @@ export default function SurveyQuestion({
 
   return (
     <Card
-      className="mt- transition-all"
-      style={{
-        borderLeft: activeQuestionId == info.id ? "4px solid blue" : "0",
-      }}
+      className={[
+        "rounded-lg border bg-card shadow-sm transition-all",
+        activeQuestionId === info.id
+          ? "border-primary/60 ring-2 ring-primary/15"
+          : "hover:border-foreground/20",
+      ].join(" ")}
       onClick={() => setActiveQuestionId(info.id)}
       onFocus={() => setActiveQuestionId(info.id)}
     >
       <CardHeader>
-        <QuestionHeader info={info} showDesc={showDesc} sectionID={sectionID} />
+        <QuestionHeader
+          info={info}
+          index={index}
+          showDesc={showDesc}
+          sectionID={sectionID}
+        />
       </CardHeader>
-      <CardContent>{getQuestionComponent()}</CardContent>
+      <CardContent className="pt-0">{getQuestionComponent()}</CardContent>
 
       <CardFooter
-        className="flex justify-between"
-        hidden={info.id != activeQuestionId}
+        className="border-t bg-muted/20 py-3"
+        hidden={info.id !== activeQuestionId}
       >
         <QuestionFooter
           questionType={info.question_type}
