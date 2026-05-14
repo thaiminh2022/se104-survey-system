@@ -12,6 +12,7 @@ interface QuestionHeaderProps {
   index: number;
   sectionID: string;
   showDesc: boolean;
+  isActive: boolean;
 }
 
 export default function QuestionHeader({
@@ -19,6 +20,7 @@ export default function QuestionHeader({
   index,
   sectionID,
   showDesc,
+  isActive,
 }: QuestionHeaderProps) {
   const updateQuestionTitle = useSurveyStore((s) => s.updateQuestionTitle);
   const updateQuestionDescription = useSurveyStore(
@@ -37,7 +39,10 @@ export default function QuestionHeader({
         </div>
         <CardTitle>
           <Field>
-            <FieldLabel htmlFor={`question-title-${info.id}`}>
+            <FieldLabel
+              htmlFor={`question-title-${info.id}`}
+              hidden={!isActive}
+            >
               Question title
             </FieldLabel>
             <Input
@@ -52,7 +57,7 @@ export default function QuestionHeader({
             />
           </Field>
         </CardTitle>
-        <CardDescription hidden={!showDesc}>
+        <CardDescription hidden={!isActive || !showDesc}>
           <Field>
             <FieldLabel htmlFor={`question-description-${info.id}`}>
               Description

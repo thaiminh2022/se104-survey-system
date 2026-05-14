@@ -62,12 +62,13 @@ export default function SurveyQuestion({
   const [showDesc, setShowDesc] = useState(false);
   const setActiveQuestionId = useToolbarStore((s) => s.setActiveQuestionId);
   const activeQuestionId = useToolbarStore((s) => s.activeQuestionId);
+  const isActive = activeQuestionId === info.id;
 
   return (
     <Card
       className={[
         "rounded-lg border bg-card shadow-sm transition-all",
-        activeQuestionId === info.id
+        isActive
           ? "border-primary/60 ring-2 ring-primary/15"
           : "hover:border-foreground/20",
       ].join(" ")}
@@ -78,15 +79,18 @@ export default function SurveyQuestion({
         <QuestionHeader
           info={info}
           index={index}
+          isActive={isActive}
           showDesc={showDesc}
           sectionID={sectionID}
         />
       </CardHeader>
-      <CardContent className="pt-0">{getQuestionComponent()}</CardContent>
+      {isActive ? (
+        <CardContent className="pt-0">{getQuestionComponent()}</CardContent>
+      ) : null}
 
       <CardFooter
         className="border-t bg-muted/20 py-3"
-        hidden={info.id !== activeQuestionId}
+        hidden={!isActive}
       >
         <QuestionFooter
           questionType={info.question_type}
