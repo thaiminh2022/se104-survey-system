@@ -21,7 +21,7 @@ export async function fakeSubmitSurveyResponse(
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
         answer_type: answer.answer_type,
-        answer: answer.config,
+        answer_data: answer.config,
       }) as AnswerInsert,
   );
   console.log(submission);
@@ -34,9 +34,15 @@ export async function submitSurveyResponse(
   surveyId: string,
   answerForm: AnswerForm,
 ) {
+  const userRes = await getUser();
+  let userId = null;
+  if (userRes.success === true) {
+    userId = userRes.data.id;
+  }
+
   const submission: SubmissionInsert = {
     survey_id: surveyId,
-    user_id: "test-user",
+    user_id: userId,
     submitted_at: new Date(),
   };
   const answerRows: AnswerInsert[] = Object.entries(answerForm.answers).map(
@@ -45,7 +51,7 @@ export async function submitSurveyResponse(
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
         answer_type: answer.answer_type,
-        answer: answer.config,
+        answer_data: answer.config,
       }) as AnswerInsert,
   );
 
@@ -53,11 +59,6 @@ export async function submitSurveyResponse(
     return createError(null, "No answers");
   }
 
-  const userRes = await getUser();
-  let userId = "empty";
-  if (userRes.success === true) {
-    userId = userRes.data.id;
-  }
   const supabase = await createClient();
   const submissionInsertRes = await supabase
     .from("submissions")
