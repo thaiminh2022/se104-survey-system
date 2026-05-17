@@ -1,6 +1,5 @@
-import { SiteHeader } from "@/components/ui/dashboard/site-header";
-import ChangeStateSurveyButton from "@/components/ui/dashboard/surveys/ChangeStateSurveyBtn";
-import DeleteSurveyButton from "@/components/ui/dashboard/surveys/DeleteSurveyBtn";
+import ChangeStateSurveyButton from "@/components/dashboard/surveys/ChangeStateSurveyBtn";
+import DeleteSurveyButton from "@/components/dashboard/surveys/DeleteSurveyBtn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +21,6 @@ export default async function Page() {
 
   return (
     <>
-      <SiteHeader header="Surveys" />
       <div className="mx-auto lg:w-1/2 w-3/4">
         <h1 className="text-3xl font-bold my-3">Your surveys</h1>
         {surveys.data.map((s, i) => {

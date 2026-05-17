@@ -1,11 +1,9 @@
-import { SiteHeader } from "@/components/ui/dashboard/site-header";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
     <>
-      <SiteHeader header="Surveys" />
       <div className="mx-auto w-3/4 lg:w-1/2">
         <div className="my-3 flex items-center justify-between gap-4">
           <Skeleton className="h-9 w-44 rounded-md" />

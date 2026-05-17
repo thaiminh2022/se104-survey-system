@@ -1,6 +1,6 @@
 import { Label } from "@/components/ui/label";
 import type { Question } from "@/lib/types/question-type";
-import { SurveyQuestionInput } from "./SurveyQuestionInput";
+import { SurveyQuestionInput } from "./response/SurveyQuestionInput";
 
 type Props = {
   index: number;

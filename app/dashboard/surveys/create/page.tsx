@@ -1,9 +1,8 @@
 "use client";
 
-import { SiteHeader } from "@/components/ui/dashboard/site-header";
-import SurveyHeader from "@/components/ui/dashboard/survey-create/SurveyHeader";
-import SurveySection from "@/components/ui/dashboard/survey-create/SurveySection";
-import SurveyToolbar from "@/components/ui/dashboard/survey-create/SurveyToolbar";
+import SurveyHeader from "@/components/dashboard/survey-create/SurveyHeader";
+import SurveySection from "@/components/dashboard/survey-create/SurveySection";
+import SurveyToolbar from "@/components/dashboard/survey-create/SurveyToolbar";
 import { useSurveyStore } from "@/lib/stores/survey_store";
 
 export default function Page() {
@@ -15,7 +14,6 @@ export default function Page() {
 
   return (
     <>
-      <SiteHeader header="Create survey" />
       <main className="min-h-[calc(100svh-4rem)] bg-muted/20">
         <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_16rem] lg:px-8">
           <div className="min-w-0 space-y-5 pb-28">
