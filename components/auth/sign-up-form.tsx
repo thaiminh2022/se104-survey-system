@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeReturnUrl } from "@/lib/auth/return-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +24,7 @@ interface SignUpProps {
 type Props = React.ComponentPropsWithoutRef<"div"> & SignUpProps;
 
 export function SignUpForm({ className, returnUrl, ...props }: Props) {
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -43,15 +45,15 @@ export function SignUpForm({ className, returnUrl, ...props }: Props) {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/me`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(safeReturnUrl)}`,
         },
       });
       if (error) throw error;
-      router.push("/auth/sign-up-success");
+      router.push(data.session ? safeReturnUrl : "/auth/sign-up-success");
     } catch (error: unknown) {
       setError(
         error instanceof Error
@@ -120,7 +122,7 @@ export function SignUpForm({ className, returnUrl, ...props }: Props) {
                   returnUrl
                     ? {
                         pathname: "/auth/login",
-                        query: { returnUrl: returnUrl },
+                        query: { returnUrl: safeReturnUrl },
                       }
                     : "/auth/login"
                 }

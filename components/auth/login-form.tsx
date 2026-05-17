@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeReturnUrl } from "@/lib/auth/return-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +24,7 @@ interface LoginFormProps {
 type Props = React.ComponentPropsWithoutRef<"div"> & LoginFormProps;
 
 export function LoginForm({ className, returnUrl, ...props }: Props) {
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -41,8 +43,7 @@ export function LoginForm({ className, returnUrl, ...props }: Props) {
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push(returnUrl ?? "/dashboard");
+      router.push(safeReturnUrl);
     } catch (error: unknown) {
       setError(
         error instanceof Error
@@ -107,7 +108,7 @@ export function LoginForm({ className, returnUrl, ...props }: Props) {
                   returnUrl
                     ? {
                         pathname: "/auth/sign-up",
-                        query: { returnUrl: returnUrl },
+                        query: { returnUrl: safeReturnUrl },
                       }
                     : "/auth/sign-up"
                 }
