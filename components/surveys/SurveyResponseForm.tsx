@@ -8,7 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { submitSurveyResponse } from "@/lib/actions/submit_survey_response";
+import {
+  fakeSubmitSurveyResponse,
+  submitSurveyResponse,
+} from "@/lib/actions/submit_survey_response";
 import { Answer, AnswerForm } from "@/lib/types/answer-type";
 import type { Survey } from "@/lib/types/question-type";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
@@ -79,7 +82,10 @@ export default function SurveyResponseForm({ survey }: Props) {
   }
 
   async function onSubmit(data: AnswerForm) {
-    const result = await submitSurveyResponse(survey.id, data);
+    const result =
+      survey.id == "test"
+        ? await fakeSubmitSurveyResponse(survey.id, data)
+        : await submitSurveyResponse(survey.id, data);
 
     if (result.success) {
       setSubmitted(true);
