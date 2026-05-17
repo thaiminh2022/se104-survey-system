@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSurveyStore } from "@/lib/stores/survey_store";
+import { useToolbarStore } from "@/lib/stores/tool_bar";
 import { QuestionTypes } from "@/lib/types/question-type";
 import { IconDots, IconPlus, IconTrash } from "@tabler/icons-react";
 import { ToggleDescription } from "../ToggleDescription";
@@ -38,13 +39,20 @@ export default function QuestionFooter({
     .find((section) => section.id === sectionID)
     ?.questions.find((item) => item.id === questionID);
 
+  const setQuestionFocus = useToolbarStore((t) => t.setActiveQuestionId);
+
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-3">
       <Button
         type="button"
         variant="outline"
         className="rounded-md"
-        onClick={() => addQuestion(sectionID)}
+        onClick={() => {
+          const id = addQuestion(sectionID);
+          if (id) {
+            setQuestionFocus(id);
+          }
+        }}
       >
         <IconPlus />
         Add question

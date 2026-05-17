@@ -3,13 +3,6 @@ import { useToolbarStore } from "@/lib/stores/tool_bar";
 import { Section } from "@/lib/types/question-type";
 import { IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,18 +25,18 @@ export default function SurveySection({ info, index }: SurveySectionProps) {
 
   return (
     <section
-      className="space-y-3"
+      className={[
+        "relative space-y-4 rounded-lg border-l-4 px-4 py-3 transition-colors",
+        isActive
+          ? "border-l-primary bg-primary/5"
+          : "border-l-border bg-transparent hover:bg-muted/30",
+      ].join(" ")}
       onFocus={() => setActiveSectionId(info.id)}
       onClick={() => setActiveSectionId(info.id)}
     >
-      <Card
-        className={[
-          "rounded-lg shadow-sm transition-colors",
-          isActive ? "ring-primary/40" : "",
-        ].join(" ")}
-      >
-        <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
-          <CardTitle className="space-y-1">
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+          <div className="space-y-1">
             <span className="text-sm font-medium text-muted-foreground">
               Section {index + 1}
             </span>
@@ -56,22 +49,21 @@ export default function SurveySection({ info, index }: SurveySectionProps) {
                 updateSectionTitle(info.id, event.target.value)
               }
             />
-          </CardTitle>
-          <CardAction>
-            <Button
-              type="button"
-              size="icon"
-              variant="destructive"
-              className="rounded-md"
-              onClick={() => deleteSection(info.id)}
-              aria-label="Delete section"
-            >
-              <IconTrash />
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <Field>
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="destructive"
+            className="rounded-md"
+            onClick={() => deleteSection(info.id)}
+            aria-label="Delete section"
+          >
+            <IconTrash />
+          </Button>
+        </div>
+
+        {isActive ? (
+          <Field className="max-w-3xl">
             <FieldLabel>Section description</FieldLabel>
             <Textarea
               placeholder="Optional context for this section."
@@ -81,10 +73,10 @@ export default function SurveySection({ info, index }: SurveySectionProps) {
               }
             />
           </Field>
-        </CardContent>
-      </Card>
+        ) : null}
+      </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 pl-0 sm:pl-4">
         {info.questions.map((question, questionIndex) => (
           <SurveyQuestion
             info={question}

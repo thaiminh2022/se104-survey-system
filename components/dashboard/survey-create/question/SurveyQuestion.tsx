@@ -75,10 +75,10 @@ export default function SurveyQuestion({
   return (
     <Card
       className={[
-        "rounded-lg border bg-card shadow-sm transition-all",
+        "relative rounded-lg border bg-card shadow-sm transition-all before:absolute before:inset-y-0 before:left-0 before:w-1 before:rounded-l-lg before:content-['']",
         isActive
-          ? "border-primary/60 ring-2 ring-primary/15"
-          : "hover:border-foreground/20",
+          ? "border-primary/70 ring-2 ring-primary/20 before:bg-primary"
+          : "before:bg-transparent hover:border-foreground/20 hover:before:bg-muted-foreground/25",
       ].join(" ")}
       onClick={() => setActiveQuestionId(info.id)}
       onFocus={() => setActiveQuestionId(info.id)}
