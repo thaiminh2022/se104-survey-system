@@ -11,14 +11,12 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   IconArrowRight,
-  IconClipboardList,
   IconEye,
   IconFilePlus,
   IconPencil,
   IconShare,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
 import {
   getRecentSurveyRowsForUser,
   getSurveyRowForUser,
@@ -164,7 +162,7 @@ export default async function DashboardPage() {
 
 function DashboardHeader() {
   return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <header>
       <div>
         <p className="text-sm font-medium text-muted-foreground">
           Survey workspace
@@ -172,22 +170,6 @@ function DashboardHeader() {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">
           Dashboard
         </h1>
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <ThemeToggle />
-        <Button asChild variant="outline" size="lg">
-          <Link href="/dashboard/surveys">
-            <IconClipboardList />
-            View surveys
-          </Link>
-        </Button>
-        <Button asChild size="lg">
-          <Link href="/dashboard/surveys/create">
-            <IconFilePlus />
-            Create survey
-          </Link>
-        </Button>
       </div>
     </header>
   );

@@ -31,6 +31,7 @@ import {
 import { faker } from "@faker-js/faker";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
+import { getUser } from "./read_user";
 
 export async function getSurveyRowForUser() {
   const supabase = await createClient();
@@ -73,16 +74,6 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
   }
 
   return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
-}
-
-export async function getUser() {
-  const supabase = await createClient();
-  const userRes = await supabase.auth.getUser();
-
-  if (userRes.error) {
-    return createError(userRes.error, userRes.error.message);
-  }
-  return createSuccess(userRes.data.user);
 }
 
 export async function updateSurveyStatus(id: string, status: SurveyStatus) {

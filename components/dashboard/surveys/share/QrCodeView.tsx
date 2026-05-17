@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { IconCopy, IconDownload } from "@tabler/icons-react";
 import { useRef } from "react";
 import QRCode from "react-qr-code";
+import { toast } from "sonner";
 
 type Props = {
   value: string;
@@ -65,7 +66,7 @@ export default function QrCodeView({ value }: Props) {
       }),
     ]);
 
-    alert("QR code copied!");
+    toast.success("QR code copied");
   }
 
   async function downloadQRCode() {
@@ -81,22 +82,26 @@ export default function QrCodeView({ value }: Props) {
     link.click();
 
     URL.revokeObjectURL(url);
+    toast.success("QR code downloaded");
   }
   return (
-    <div>
-      <div ref={qrRef} className="">
-        <QRCode value={value} size={200} />
-      </div>
-      <Button className="rounded-none" variant={"ghost"} onClick={copyQRCode}>
-        <IconCopy />
-      </Button>
-      <Button
-        className="rounded-none"
-        variant={"ghost"}
-        onClick={downloadQRCode}
+    <div className="flex flex-col items-center gap-4">
+      <div
+        ref={qrRef}
+        className="rounded-lg border border-border bg-white p-4 shadow-sm"
       >
-        <IconDownload />
-      </Button>
+        <QRCode value={value} size={220} />
+      </div>
+      <div className="grid w-full grid-cols-2 gap-2">
+        <Button type="button" variant="outline" onClick={copyQRCode}>
+          <IconCopy />
+          Copy
+        </Button>
+        <Button type="button" onClick={downloadQRCode}>
+          <IconDownload />
+          Download
+        </Button>
+      </div>
     </div>
   );
 }

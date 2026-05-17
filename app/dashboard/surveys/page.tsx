@@ -1,7 +1,6 @@
 import ChangeStateSurveyButton from "@/components/dashboard/surveys/ChangeStateSurveyBtn";
-import DeleteSurveyButton from "@/components/dashboard/surveys/DeleteSurveyBtn";
+import SurveyActionsDropdown from "@/components/dashboard/surveys/SurveyActionsDropdown";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -10,8 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getSurveyRowForUser } from "@/lib/actions/read_survey";
-import { IconPencil, IconShare } from "@tabler/icons-react";
-import Link from "next/link";
 
 export default async function Page() {
   const surveys = await getSurveyRowForUser();
@@ -41,24 +38,7 @@ export default async function Page() {
                 </div>
                 <CardDescription>{s.description}</CardDescription>
                 <CardAction className="flex gap-x-3 flex-wrap">
-                  <DeleteSurveyButton surveyId={s.id} />
-                  <Link href={`/dashboard/surveys/${s.id}/share`}>
-                    <Button
-                      className="rounded-md cursor-pointer"
-                      variant="secondary"
-                    >
-                      <IconShare />
-                    </Button>
-                  </Link>
-
-                  <Link href={`/dashboard/surveys/${s.id}/edit`}>
-                    <Button
-                      className="rounded-md cursor-pointer"
-                      variant="secondary"
-                    >
-                      <IconPencil />
-                    </Button>
-                  </Link>
+                  <SurveyActionsDropdown surveyId={s.id} />
                   <ChangeStateSurveyButton surveyId={s.id} state={s.state} />
                 </CardAction>
               </CardHeader>

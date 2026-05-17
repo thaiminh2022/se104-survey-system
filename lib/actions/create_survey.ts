@@ -5,7 +5,7 @@ import {
   SectionInsert,
   SurveyInsert,
 } from "@/lib/types/db_schema";
-import { ActionState, createError } from "@/lib/types/errors";
+import { createError } from "@/lib/types/errors";
 import { Survey } from "@/lib/types/question-type";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -35,67 +35,63 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
     .single();
 
   if (surveyInsertRes.error) {
-    return createError(surveyInsertRes.error, surveyInsertRes.error.message);
+    return createError(
+      surveyInsertRes.error,
+      `Survey insert error: ${surveyInsertRes.error.message}`,
+    );
   }
 
   const surveyId = surveyInsertRes.data.id as string;
-  // insert them sections
 
-  const sectionAndQuestions = s.sections.map((sec, i) => {
-    const index = i;
-    const sectionSchema: SectionInsert = {
-      survey_id: surveyId,
-      order_index: index,
-      end_behavior: "continue",
-      config: null,
-      title: sec.title,
-      description: sec.description,
-    };
+  const sectionSchemas: SectionInsert[] = s.sections.map((sec, index) => ({
+    id: sec.id,
+    survey_id: surveyId,
+    order_index: index,
+    end_behavior: "continue",
+    config: "{}",
+    title: sec.title,
+    description: sec.description,
+  }));
 
-    const questionSchemas = sec.questions.map((q, j) => {
-      const jndex = j;
-      const questionSchema: QuestionInsert = {
-        section_id: sec.id,
-        order_index: jndex,
-        title: q.title,
-        question_type: q.question_type,
-        config: JSON.stringify(q.config),
-        required: q.required,
-      };
-
-      return questionSchema;
-    });
-
-    return { sectionSchema, questionSchemas };
-  });
-
-  const errors: ActionState<unknown>[] = [];
-  sectionAndQuestions.forEach(async ({ sectionSchema, questionSchemas }) => {
+  if (sectionSchemas.length > 0) {
     const sectionInsertRes = await supabase
       .from("sections")
-      .insert([sectionSchema]);
+      .insert(sectionSchemas);
 
     if (sectionInsertRes.error) {
-      errors.push(
-        createError(sectionInsertRes.error, sectionInsertRes.error.message),
+      return createError(
+        sectionInsertRes.error,
+        `Section insert error: ${sectionInsertRes.error.message}`,
       );
-      return;
     }
+  }
 
+  const questionSchemas: QuestionInsert[] = s.sections.flatMap((sec) =>
+    sec.questions.map((q, index) => ({
+      section_id: sec.id,
+      order_index: index,
+      title: q.title,
+      question_type: q.question_type,
+      config: q.config,
+      description: q.description,
+      required: q.required,
+    })),
+  );
+
+  if (questionSchemas.length > 0) {
     const questionsInsertRes = await supabase
       .from("questions")
       .insert(questionSchemas);
 
     if (questionsInsertRes.error) {
-      errors.push(
-        createError(questionsInsertRes.error, questionsInsertRes.error.message),
+      return createError(
+        questionsInsertRes.error,
+        `Question insert error: ${questionsInsertRes.error.message}`,
       );
     }
-  });
-  if (errors.length > 0) {
-    return createError(errors, "Multiple error");
   }
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/surveys");
   redirect("/dashboard/surveys");
 }

@@ -7,7 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getFakeSurveyById } from "@/lib/actions/read_survey";
+import {
+  getFakeSurveyById,
+  getPublishedSurveyById,
+} from "@/lib/actions/read_survey";
+import { ActionState } from "@/lib/types/errors";
+import { Survey } from "@/lib/types/question-type";
 import { IconFileReport } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -16,9 +21,16 @@ type Props = { params: Promise<{ id: string }> };
 export default async function Page(props: Props) {
   const params = await props.params;
   const id = params.id;
-  const surveyRes = await getFakeSurveyById(id);
+  let surveyRes: ActionState<Survey>;
+
+  if (id === "test") {
+    surveyRes = await getFakeSurveyById(id);
+  } else {
+    surveyRes = await getPublishedSurveyById(id);
+  }
+
   if (!surveyRes.success) {
-    return <>Cannot fetch survey {surveyRes.error}</>;
+    return <>Cannot fetch survey: {surveyRes.message}</>;
   }
   const survey = surveyRes.data;
   if (survey.state == "draft" || survey.state == "archived") {
