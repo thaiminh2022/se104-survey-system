@@ -33,7 +33,7 @@ export default function Home() {
                 Log in
               </Link>
               <Link
-                href="/auth/login"
+                href="/auth/register"
                 className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
               >
                 Sign in

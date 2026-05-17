@@ -53,6 +53,28 @@ export async function getSurveyRowForUser() {
   return createSuccess<SurveyRow[]>(surveys);
 }
 
+export async function getRecentSurveyRowsForUser(limit = 5) {
+  const supabase = await createClient();
+  const userRes = await getUser();
+  if (!userRes.success) {
+    return userRes;
+  }
+  const user = userRes.data;
+
+  const { data: surveysRows, error } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    return createError(error, error.message);
+  }
+
+  return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
+}
+
 export async function getUser() {
   const supabase = await createClient();
   const userRes = await supabase.auth.getUser();
