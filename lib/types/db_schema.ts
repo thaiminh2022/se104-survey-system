@@ -124,3 +124,7 @@ export type AppUserData = {
   name: string;
   email: string;
 };
+
+export type SurveyRowJoinSubmissionRow = SurveyRow & {
+  submissions: SubmissionRow[];
+};

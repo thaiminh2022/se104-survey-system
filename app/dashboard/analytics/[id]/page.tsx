@@ -1,4 +1,6 @@
+import SubmissionCountChart from "@/components/dashboard/analytics/SubmissionCountChart";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,16 +8,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getSurveyAnalyticsRowsForUser } from "@/lib/actions/read_survey";
+import { ChartConfig } from "@/components/ui/chart";
+import { getSurveyAnalytics } from "@/lib/actions/read_survey";
+import { getSubmissionCount } from "@/lib/charts/survey_charts";
 import type { SurveyStatus } from "@/lib/types/db_schema";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = { params: Promise<{ id: string }> };
 
+
 export default async function SurveyAnalyticsPage(props: Props) {
   const { id } = await props.params;
-  const surveysResult = await getSurveyAnalyticsRowsForUser();
+  const surveysResult = await getSurveyAnalytics(id);
 
   if (!surveysResult.success) {
     return (
@@ -32,15 +37,17 @@ export default async function SurveyAnalyticsPage(props: Props) {
     );
   }
 
-  const survey = surveysResult.data.find((item) => item.id === id);
+  const survey = surveysResult.data;
   if (!survey) {
-    notFound();
+    return notFound();
   }
 
   const conversion =
     survey.view_count > 0
       ? Math.round((survey.submission_count / survey.view_count) * 100)
       : 0;
+
+  const submissionChartData = getSubmissionCount(survey.submissions);
 
   return (
     <main className="min-h-screen bg-muted/20 px-4 py-6 text-foreground sm:px-6 lg:px-8">
@@ -62,7 +69,7 @@ export default async function SurveyAnalyticsPage(props: Props) {
             {survey.description || "No description provided."}
           </p>
         </header>
-
+        <h2>Views And Submission</h2>
         <section className="grid gap-4 sm:grid-cols-3">
           <MetricCard label="Views" value={survey.view_count} />
           <MetricCard label="Submissions" value={survey.submission_count} />
@@ -77,6 +84,18 @@ export default async function SurveyAnalyticsPage(props: Props) {
               Submissions divided by views
             </CardContent>
           </Card>
+        </section>
+
+        <h2>Actions</h2>
+        <section>
+          <Link href={`/dashboard/analytics/${id}/export`}>
+            <Button>Export</Button>
+          </Link>
+        </section>
+        <div className="w-full border-2 border-accent"></div>
+        <h2>Charts</h2>
+        <section>
+          <SubmissionCountChart />
         </section>
       </div>
     </main>
