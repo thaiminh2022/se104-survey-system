@@ -76,6 +76,28 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
   return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
 }
 
+export async function getSurveyAnalyticsRowsForUser() {
+  const supabase = await createClient();
+  const userRes = await getUser();
+  if (!userRes.success) {
+    return userRes;
+  }
+  const user = userRes.data;
+
+  const { data: surveysRows, error } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("submission_count", { ascending: false })
+    .order("view_count", { ascending: false });
+
+  if (error) {
+    return createError(error, error.message);
+  }
+
+  return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
+}
+
 export async function updateSurveyStatus(id: string, status: SurveyStatus) {
   const supabase = await createClient();
   const userRes = await getUser();
@@ -200,6 +222,7 @@ export async function getPublishedSurveyById(id: string) {
   }
 
   const surveyRow = surveyData as SurveyRow;
+
   const { data: sectionsData, error: sectionsError } = await supabase
     .from("sections")
     .select("*")
