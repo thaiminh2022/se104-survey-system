@@ -69,8 +69,16 @@ export default async function SurveyAnalyticsPage(props: Props) {
           </p>
         </header>
         <section className="grid gap-4 sm:grid-cols-3">
-          <MetricCard label="Views" value={survey.view_count} />
-          <MetricCard label="Submissions" value={survey.submission_count} />
+          <MetricCard
+            label="Views"
+            value={survey.view_count}
+            desc="How many people enter the survey"
+          />
+          <MetricCard
+            label="Submissions"
+            value={survey.submission_count}
+            desc="How many people finished the survey"
+          />
           <Card>
             <CardHeader>
               <CardDescription>Conversion</CardDescription>
@@ -116,7 +124,15 @@ export default async function SurveyAnalyticsPage(props: Props) {
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: number }) {
+function MetricCard({
+  label,
+  value,
+  desc,
+}: {
+  label: string;
+  value: number;
+  desc: string;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -126,7 +142,7 @@ function MetricCard({ label, value }: { label: string; value: number }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">
-        Persisted on the survey row
+        {desc}
       </CardContent>
     </Card>
   );

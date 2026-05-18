@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import { getSurveyAnalyticsRowsForUser } from "@/lib/actions/read_analytics";
 import type { SurveyRow, SurveyStatus } from "@/lib/types/db_schema";
 import {
   IconClipboardCheck,
+  IconChartArcs,
   IconEye,
   IconTrendingUp,
 } from "@tabler/icons-react";
@@ -124,6 +126,9 @@ export default async function Analytics() {
                       <th className="py-3 pl-4 text-right font-medium">
                         Created
                       </th>
+                      <th className="py-3 pl-4 text-right font-medium">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -191,6 +196,14 @@ function SurveyAnalyticsRow({ survey }: { survey: SurveyRow }) {
       <td className="px-4 py-4 text-right tabular-nums">{conversion}%</td>
       <td className="py-4 pl-4 text-right text-muted-foreground">
         {new Date(survey.created_at).toLocaleDateString()}
+      </td>
+      <td className="py-4 pl-4 text-right">
+        <Button asChild size="sm" variant="outline">
+          <Link href={`/dashboard/analytics/${survey.id}`}>
+            <IconChartArcs />
+            View
+          </Link>
+        </Button>
       </td>
     </tr>
   );
