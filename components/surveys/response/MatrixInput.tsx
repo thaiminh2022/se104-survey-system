@@ -5,20 +5,39 @@ import { useState } from "react";
 import { useAnswerWriter } from "./useAnswerWriter";
 
 export function MatrixInput({ question }: { question: Question<"matrix"> }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
   const [rows, setRows] = useState<Record<string, string | string[]>>({});
 
   function updateRow(row: string, value: string, checked?: boolean) {
+    if (
+      !question.config.rows.includes(row) ||
+      !question.config.columns.includes(value)
+    ) {
+      return;
+    }
+
     const next = { ...rows };
     if (question.config.multiplePerRow) {
       const current = Array.isArray(next[row]) ? next[row] : [];
       next[row] = checked
-        ? [...current, value]
+        ? Array.from(new Set([...current, value]))
         : current.filter((item) => item !== value);
+      if (Array.isArray(next[row]) && next[row].length === 0) {
+        delete next[row];
+      }
     } else {
       next[row] = value;
     }
     setRows(next);
+    if (
+      !Object.values(next).some((rowValue) =>
+        Array.isArray(rowValue) ? rowValue.length > 0 : rowValue.trim() !== "",
+      )
+    ) {
+      clearAnswer(question.id);
+      return;
+    }
+
     setAnswer(question.id, {
       answer_type: "matrix",
       config: { rows: next },

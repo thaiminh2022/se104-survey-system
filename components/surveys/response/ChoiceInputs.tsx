@@ -12,13 +12,18 @@ export function SingleChoiceInput({
 }: {
   question: Question<"single-choice">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
   const [usingOther, setUsingOther] = useState(false);
 
   return (
     <div className="space-y-3">
       <RadioGroup
         onValueChange={(value) => {
+          if (!question.config.options.includes(value)) {
+            clearAnswer(question.id);
+            return;
+          }
+
           setUsingOther(false);
           setAnswer(question.id, {
             answer_type: "single-choice",
@@ -42,10 +47,16 @@ export function SingleChoiceInput({
           placeholder="Other"
           onFocus={() => setUsingOther(true)}
           onChange={(event) => {
+            const otherAnswer = event.target.value.trim();
             setUsingOther(true);
+            if (!otherAnswer) {
+              clearAnswer(question.id);
+              return;
+            }
+
             setAnswer(question.id, {
               answer_type: "single-choice",
-              config: { use_other: true, other_answer: event.target.value },
+              config: { use_other: true, other_answer: otherAnswer },
             });
           }}
           className={usingOther ? "border-primary" : undefined}
@@ -60,14 +71,23 @@ export function MultipleChoiceInput({
 }: {
   question: Question<"multiple-choice">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
   const [selected, setSelected] = useState<string[]>([]);
 
   function updateSelected(option: string, checked: boolean) {
+    if (!question.config.options.includes(option)) {
+      return;
+    }
+
     const next = checked
       ? [...selected, option]
       : selected.filter((value) => value !== option);
     setSelected(next);
+    if (next.length === 0) {
+      clearAnswer(question.id);
+      return;
+    }
+
     setAnswer(question.id, {
       answer_type: "multiple-choice",
       config: { use_other: false, selected_options: next },
@@ -101,12 +121,18 @@ export function MultipleChoiceInput({
         <Input
           type="text"
           placeholder="Other"
-          onChange={(event) =>
+          onChange={(event) => {
+            const otherAnswer = event.target.value.trim();
+            if (!otherAnswer) {
+              clearAnswer(question.id);
+              return;
+            }
+
             setAnswer(question.id, {
               answer_type: "multiple-choice",
-              config: { use_other: true, other_answer: event.target.value },
-            })
-          }
+              config: { use_other: true, other_answer: otherAnswer },
+            });
+          }}
         />
       ) : null}
     </div>
@@ -114,16 +140,21 @@ export function MultipleChoiceInput({
 }
 
 export function YesNoInput({ question }: { question: Question<"yes-no"> }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
 
   return (
     <RadioGroup
-      onValueChange={(value) =>
+      onValueChange={(value) => {
+        if (value !== "yes" && value !== "no") {
+          clearAnswer(question.id);
+          return;
+        }
+
         setAnswer(question.id, {
           answer_type: "yes-no",
           config: { value: value === "yes" },
-        })
-      }
+        });
+      }}
     >
       <div className="flex items-center gap-3">
         <RadioGroupItem value="yes" id={`${question.id}-yes`} />

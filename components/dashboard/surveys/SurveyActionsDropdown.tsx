@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deleteSurvey } from "@/lib/actions/read_survey";
 import {
+  IconChartArea,
   IconDotsVertical,
   IconPencil,
   IconShare,
@@ -46,6 +47,12 @@ export default function SurveyActionsDropdown({
           <Link href={`/dashboard/surveys/${surveyId}/edit`}>
             <IconPencil />
             Edit
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/dashboard/analytics/${surveyId}`}>
+            <IconChartArea />
+            Analytics
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

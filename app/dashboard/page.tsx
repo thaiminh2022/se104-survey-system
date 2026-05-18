@@ -65,10 +65,11 @@ export default async function DashboardPage() {
   const publishedSurveys = surveys.filter(
     (survey) => survey.state === "published",
   ).length;
-  const draftSurveys = surveys.filter((survey) => survey.state === "draft").length;
-  const archivedSurveys = surveys.filter(
-    (survey) => survey.state === "archived",
-  ).length;
+  const totalViews = surveys.reduce((sum, survey) => sum + survey.view_count, 0);
+  const totalSubmissions = surveys.reduce(
+    (sum, survey) => sum + survey.submission_count,
+    0,
+  );
   const recentSurveys = recentSurveysResult.data;
 
   const metrics = [
@@ -83,14 +84,14 @@ export default async function DashboardPage() {
       note: "Available to respondents",
     },
     {
-      label: "Drafts",
-      value: draftSurveys.toString(),
-      note: "Waiting to be published",
+      label: "Views",
+      value: totalViews.toLocaleString("en-US"),
+      note: "From published survey pages",
     },
     {
-      label: "Archived",
-      value: archivedSurveys.toString(),
-      note: "No longer active",
+      label: "Submissions",
+      value: totalSubmissions.toLocaleString("en-US"),
+      note: "Completed responses",
     },
   ];
 

@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { logout } from "@/lib/actions/auth";
 import { getUserData } from "@/lib/actions/read_user";
 import {
+  IconChartArcs,
   IconClipboardList,
   IconFilePlus,
   IconHome,
@@ -56,6 +57,9 @@ async function DashboardSidebar() {
         </SidebarLink>
         <SidebarLink href="/dashboard/surveys/create" icon={<IconFilePlus />}>
           Create survey
+        </SidebarLink>
+        <SidebarLink href="/dashboard/analytics" icon={<IconChartArcs />}>
+          Analytics
         </SidebarLink>
       </nav>
 

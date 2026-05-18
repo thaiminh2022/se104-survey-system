@@ -8,19 +8,25 @@ export function ShortTextInput({
 }: {
   question: Question<"short-text">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
 
   return (
     <Input
       placeholder={question.config.placeholder}
       maxLength={question.config.maxLength}
       required={question.required}
-      onChange={(event) =>
+      onChange={(event) => {
+        const text = event.target.value.trim();
+        if (!text) {
+          clearAnswer(question.id);
+          return;
+        }
+
         setAnswer(question.id, {
           answer_type: "short-text",
-          config: { text: event.target.value },
-        })
-      }
+          config: { text },
+        });
+      }}
     />
   );
 }
@@ -30,19 +36,25 @@ export function LongTextInput({
 }: {
   question: Question<"long-text">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
 
   return (
     <Textarea
       placeholder={question.config.placeholder ?? "Your answer"}
       maxLength={question.config.maxLength}
       required={question.required}
-      onChange={(event) =>
+      onChange={(event) => {
+        const text = event.target.value.trim();
+        if (!text) {
+          clearAnswer(question.id);
+          return;
+        }
+
         setAnswer(question.id, {
           answer_type: "long-text",
-          config: { text: event.target.value },
-        })
-      }
+          config: { text },
+        });
+      }}
     />
   );
 }

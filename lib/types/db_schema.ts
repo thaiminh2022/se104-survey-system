@@ -12,6 +12,8 @@ export const surveyRowSchema = z.object({
   state: surveyStatusSchema,
   image: z.string().nullable(),
   description: z.string().nullable(),
+  submission_count: z.int().nonnegative().nonoptional(),
+  view_count: z.int().nonnegative().nonoptional(),
   created_at: z.coerce.date(),
 });
 
@@ -121,4 +123,16 @@ export type AnswerInsert = z.infer<typeof answerInsertSchema>;
 export type AppUserData = {
   name: string;
   email: string;
+};
+
+export type SurveyRowJoinSubmissionRow = SurveyRow & {
+  submissions: SubmissionRow[];
+};
+
+type SectionRowJoinQuestionRow = SectionRow & {
+  questions: QuestionRow[];
+};
+
+export type SurveyRowJoinSectionRowJoinQuestionRow = SurveyRow & {
+  sections: SectionRowJoinQuestionRow[];
 };

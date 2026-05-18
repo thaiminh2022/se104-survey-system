@@ -200,6 +200,17 @@ export async function getPublishedSurveyById(id: string) {
   }
 
   const surveyRow = surveyData as SurveyRow;
+
+  const viewCountUpdateRes = await supabase
+    .from("surveys")
+    .update({ view_count: surveyRow.view_count + 1 })
+    .eq("id", id)
+    .eq("state", "published");
+
+  if (viewCountUpdateRes.error) {
+    console.error("Survey view count update failed", viewCountUpdateRes.error);
+  }
+
   const { data: sectionsData, error: sectionsError } = await supabase
     .from("sections")
     .select("*")
