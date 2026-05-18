@@ -107,7 +107,7 @@ export default async function Page(props: Props) {
           </Card>
         </form>
 
-        <form>
+        <form action={`/dashboard/analytics/${id}/export/charts`} method="get">
           <Card>
             <CardHeader className="gap-3 sm:grid-cols-[1fr_auto]">
               <div>
@@ -120,7 +120,7 @@ export default async function Page(props: Props) {
                 </CardDescription>
               </div>
               <CardAction>
-                <Button variant="outline" disabled>
+                <Button variant="outline" type="submit">
                   <IconDownload />
                   Export report
                 </Button>
@@ -132,24 +132,30 @@ export default async function Page(props: Props) {
                   id="report-summary"
                   label="Summary metrics"
                   description="Views, submissions, conversion, and status."
+                  name="summary"
+                  value="1"
                   defaultChecked
                 />
                 <CheckboxOption
                   id="report-submissions"
                   label="Submission timeline"
                   description="Daily, monthly, yearly, and all-time counts."
+                  name="submissions"
+                  value="1"
                   defaultChecked
                 />
                 <CheckboxOption
                   id="report-answers"
                   label="Answer distributions"
                   description="Aggregated counts for chartable question types."
+                  name="answers"
+                  value="1"
                   defaultChecked
                 />
               </OptionGroup>
 
               <OptionGroup title="Format">
-                <RadioGroup defaultValue="json">
+                <RadioGroup defaultValue="json" name="format">
                   <RadioOption
                     id="report-json"
                     value="json"
@@ -160,7 +166,8 @@ export default async function Page(props: Props) {
                     id="report-pdf"
                     value="pdf"
                     label="PDF"
-                    description="Best for sharing a static report."
+                    description="Not available yet."
+                    disabled
                   />
                 </RadioGroup>
               </OptionGroup>
@@ -236,15 +243,17 @@ function RadioOption({
   value,
   label,
   description,
+  disabled,
 }: {
   id: string;
   value: string;
   label: string;
   description: string;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex gap-3 rounded-md border bg-background p-3">
-      <RadioGroupItem id={id} value={value} />
+    <div className="flex gap-3 rounded-md border bg-background p-3 has-disabled:opacity-60">
+      <RadioGroupItem id={id} value={value} disabled={disabled} />
       <div className="grid gap-1">
         <Label htmlFor={id}>{label}</Label>
         <p className="text-xs text-muted-foreground">{description}</p>
