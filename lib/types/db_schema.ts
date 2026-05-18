@@ -12,6 +12,8 @@ export const surveyRowSchema = z.object({
   state: surveyStatusSchema,
   image: z.string().nullable(),
   description: z.string().nullable(),
+  submission_count: z.int().positive().nonoptional(),
+  view_count: z.int().positive().nonoptional(),
   created_at: z.coerce.date(),
 });
 
