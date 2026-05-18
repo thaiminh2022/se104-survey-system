@@ -4,26 +4,21 @@ import { SubmissionRow } from "../types/db_schema";
 export function getSubmissionCount(
   submissions: SubmissionRow[],
 ): SubmissionCount[] {
-  const shits: Map<number, number> = new Map();
+  const countsByDate = new Map<string, number>();
+
   submissions.forEach((s) => {
-    const ms = new Date(s.created_at).getTime();
+    const date = new Date(s.submitted_at).toISOString().slice(0, 10);
+    const count = countsByDate.get(date) ?? 0;
 
-    if (!shits.get(ms)) {
-      shits.set(ms, 1);
-      return;
-    }
-
-    const inner = shits.get(ms)!;
-    shits.set(ms, inner + 1);
+    countsByDate.set(date, count + 1);
   });
 
-  return shits
-    .entries()
+  return Array.from(countsByDate.entries())
+    .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
     .map(([k, v]) => {
       return {
         count: v,
-        date: new Date(k),
+        date: k,
       } as SubmissionCount;
-    })
-    .toArray();
+    });
 }

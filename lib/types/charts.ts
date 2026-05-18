@@ -1,9 +1,9 @@
 export type ViewCount = {
   count: number;
-  date: Date;
+  date: string;
 };
 
 export type SubmissionCount = {
   count: number;
-  date: Date;
+  date: string;
 };

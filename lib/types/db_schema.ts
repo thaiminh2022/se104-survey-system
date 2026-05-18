@@ -128,3 +128,11 @@ export type AppUserData = {
 export type SurveyRowJoinSubmissionRow = SurveyRow & {
   submissions: SubmissionRow[];
 };
+
+type SectionRowJoinQuestionRow = SectionRow & {
+  questions: QuestionRow[];
+};
+
+export type SurveyRowJoinSectionRowJoinQuestionRow = SurveyRow & {
+  sections: SectionRowJoinQuestionRow[];
+};

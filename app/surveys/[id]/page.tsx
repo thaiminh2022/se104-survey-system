@@ -36,6 +36,7 @@ export default async function Page(props: Props) {
   if (survey.state == "draft" || survey.state == "archived") {
     return <>You are not allowed to view this survey</>;
   }
+  console.dir(survey, { depth: null });
   return (
     <>
       <SurveyTitle title={survey.title} description={survey.description} />

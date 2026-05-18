@@ -4,7 +4,6 @@ import {
   QuestionRow,
   SectionRow,
   SurveyRow,
-  SurveyRowJoinSubmissionRow,
   SurveyStatus,
 } from "@/lib/types/db_schema";
 import { createError, createSuccess } from "@/lib/types/errors";
@@ -75,60 +74,6 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
   }
 
   return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
-}
-
-export async function getSurveyAnalyticsRowsForUser() {
-  const supabase = await createClient();
-  const userRes = await getUser();
-  if (!userRes.success) {
-    return userRes;
-  }
-  const user = userRes.data;
-
-  const { data: surveysRows, error } = await supabase
-    .from("surveys")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("submission_count", { ascending: false })
-    .order("view_count", { ascending: false });
-
-  if (error) {
-    return createError(error, error.message);
-  }
-
-  return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
-}
-
-export async function getSurveyAnalytics(surveyId: string) {
-  const supabase = await createClient();
-  const userRes = await getUser();
-  if (!userRes.success) {
-    return userRes;
-  }
-  const user = userRes.data;
-
-  const res = await supabase
-    .from("surveys")
-    .select(
-      `
-      *,
-      submissions(*) 
-    `,
-    )
-    .eq("user_id", user.id)
-    .eq("id", surveyId)
-    .limit(1)
-    .single();
-
-  if (res.error) {
-    return createError(res.error, res.error.message);
-  }
-
-  if (!res.data) {
-    return createSuccess(null);
-  }
-
-  return createSuccess(res.data as SurveyRowJoinSubmissionRow);
 }
 
 export async function updateSurveyStatus(id: string, status: SurveyStatus) {

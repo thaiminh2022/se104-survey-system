@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getSurveyAnalyticsRowsForUser } from "@/lib/actions/read_survey";
+import { getSurveyAnalyticsRowsForUser } from "@/lib/actions/read_analytics";
 import type { SurveyRow, SurveyStatus } from "@/lib/types/db_schema";
 import {
   IconClipboardCheck,

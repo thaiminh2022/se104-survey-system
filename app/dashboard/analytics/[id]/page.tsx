@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChartConfig } from "@/components/ui/chart";
-import { getSurveyAnalytics } from "@/lib/actions/read_survey";
+import QuestionAnswerAnalytics from "@/components/dashboard/analytics/QuestionAnswerAnalytics";
+import { getSurveyAnalytics } from "@/lib/actions/read_analytics";
 import { getSubmissionCount } from "@/lib/charts/survey_charts";
 import type { SurveyStatus } from "@/lib/types/db_schema";
 import Link from "next/link";
@@ -69,7 +69,6 @@ export default async function SurveyAnalyticsPage(props: Props) {
             {survey.description || "No description provided."}
           </p>
         </header>
-        <h2>Views And Submission</h2>
         <section className="grid gap-4 sm:grid-cols-3">
           <MetricCard label="Views" value={survey.view_count} />
           <MetricCard label="Submissions" value={survey.submission_count} />
@@ -86,16 +85,34 @@ export default async function SurveyAnalyticsPage(props: Props) {
           </Card>
         </section>
 
-        <h2>Actions</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Submissions over time</CardTitle>
+            <CardDescription>
+              Daily response count from submitted responses.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SubmissionCountChart data={submissionChartData} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Question answer charts</CardTitle>
+            <CardDescription>
+              Load answer distributions for each question in this survey.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QuestionAnswerAnalytics surveyId={id} />
+          </CardContent>
+        </Card>
+
         <section>
           <Link href={`/dashboard/analytics/${id}/export`}>
             <Button>Export</Button>
           </Link>
-        </section>
-        <div className="w-full border-2 border-accent"></div>
-        <h2>Charts</h2>
-        <section>
-          <SubmissionCountChart />
         </section>
       </div>
     </main>
