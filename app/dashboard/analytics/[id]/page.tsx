@@ -1,3 +1,4 @@
+import QuestionAnswerAnalytics from "@/components/dashboard/analytics/QuestionAnswerAnalytics";
 import SubmissionCountChart from "@/components/dashboard/analytics/SubmissionCountChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import QuestionAnswerAnalytics from "@/components/dashboard/analytics/QuestionAnswerAnalytics";
 import { getSurveyAnalytics } from "@/lib/actions/read_analytics";
 import { getSubmissionCount } from "@/lib/charts/survey_charts";
 import type { SurveyStatus } from "@/lib/types/db_schema";
@@ -16,7 +16,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = { params: Promise<{ id: string }> };
-
 
 export default async function SurveyAnalyticsPage(props: Props) {
   const { id } = await props.params;
@@ -84,7 +83,11 @@ export default async function SurveyAnalyticsPage(props: Props) {
             </CardContent>
           </Card>
         </section>
-
+        <section>
+          <Link href={`/dashboard/analytics/${id}/export`}>
+            <Button>Export</Button>
+          </Link>
+        </section>
         <Card>
           <CardHeader>
             <CardTitle>Submissions over time</CardTitle>
@@ -108,12 +111,6 @@ export default async function SurveyAnalyticsPage(props: Props) {
             <QuestionAnswerAnalytics surveyId={id} />
           </CardContent>
         </Card>
-
-        <section>
-          <Link href={`/dashboard/analytics/${id}/export`}>
-            <Button>Export</Button>
-          </Link>
-        </section>
       </div>
     </main>
   );
