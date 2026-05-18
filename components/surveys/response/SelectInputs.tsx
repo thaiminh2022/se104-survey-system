@@ -10,17 +10,22 @@ import { useState } from "react";
 import { useAnswerWriter } from "./useAnswerWriter";
 
 export function DropDownInput({ question }: { question: Question<"dropdown"> }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
 
   return (
     <Select
       required={question.required}
-      onValueChange={(value) =>
+      onValueChange={(value) => {
+        if (!question.config.options.includes(value)) {
+          clearAnswer(question.id);
+          return;
+        }
+
         setAnswer(question.id, {
           answer_type: "dropdown",
           config: { selected_option: value },
-        })
-      }
+        });
+      }}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select an option" />
@@ -37,16 +42,27 @@ export function DropDownInput({ question }: { question: Question<"dropdown"> }) 
 }
 
 export function RankingInput({ question }: { question: Question<"ranking"> }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
   const [rankedOptions, setRankedOptions] = useState<string[]>([]);
 
   function updateRank(index: number, value: string) {
+    if (!question.config.options.includes(value)) {
+      return;
+    }
+
     const next = [...rankedOptions];
     next[index] = value;
+    const ranked = next.filter(Boolean);
+    const uniqueRanked = Array.from(new Set(ranked));
     setRankedOptions(next);
+    if (uniqueRanked.length === 0) {
+      clearAnswer(question.id);
+      return;
+    }
+
     setAnswer(question.id, {
       answer_type: "ranking",
-      config: { ranked_options: next.filter(Boolean) },
+      config: { ranked_options: uniqueRanked },
     });
   }
 

@@ -13,7 +13,7 @@ export function RatingScaleInput({
 }: {
   question: Question<"rating-scale">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { setAnswer } = useAnswerWriter();
   const form = useFormContext<AnswerForm>();
   const [ratingValue, setRatingValue] = useState<number | undefined>(undefined);
 
@@ -61,16 +61,21 @@ export function LikertScaleInput({
 }: {
   question: Question<"likert-scale">;
 }) {
-  const setAnswer = useAnswerWriter();
+  const { clearAnswer, setAnswer } = useAnswerWriter();
 
   return (
     <RadioGroup
-      onValueChange={(value) =>
+      onValueChange={(value) => {
+        if (!question.config.options.includes(value)) {
+          clearAnswer(question.id);
+          return;
+        }
+
         setAnswer(question.id, {
           answer_type: "likert-scale",
           config: { selected_option: value },
-        })
-      }
+        });
+      }}
     >
       {question.config.options.map((option, index) => {
         const identifier = `${question.id}-${option}-${index}`;
