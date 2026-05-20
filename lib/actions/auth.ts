@@ -45,6 +45,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     redirectWithError("/auth/login", returnUrl, error.message);
+    return;
   }
 
   redirect(returnUrl);
