@@ -9,7 +9,7 @@ import {
 } from "@/lib/exports/chart_report";
 import { createClient } from "@/lib/supabase/server";
 import type { AnswerRow } from "@/lib/types/db_schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -26,10 +26,11 @@ export async function GET(request: NextRequest, props: Props) {
   const searchParams = request.nextUrl.searchParams;
   const format = searchParams.get("format") === "pdf" ? "pdf" : "json";
 
-  if (format !== "json") {
-    return new Response("PDF chart export is not implemented.", {
-      status: 400,
-    });
+  if (format === "pdf") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/dashboard/analytics/${id}/export/pdf`;
+    url.searchParams.delete("format");
+    return NextResponse.redirect(url);
   }
 
   const surveyRes = await supabase

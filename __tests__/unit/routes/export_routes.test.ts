@@ -204,7 +204,7 @@ describe("analytics chart export route", () => {
     vi.clearAllMocks();
   });
 
-  test("rejects PDF export because it is not implemented", async () => {
+  test("redirects PDF export to the printable report page", async () => {
     mockAuthenticatedClient(vi.fn());
 
     const { GET } = await import(
@@ -213,14 +213,14 @@ describe("analytics chart export route", () => {
 
     const response = await GET(
       new NextRequest(
-        "https://example.test/dashboard/analytics/survey-1/export/charts?format=pdf",
+        "https://example.test/dashboard/analytics/survey-1/export/charts?format=pdf&summary=1&answers=1",
       ),
       { params: Promise.resolve({ id: "survey-1" }) },
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.text()).resolves.toBe(
-      "PDF chart export is not implemented.",
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "https://example.test/dashboard/analytics/survey-1/export/pdf?summary=1&answers=1",
     );
   });
 

@@ -166,8 +166,7 @@ export default async function Page(props: Props) {
                     id="report-pdf"
                     value="pdf"
                     label="PDF"
-                    description="Not available yet."
-                    disabled
+                    description="Opens a print-ready chart page."
                   />
                 </RadioGroup>
               </OptionGroup>
