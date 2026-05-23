@@ -32,8 +32,17 @@ import { faker } from "@faker-js/faker";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 import { getUser } from "./read_user";
+import {
+  e2eSections,
+  e2eSurveyRows,
+  isPlaywrightE2E,
+} from "@/lib/e2e/fixtures";
 
 export async function getSurveyRowForUser() {
+  if (isPlaywrightE2E()) {
+    return createSuccess<SurveyRow[]>(e2eSurveyRows);
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -55,6 +64,10 @@ export async function getSurveyRowForUser() {
 }
 
 export async function getRecentSurveyRowsForUser(limit = 5) {
+  if (isPlaywrightE2E()) {
+    return createSuccess<SurveyRow[]>(e2eSurveyRows.slice(0, limit));
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -77,6 +90,11 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
 }
 
 export async function updateSurveyStatus(id: string, status: SurveyStatus) {
+  if (isPlaywrightE2E()) {
+    revalidatePath("/dashboard/surveys");
+    return createSuccess({ id, state: status });
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -99,6 +117,11 @@ export async function updateSurveyStatus(id: string, status: SurveyStatus) {
   return createSuccess(data);
 }
 export async function deleteSurvey(id: string) {
+  if (isPlaywrightE2E()) {
+    revalidatePath("/dashboard/surveys");
+    return;
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -117,6 +140,26 @@ export async function deleteSurvey(id: string) {
 }
 
 export async function getSurveyById(id: string) {
+  if (isPlaywrightE2E()) {
+    const surveyRow = e2eSurveyRows.find((survey) => survey.id === id);
+    if (!surveyRow) {
+      return createError(null, "Survey not found");
+    }
+
+    return createSuccess<Survey>({
+      id: surveyRow.id,
+      title: surveyRow.title,
+      state: surveyRow.state,
+      description: surveyRow.description ?? "",
+      sections: e2eSections.map((section) => ({
+        id: section.id,
+        title: section.title,
+        description: section.description ?? "",
+        questions: section.questions.map(toQuestion),
+      })),
+    });
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -186,6 +229,23 @@ export async function getSurveyById(id: string) {
 }
 
 export async function getPublishedSurveyById(id: string) {
+  if (isPlaywrightE2E() && id === "e2e-survey") {
+    const surveyRow = e2eSurveyRows[0];
+
+    return createSuccess<Survey>({
+      id: surveyRow.id,
+      title: surveyRow.title,
+      state: surveyRow.state,
+      description: surveyRow.description ?? "",
+      sections: e2eSections.map((section) => ({
+        id: section.id,
+        title: section.title,
+        description: section.description ?? "",
+        questions: section.questions.map(toQuestion),
+      })),
+    });
+  }
+
   const supabase = await createClient();
   const { data: surveyData, error: surveyError } = await supabase
     .from("surveys")

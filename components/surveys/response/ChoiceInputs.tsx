@@ -15,27 +15,36 @@ export function SingleChoiceInput({
   const { clearAnswer, setAnswer } = useAnswerWriter();
   const [usingOther, setUsingOther] = useState(false);
 
+  function commitOption(value: string) {
+    if (!question.config.options.includes(value)) {
+      clearAnswer(question.id);
+      return;
+    }
+
+    setUsingOther(false);
+    setAnswer(question.id, {
+      answer_type: "single-choice",
+      config: { use_other: false, selected_option: value },
+    });
+  }
+
   return (
     <div className="space-y-3">
-      <RadioGroup
-        onValueChange={(value) => {
-          if (!question.config.options.includes(value)) {
-            clearAnswer(question.id);
-            return;
-          }
-
-          setUsingOther(false);
-          setAnswer(question.id, {
-            answer_type: "single-choice",
-            config: { use_other: false, selected_option: value },
-          });
-        }}
-      >
+      <RadioGroup onValueChange={commitOption}>
         {question.config.options.map((option, index) => {
           const identifier = `${question.id}-${option}-${index}`;
           return (
-            <div className="flex items-center gap-3" key={identifier}>
-              <RadioGroupItem value={option} id={identifier} />
+            <div
+              className="flex items-center gap-3"
+              key={identifier}
+              onPointerDown={() => commitOption(option)}
+            >
+              <RadioGroupItem
+                value={option}
+                id={identifier}
+                onPointerDown={() => commitOption(option)}
+                onClick={() => commitOption(option)}
+              />
               <Label htmlFor={identifier}>{option}</Label>
             </div>
           );
@@ -142,28 +151,44 @@ export function MultipleChoiceInput({
 export function YesNoInput({ question }: { question: Question<"yes-no"> }) {
   const { clearAnswer, setAnswer } = useAnswerWriter();
 
-  return (
-    <RadioGroup
-      onValueChange={(value) => {
-        if (value !== "yes" && value !== "no") {
-          clearAnswer(question.id);
-          return;
-        }
+  function commitValue(value: string) {
+    if (value !== "yes" && value !== "no") {
+      clearAnswer(question.id);
+      return;
+    }
 
-        setAnswer(question.id, {
-          answer_type: "yes-no",
-          config: { value: value === "yes" },
-        });
-      }}
-    >
-      <div className="flex items-center gap-3">
-        <RadioGroupItem value="yes" id={`${question.id}-yes`} />
+    setAnswer(question.id, {
+      answer_type: "yes-no",
+      config: { value: value === "yes" },
+    });
+  }
+
+  return (
+    <RadioGroup onValueChange={commitValue}>
+      <div
+        className="flex items-center gap-3"
+        onPointerDown={() => commitValue("yes")}
+      >
+        <RadioGroupItem
+          value="yes"
+          id={`${question.id}-yes`}
+          onPointerDown={() => commitValue("yes")}
+          onClick={() => commitValue("yes")}
+        />
         <Label htmlFor={`${question.id}-yes`}>
           {question.config.yesLabel ?? "Yes"}
         </Label>
       </div>
-      <div className="flex items-center gap-3">
-        <RadioGroupItem value="no" id={`${question.id}-no`} />
+      <div
+        className="flex items-center gap-3"
+        onPointerDown={() => commitValue("no")}
+      >
+        <RadioGroupItem
+          value="no"
+          id={`${question.id}-no`}
+          onPointerDown={() => commitValue("no")}
+          onClick={() => commitValue("no")}
+        />
         <Label htmlFor={`${question.id}-no`}>
           {question.config.noLabel ?? "No"}
         </Label>

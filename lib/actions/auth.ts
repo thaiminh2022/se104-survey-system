@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { e2eUser, isPlaywrightE2E } from "@/lib/e2e/fixtures";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const DEFAULT_AUTH_REDIRECT = "/dashboard";
@@ -35,7 +37,15 @@ export async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const returnUrl = sanitizeReturnUrl(formData.get("returnUrl"));
 
-  
+  if (isPlaywrightE2E()) {
+    if (email === e2eUser.email && password === "password") {
+      const cookieStore = await cookies();
+      cookieStore.set("e2e-auth", "1", { path: "/" });
+      redirect(returnUrl);
+    }
+
+    redirectWithError("/auth/login", returnUrl, "Invalid login credentials");
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -61,6 +71,12 @@ export async function register(formData: FormData) {
     redirectWithError("/auth/register", returnUrl, "Passwords do not match.");
   }
 
+  if (isPlaywrightE2E()) {
+    const cookieStore = await cookies();
+    cookieStore.set("e2e-auth", "1", { path: "/" });
+    redirect(returnUrl);
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -83,6 +99,12 @@ export async function register(formData: FormData) {
 }
 
 export async function logout() {
+  if (isPlaywrightE2E()) {
+    const cookieStore = await cookies();
+    cookieStore.delete("e2e-auth");
+    redirect("/auth/login");
+  }
+
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/auth/login");

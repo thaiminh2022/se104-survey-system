@@ -3,8 +3,13 @@
 import { createError, createSuccess } from "@/lib/types/errors";
 import { createClient } from "../supabase/server";
 import { AppUserData } from "@/lib/types/db_schema";
+import { e2eUser, isPlaywrightE2E } from "@/lib/e2e/fixtures";
 
 export async function getUser() {
+  if (isPlaywrightE2E()) {
+    return createSuccess(e2eUser);
+  }
+
   const supabase = await createClient();
   const userRes = await supabase.auth.getUser();
 
@@ -15,6 +20,13 @@ export async function getUser() {
 }
 
 export async function getUserData() {
+  if (isPlaywrightE2E()) {
+    return createSuccess<AppUserData>({
+      name: "e2e",
+      email: e2eUser.email,
+    });
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {

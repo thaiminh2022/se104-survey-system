@@ -77,7 +77,11 @@ export function MatrixInput({ question }: { question: Question<"matrix"> }) {
                       value={typeof rows[row] === "string" ? rows[row] : ""}
                       onValueChange={(value) => updateRow(row, value)}
                     >
-                      <RadioGroupItem value={column} />
+                      <RadioGroupItem
+                        value={column}
+                        onPointerDown={() => updateRow(row, column)}
+                        onClick={() => updateRow(row, column)}
+                      />
                     </RadioGroup>
                   )}
                 </td>
