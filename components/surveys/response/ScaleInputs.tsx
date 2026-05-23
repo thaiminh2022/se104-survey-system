@@ -63,25 +63,34 @@ export function LikertScaleInput({
 }) {
   const { clearAnswer, setAnswer } = useAnswerWriter();
 
-  return (
-    <RadioGroup
-      onValueChange={(value) => {
-        if (!question.config.options.includes(value)) {
-          clearAnswer(question.id);
-          return;
-        }
+  function commitOption(value: string) {
+    if (!question.config.options.includes(value)) {
+      clearAnswer(question.id);
+      return;
+    }
 
-        setAnswer(question.id, {
-          answer_type: "likert-scale",
-          config: { selected_option: value },
-        });
-      }}
-    >
+    setAnswer(question.id, {
+      answer_type: "likert-scale",
+      config: { selected_option: value },
+    });
+  }
+
+  return (
+    <RadioGroup onValueChange={commitOption}>
       {question.config.options.map((option, index) => {
         const identifier = `${question.id}-${option}-${index}`;
         return (
-          <div className="flex items-center gap-3" key={identifier}>
-            <RadioGroupItem value={option} id={identifier} />
+          <div
+            className="flex items-center gap-3"
+            key={identifier}
+            onPointerDown={() => commitOption(option)}
+          >
+            <RadioGroupItem
+              value={option}
+              id={identifier}
+              onPointerDown={() => commitOption(option)}
+              onClick={() => commitOption(option)}
+            />
             <Label htmlFor={identifier}>{option}</Label>
           </div>
         );

@@ -11,6 +11,13 @@ import {
 import { createError, createSuccess } from "@/lib/types/errors";
 import { createClient } from "../supabase/server";
 import { getUser } from "./read_user";
+import {
+  e2eSections,
+  e2eSubmissions,
+  e2eSurveyRows,
+  getE2ESurveyAnalytics,
+  isPlaywrightE2E,
+} from "@/lib/e2e/fixtures";
 
 export type QuestionAnswerAnalyticsRow = QuestionRow & {
   answers: Pick<AnswerRow, "id" | "question_id" | "answer_data" | "created_at">[];
@@ -21,6 +28,10 @@ export type QuestionAnswerAnalyticsSection = SectionRow & {
 };
 
 export async function getSurveyAnalyticsRowsForUser() {
+  if (isPlaywrightE2E()) {
+    return createSuccess<SurveyRow[]>(e2eSurveyRows);
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -43,6 +54,12 @@ export async function getSurveyAnalyticsRowsForUser() {
 }
 
 export async function getSurveyAnalytics(surveyId: string) {
+  if (isPlaywrightE2E()) {
+    return createSuccess(
+      surveyId === "e2e-survey" ? getE2ESurveyAnalytics() : null,
+    );
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {
@@ -75,6 +92,31 @@ export async function getSurveyAnalytics(surveyId: string) {
 }
 
 export async function getQuestionAnswerAnalytics(surveyId: string) {
+  if (isPlaywrightE2E()) {
+    if (surveyId !== "e2e-survey") {
+      return createSuccess<QuestionAnswerAnalyticsSection[]>([]);
+    }
+
+    return createSuccess<QuestionAnswerAnalyticsSection[]>(
+      e2eSections.map((section) => ({
+        ...section,
+        questions: section.questions.map((question) => ({
+          ...question,
+          answers: e2eSubmissions.flatMap((submission) =>
+            submission.answers
+              .filter((answer) => answer.question_id === question.id)
+              .map(({ id, question_id, answer_data, created_at }) => ({
+                id,
+                question_id,
+                answer_data,
+                created_at,
+              })),
+          ),
+        })),
+      })),
+    );
+  }
+
   const supabase = await createClient();
   const userRes = await getUser();
   if (!userRes.success) {

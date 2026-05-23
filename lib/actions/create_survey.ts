@@ -10,8 +10,15 @@ import { Survey } from "@/lib/types/question-type";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
+import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
 
 export async function submitSurvey(s: Survey, isDraft: boolean) {
+  if (isPlaywrightE2E()) {
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/surveys");
+    redirect("/dashboard/surveys");
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {

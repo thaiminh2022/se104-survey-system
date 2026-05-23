@@ -19,6 +19,7 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { SurveyResponseSection } from "./SurveyResponseSection";
+import { AnswerWriterSyncProvider } from "./response/useAnswerWriter";
 
 type Props = {
   survey: Survey;
@@ -27,6 +28,7 @@ type Props = {
 export default function SurveyResponseForm({ survey }: Props) {
   const [sectionIndex, setSectionIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [answers, setAnswers] = useState<AnswerForm["answers"]>({});
 
   const answerForm = useForm<AnswerForm>({
     defaultValues: {
@@ -63,13 +65,27 @@ export default function SurveyResponseForm({ survey }: Props) {
   const section = survey.sections[sectionIndex];
   const isFirstSection = sectionIndex === 0;
   const isLastSection = sectionIndex === survey.sections.length - 1;
-  const values = answerForm.watch("answers");
 
-  const missingRequired = section.questions.some((question) => {
-    const answer = values?.[question.id];
+  const missingRequiredQuestionIds = getMissingRequiredQuestionIds(
+    section,
+    answers,
+  );
+  const missingRequired = missingRequiredQuestionIds.length > 0;
 
-    return question.required && !hasEnteredValue(answer);
-  });
+  function setSyncedAnswer(questionId: string, answer: Answer) {
+    setAnswers((current) => ({
+      ...current,
+      [questionId]: answer,
+    }));
+  }
+
+  function clearSyncedAnswer(questionId: string) {
+    setAnswers((current) => {
+      const next = { ...current };
+      delete next[questionId];
+      return next;
+    });
+  }
 
   function goBack() {
     setSectionIndex((current) => current - 1);
@@ -77,15 +93,23 @@ export default function SurveyResponseForm({ survey }: Props) {
   }
 
   function goNext() {
+    if (hasMissingRequiredAnswers(section, answers)) {
+      return;
+    }
+
     setSectionIndex((current) => current + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function onSubmit(data: AnswerForm) {
+    const formData = {
+      ...data,
+      answers,
+    };
     const result =
       survey.id == "test"
-        ? await fakeSubmitSurveyResponse(survey.id, data)
-        : await submitSurveyResponse(survey.id, data);
+        ? await fakeSubmitSurveyResponse(survey.id, formData)
+        : await submitSurveyResponse(survey.id, formData);
 
     if (result.success) {
       setSubmitted(true);
@@ -99,57 +123,91 @@ export default function SurveyResponseForm({ survey }: Props) {
 
   return (
     <FormProvider {...answerForm}>
-      <form
-        onSubmit={answerForm.handleSubmit(onSubmit)}
-        className="mt-5 space-y-5 pb-10"
+      <AnswerWriterSyncProvider
+        value={{
+          setSyncedAnswer,
+          clearSyncedAnswer,
+        }}
       >
-        <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-          <span>
-            Section {sectionIndex + 1} of {survey.sections.length}
-          </span>
-          <span>{section.questions.length} questions</span>
-        </div>
+        <form
+          onSubmit={answerForm.handleSubmit(onSubmit)}
+          className="mt-5 space-y-5 pb-10"
+        >
+          <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+            <span>
+              Section {sectionIndex + 1} of {survey.sections.length}
+            </span>
+            <span>{section.questions.length} questions</span>
+          </div>
 
-        <SurveyResponseSection section={section} />
+          <SurveyResponseSection section={section} />
 
-        <Card>
-          <CardContent>
-            {answerForm.formState.errors.root?.message ? (
-              <p className="text-sm text-destructive">
-                {answerForm.formState.errors.root.message}
-              </p>
-            ) : null}
-          </CardContent>
-          <CardFooter className="justify-between gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isFirstSection}
-              onClick={goBack}
-            >
-              <IconArrowLeft />
-              Back
-            </Button>
-            {isLastSection ? (
+          <Card>
+            <CardContent>
+              {answerForm.formState.errors.root?.message ? (
+                <p className="text-sm text-destructive">
+                  {answerForm.formState.errors.root.message}
+                </p>
+              ) : null}
+            </CardContent>
+            <CardFooter className="justify-between gap-3">
               <Button
-                type="submit"
-                disabled={missingRequired || answerForm.formState.isSubmitting}
+                type="button"
+                variant="outline"
+                disabled={isFirstSection}
+                onClick={goBack}
               >
-                <IconCheck />
-                {answerForm.formState.isSubmitting ? "Submitting..." : "Submit"}
+                <IconArrowLeft />
+                Back
               </Button>
-            ) : (
-              <Button type="button" disabled={missingRequired} onClick={goNext}>
-                Next
-                <IconArrowRight />
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
-      </form>
+              {isLastSection ? (
+                <Button
+                  type="submit"
+                  disabled={missingRequired || answerForm.formState.isSubmitting}
+                  data-missing-required={missingRequiredQuestionIds.join(",")}
+                >
+                  <IconCheck />
+                  {answerForm.formState.isSubmitting
+                    ? "Submitting..."
+                    : "Submit"}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  disabled={missingRequired}
+                  data-missing-required={missingRequiredQuestionIds.join(",")}
+                  onClick={goNext}
+                >
+                  Next
+                  <IconArrowRight />
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        </form>
+      </AnswerWriterSyncProvider>
     </FormProvider>
   );
 }
+
+function hasMissingRequiredAnswers(
+  section: Survey["sections"][number],
+  answers: AnswerForm["answers"] | undefined,
+) {
+  return getMissingRequiredQuestionIds(section, answers).length > 0;
+}
+
+function getMissingRequiredQuestionIds(
+  section: Survey["sections"][number],
+  answers: AnswerForm["answers"] | undefined,
+) {
+  return section.questions.flatMap((question) => {
+    const answer = answers?.[question.id];
+
+    return question.required && !hasEnteredValue(answer) ? [question.id] : [];
+  });
+}
+
 function hasEnteredValue(answer: Answer | undefined) {
   if (answer == undefined) {
     return false;

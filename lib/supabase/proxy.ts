@@ -1,7 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
 
 export async function updateSession(request: NextRequest) {
+  if (isPlaywrightE2E()) {
+    const isSignedIn = request.cookies.get("e2e-auth")?.value === "1";
+
+    if (!isSignedIn && request.nextUrl.pathname.startsWith("/dashboard")) {
+      const url = request.nextUrl.clone();
+      const returnUrl = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+      url.pathname = "/auth/login";
+      url.searchParams.set("returnUrl", returnUrl);
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });

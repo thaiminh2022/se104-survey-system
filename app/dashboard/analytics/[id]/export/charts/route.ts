@@ -7,14 +7,63 @@ import {
   ChartReportSurvey,
   getChartReportFilename,
 } from "@/lib/exports/chart_report";
+import {
+  e2eSections,
+  e2eSurveyRows,
+  getE2ESurveyAnalytics,
+  isPlaywrightE2E,
+} from "@/lib/e2e/fixtures";
 import { createClient } from "@/lib/supabase/server";
 import type { AnswerRow } from "@/lib/types/db_schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, props: Props) {
   const { id } = await props.params;
+  const searchParams = request.nextUrl.searchParams;
+  const format = searchParams.get("format") === "pdf" ? "pdf" : "json";
+
+  if (isPlaywrightE2E() && request.cookies.get("e2e-auth")?.value !== "1") {
+    return new Response("Not authenticated", { status: 401 });
+  }
+
+  if (format === "pdf") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/dashboard/analytics/${id}/export/pdf`;
+    url.searchParams.delete("format");
+    return NextResponse.redirect(url);
+  }
+
+  if (isPlaywrightE2E() && id === "e2e-survey") {
+    const report = buildChartReport(
+      {
+        ...getE2ESurveyAnalytics(),
+        sections: e2eSections.map((section) => ({
+          ...section,
+          questions: section.questions.map((question) => ({
+            ...question,
+            answers: [],
+          })),
+        })),
+      } satisfies ChartReportSurvey,
+      {
+        includeSummary: searchParams.get("summary") === "1",
+        includeSubmissionTimeline: searchParams.get("submissions") === "1",
+        includeAnswerDistributions: searchParams.get("answers") === "1",
+      },
+    );
+
+    return new Response(report, {
+      headers: {
+        "Content-Disposition": `attachment; filename="${getChartReportFilename(
+          e2eSurveyRows[0].title,
+        )}"`,
+        "Content-Type": "application/json; charset=utf-8",
+      },
+    });
+  }
+
   const supabase = await createClient();
   const userRes = await supabase.auth.getUser();
 
@@ -23,14 +72,6 @@ export async function GET(request: NextRequest, props: Props) {
   }
 
   const user = userRes.data.user;
-  const searchParams = request.nextUrl.searchParams;
-  const format = searchParams.get("format") === "pdf" ? "pdf" : "json";
-
-  if (format !== "json") {
-    return new Response("PDF chart export is not implemented.", {
-      status: 400,
-    });
-  }
 
   const surveyRes = await supabase
     .from("surveys")

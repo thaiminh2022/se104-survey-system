@@ -5,6 +5,7 @@ import { AnswerInsert, SubmissionInsert } from "@/lib/types/db_schema";
 import { createError, createSuccess } from "@/lib/types/errors";
 import { createClient } from "../supabase/server";
 import { getUser } from "./read_user";
+import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
 
 export async function fakeSubmitSurveyResponse(
   surveyId: string,
@@ -34,6 +35,12 @@ export async function submitSurveyResponse(
   surveyId: string,
   answerForm: AnswerForm,
 ) {
+  if (isPlaywrightE2E()) {
+    return Object.keys(answerForm.answers).length === 0
+      ? createError(null, "No answers")
+      : createSuccess(null);
+  }
+
   const userRes = await getUser();
   let userId = null;
   if (userRes.success === true) {
