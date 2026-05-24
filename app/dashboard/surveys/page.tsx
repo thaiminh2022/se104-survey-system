@@ -1,12 +1,20 @@
 import SurveyList, {
   type SurveyListRow,
 } from "@/components/dashboard/surveys/SurveyList";
+import ErrorState from "@/components/dashboard/ErrorState";
 import { getSurveyDashboardRowsForUser } from "@/lib/actions/read_survey";
 
 export default async function Page() {
   const surveys = await getSurveyDashboardRowsForUser();
   if (!surveys.success) {
-    return <>Cannot fetch surveys {surveys.error}</>;
+    return (
+      <main className="mx-auto w-3/4 py-6 lg:w-1/2">
+        <ErrorState
+          title="Cannot load surveys"
+          message={surveys.message}
+        />
+      </main>
+    );
   }
 
   const surveyRows = surveys.data.map(

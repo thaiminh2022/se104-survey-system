@@ -1,5 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import EmptyState, {
+  EmptyStateAction,
+} from "@/components/dashboard/EmptyState";
+import ErrorState from "@/components/dashboard/ErrorState";
 import {
   Card,
   CardContent,
@@ -25,12 +29,12 @@ export default async function Analytics() {
       <main className="min-h-screen bg-muted/20 px-4 py-6 text-foreground sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-7xl">
           <AnalyticsHeader />
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Cannot load analytics</CardTitle>
-              <CardDescription>{surveysResult.message}</CardDescription>
-            </CardHeader>
-          </Card>
+          <div className="mt-6">
+            <ErrorState
+              title="Cannot load analytics"
+              message={surveysResult.message}
+            />
+          </div>
         </div>
       </main>
     );
@@ -139,13 +143,15 @@ export default async function Analytics() {
                 </table>
               </div>
             ) : (
-              <div className="rounded-md border border-dashed border-border bg-background px-4 py-8 text-center">
-                <p className="font-medium">No survey analytics yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Create and publish a survey to begin collecting views and
-                  submissions.
-                </p>
-              </div>
+              <EmptyState
+                title="No survey analytics yet"
+                description="Create and publish a survey to begin collecting views and submissions."
+                action={
+                  <EmptyStateAction>
+                    <Link href="/dashboard/surveys/create">Create survey</Link>
+                  </EmptyStateAction>
+                }
+              />
             )}
           </CardContent>
         </Card>
