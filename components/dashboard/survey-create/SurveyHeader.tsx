@@ -1,6 +1,6 @@
 "use client";
 
-import { submitSurvey } from "@/lib/actions/create_survey";
+import { submitSurvey, updateSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/lib/stores/survey_store";
 import { IconDeviceFloppy, IconLoader2, IconSend } from "@tabler/icons-react";
 import { useState } from "react";
@@ -17,7 +17,11 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function SurveyHeader() {
+type SurveyHeaderProps = {
+  mode?: "create" | "edit";
+};
+
+export default function SurveyHeader({ mode = "create" }: SurveyHeaderProps) {
   const [submittingAction, setSubmittingAction] = useState<
     "draft" | "publish" | null
   >(null);
@@ -31,9 +35,12 @@ export default function SurveyHeader() {
   async function handleSubmit(isDraft: boolean) {
     setSubmittingAction(isDraft ? "draft" : "publish");
     try {
-      const result = await submitSurvey(survey, isDraft);
+      const result =
+        mode === "edit"
+          ? await updateSurvey(survey, isDraft)
+          : await submitSurvey(survey, isDraft);
       if (!result.success) {
-        toast.error(`Survey creation error: ${result.message}`);
+        toast.error(`Survey save error: ${result.message}`);
       } else {
         toast.info(`Survey saved as: ${isDraft ? "Draft" : "Published"}`);
       }
@@ -69,7 +76,7 @@ export default function SurveyHeader() {
             ) : (
               <IconDeviceFloppy />
             )}
-            {submittingAction === "draft" ? "Saving..." : "Draft"}
+            {submittingAction === "draft" ? "Saving..." : "Save draft"}
           </Button>
           <Button
             className="rounded-md"

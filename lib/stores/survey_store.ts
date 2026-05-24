@@ -120,8 +120,20 @@ function getDefaultSection(): Section {
   };
 }
 
+function getDefaultSurvey(): Survey {
+  return {
+    id: crypto.randomUUID(),
+    title: "New survey",
+    state: "draft",
+    description: "",
+    sections: [getDefaultSection()],
+  };
+}
+
 type SurveyStore = {
   survey: Survey;
+  setSurvey: (survey: Survey) => void;
+  resetSurvey: () => void;
   addSection: () => string;
   deleteSection: (sectionID: string) => void;
   addQuestion: (sectionID: string, type?: QuestionTypes) => string | null;
@@ -159,13 +171,17 @@ type SurveyStore = {
 
 export const useSurveyStore = create<SurveyStore>()(
   immer((set) => ({
-    survey: {
-      id: crypto.randomUUID(),
-      title: "New survey",
-      state: "draft",
-      description: "",
-      sections: [getDefaultSection()],
-    },
+    survey: getDefaultSurvey(),
+
+    setSurvey: (survey) =>
+      set((state) => {
+        state.survey = structuredClone(survey);
+      }),
+
+    resetSurvey: () =>
+      set((state) => {
+        state.survey = getDefaultSurvey();
+      }),
 
     // --- Section Actions ---
     addSection: () => {
