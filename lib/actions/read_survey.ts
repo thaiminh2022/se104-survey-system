@@ -99,14 +99,17 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
 export async function getSurveyDashboardRowsForUser() {
   if (isPlaywrightE2E()) {
     return createSuccess<SurveyDashboardRow[]>(
-      e2eSurveyRows.map((survey) => ({
-        ...survey,
-        last_response_at: getLatestSubmissionDate(
-          e2eSubmissions.filter(
-            (submission) => submission.survey_id === survey.id,
-          ),
-        ),
-      })),
+      e2eSurveyRows.map((survey) => {
+        const submissions = e2eSubmissions.filter(
+          (submission) => submission.survey_id === survey.id,
+        );
+
+        return {
+          ...survey,
+          submission_count: submissions.length,
+          last_response_at: getLatestSubmissionDate(submissions),
+        };
+      }),
     );
   }
 
@@ -156,12 +159,15 @@ export async function getSurveyDashboardRowsForUser() {
   }
 
   return createSuccess<SurveyDashboardRow[]>(
-    surveys.map((survey) => ({
-      ...survey,
-      last_response_at: getLatestSubmissionDate(
-        submissionsBySurvey.get(survey.id) ?? [],
-      ),
-    })),
+    surveys.map((survey) => {
+      const submissions = submissionsBySurvey.get(survey.id) ?? [];
+
+      return {
+        ...survey,
+        submission_count: submissions.length,
+        last_response_at: getLatestSubmissionDate(submissions),
+      };
+    }),
   );
 }
 

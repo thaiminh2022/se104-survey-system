@@ -35,7 +35,6 @@ export async function fakeSubmitSurveyResponse(
       ({
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
-        answer_type: answer.answer_type,
         answer_data: answer.config,
       }) as AnswerInsert,
   );
@@ -73,7 +72,6 @@ export async function submitSurveyResponse(
       ({
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
-        answer_type: answer.answer_type,
         answer_data: answer.config,
       }) as AnswerInsert,
   );
