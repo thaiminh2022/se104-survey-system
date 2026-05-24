@@ -63,27 +63,30 @@ export function MatrixInput({ question }: { question: Question<"matrix"> }) {
               <td className="py-3 pr-3 font-medium">{row}</td>
               {question.config.columns.map((column) => (
                 <td className="px-3 py-3 text-center" key={column}>
-                  {question.config.multiplePerRow ? (
-                    <Checkbox
-                      checked={
-                        Array.isArray(rows[row]) && rows[row].includes(column)
-                      }
-                      onCheckedChange={(checked) =>
-                        updateRow(row, column, checked === true)
-                      }
-                    />
-                  ) : (
-                    <RadioGroup
-                      value={typeof rows[row] === "string" ? rows[row] : ""}
-                      onValueChange={(value) => updateRow(row, value)}
-                    >
-                      <RadioGroupItem
-                        value={column}
-                        onPointerDown={() => updateRow(row, column)}
-                        onClick={() => updateRow(row, column)}
+                  <div className="flex justify-center">
+                    {question.config.multiplePerRow ? (
+                      <Checkbox
+                        checked={
+                          Array.isArray(rows[row]) && rows[row].includes(column)
+                        }
+                        onCheckedChange={(checked) =>
+                          updateRow(row, column, checked === true)
+                        }
                       />
-                    </RadioGroup>
-                  )}
+                    ) : (
+                      <RadioGroup
+                        className="w-fit"
+                        value={typeof rows[row] === "string" ? rows[row] : ""}
+                        onValueChange={(value) => updateRow(row, value)}
+                      >
+                        <RadioGroupItem
+                          value={column}
+                          onPointerDown={() => updateRow(row, column)}
+                          onClick={() => updateRow(row, column)}
+                        />
+                      </RadioGroup>
+                    )}
+                  </div>
                 </td>
               ))}
             </tr>
