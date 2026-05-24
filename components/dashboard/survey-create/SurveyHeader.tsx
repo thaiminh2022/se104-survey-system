@@ -2,6 +2,7 @@
 
 import { submitSurvey, updateSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/lib/stores/survey_store";
+import { validateSurveyForPublish } from "@/lib/validations/survey_publish";
 import { IconDeviceFloppy, IconLoader2, IconSend } from "@tabler/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +34,15 @@ export default function SurveyHeader({ mode = "create" }: SurveyHeaderProps) {
   const isSubmitting = submittingAction != null;
 
   async function handleSubmit(isDraft: boolean) {
+    if (!isDraft) {
+      const validation = validateSurveyForPublish(survey);
+
+      if (!validation.success) {
+        toast.error(validation.message);
+        return;
+      }
+    }
+
     setSubmittingAction(isDraft ? "draft" : "publish");
     try {
       const result =

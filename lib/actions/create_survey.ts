@@ -9,6 +9,7 @@ import {
 } from "@/lib/types/db_schema";
 import { createError } from "@/lib/types/errors";
 import { Survey } from "@/lib/types/question-type";
+import { validateSurveyForPublish } from "@/lib/validations/survey_publish";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
@@ -19,6 +20,14 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/surveys");
     redirect("/dashboard/surveys");
+  }
+
+  if (!isDraft) {
+    const validation = validateSurveyForPublish(s);
+
+    if (!validation.success) {
+      return createError(null, validation.message);
+    }
   }
 
   const supabase = await createClient();
@@ -106,6 +115,14 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
 }
 
 export async function updateSurvey(s: Survey, isDraft: boolean) {
+  if (!isDraft) {
+    const validation = validateSurveyForPublish(s);
+
+    if (!validation.success) {
+      return createError(null, validation.message);
+    }
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
