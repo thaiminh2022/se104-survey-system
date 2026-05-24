@@ -5,7 +5,9 @@ test.beforeEach(async ({ context }) => {
   await signInForE2E(context);
 });
 
-test("analytics page shows metrics and loads answer charts", async ({ page }) => {
+test("analytics page shows metrics and loads answer charts", async ({
+  page,
+}) => {
   await page.goto("/dashboard/analytics/e2e-survey");
 
   await expect(
@@ -60,10 +62,14 @@ test("PDF export opens printable report and calls window.print", async ({
   await page.getByLabel("PDF").check();
   await page.getByRole("button", { name: "Export report" }).click();
 
-  await expect(page).toHaveURL(/\/dashboard\/analytics\/e2e-survey\/export\/pdf/);
+  await expect(page).toHaveURL(
+    /\/dashboard\/analytics\/e2e-survey\/export\/pdf/,
+  );
   await expect(page.getByText("Analytics report")).toBeVisible();
   await expect(page.getByText("E2E Published Survey")).toBeVisible();
-  await expect.poll(async () =>
-    page.evaluate(() => window.localStorage.getItem("e2e-print-called")),
-  ).toBe("1");
+  await expect
+    .poll(async () =>
+      page.evaluate(() => window.localStorage.getItem("e2e-print-called")),
+    )
+    .toBe("1");
 });

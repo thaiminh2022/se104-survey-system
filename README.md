@@ -17,6 +17,7 @@ A survey management system built with Next.js, React, Supabase, and shadcn-style
 - [Scripts](#scripts)
 - [Testing](#testing)
 - [Test Coverage Overview](#test-coverage-overview)
+- [Project Documentation](#project-documentation)
 - [Project Structure](#project-structure)
 - [Notes](#notes)
 
@@ -187,6 +188,14 @@ Playwright starts the app in E2E fixture mode on port `3100`. This avoids hittin
 
 - Unit tests cover helper functions, auth actions, survey store behavior, CSV export, chart report generation, chart aggregation, and export route handlers.
 - E2E tests cover routing/auth, public response behavior, survey builder smoke flow, analytics, CSV export, print-to-PDF export, and API route behavior.
+
+## Project Documentation
+
+- [Vision and Scope](docs/vision-and-scope.md)
+- [Software Requirements Specification](docs/software-requirements-specification.md)
+- [Software Design Document](docs/software-design-document.md)
+- [Use Cases](docs/use-cases.md)
+- [Business Rules](docs/business-rules.md)
 
 ## Project Structure
 
