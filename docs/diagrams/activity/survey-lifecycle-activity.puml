@@ -13,6 +13,7 @@ partition "Survey Owner" {
   :Open dashboard;
   :Create survey;
   :Enter title and description;
+  :Optionally add allowed respondent emails;
   :Add sections;
   :Add questions;
   :Configure question types and required flags;
@@ -20,6 +21,11 @@ partition "Survey Owner" {
   if (Ready to publish?) then (no)
     :Save survey as draft;
     :Review draft in survey list;
+    if (Need changes?) then (yes)
+      :Open edit survey page;
+      :Update survey content;
+      :Save edited survey;
+    endif
     :Publish draft later;
   else (yes)
     :Publish survey;

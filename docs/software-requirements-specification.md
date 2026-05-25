@@ -25,7 +25,7 @@ SE104 Survey System is an academic web application project for small-team and co
 
 ### 1.3 System Overview
 
-The system supports authenticated survey owners and public respondents. Survey owners can create multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open published survey links and submit answers without signing in.
+The system supports authenticated survey owners and public respondents. Survey owners can create and edit multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open unrestricted published survey links without signing in, or sign in with an allowed email for restricted surveys.
 
 The detailed business rules for ownership, survey state, public access, response collection, analytics, exports, and current constraints are maintained in [Business Rules](business-rules.md).
 
@@ -56,7 +56,8 @@ The system includes these user-facing interfaces:
 - Login and registration pages.
 - Dashboard overview.
 - Survey list and survey actions menu.
-- Survey builder.
+- Survey create/edit builder.
+- Survey access controls for optional respondent email allowlists.
 - Survey sharing page with link and QR code.
 - Public survey response page.
 - Analytics list and survey analytics detail pages.
@@ -92,6 +93,7 @@ No special memory constraints are defined. The system is expected to run within 
 - The application must run with Node.js and pnpm.
 - Dashboard routes must require an authenticated session.
 - Public survey response pages must only load surveys in `published` state.
+- Restricted surveys must require a signed-in respondent whose email is listed by the survey owner.
 - Survey ownership must be enforced for dashboard reads, mutations, analytics, and exports.
 - Server-side mutations must verify authentication and authorization.
 - The application must rely on Supabase row-level security policies and application-level owner filters.
@@ -111,8 +113,8 @@ No special memory constraints are defined. The system is expected to run within 
 | --- | --- |
 | Authentication | Register, log in, log out, protect dashboard routes, and sanitize return URLs. |
 | Dashboard | Show workspace metrics, recent surveys, and navigation. |
-| Survey creation | Build surveys with title, description, sections, questions, required flags, and type-specific settings. |
-| Survey management | List owned surveys, publish drafts, archive published surveys, and delete surveys after confirmation. |
+| Survey creation | Build surveys with title, description, sections, questions, required flags, type-specific settings, and optional respondent email allowlists. |
+| Survey management | List owned surveys, edit existing surveys, publish drafts, archive published surveys, and delete surveys after confirmation. |
 | Sharing | Generate a public survey URL and QR code for distribution. |
 | Public response collection | Display published surveys, validate required answers, store submissions, and show confirmation. |
 | Analytics | Show views, submissions, conversion, submission timeline, and answer distributions. |
@@ -130,7 +132,6 @@ No special memory constraints are defined. The system is expected to run within 
 ### 2.5 Constraints
 
 - The current data model uses individual survey ownership only.
-- Existing survey editing is not implemented beyond a placeholder page.
 - Archived surveys cannot be republished through the current UI.
 - The respondent flow is linear by section; conditional branching is not implemented.
 - No team, organization, role, or collaboration model is implemented.
@@ -164,7 +165,7 @@ No special memory constraints are defined. The system is expected to run within 
 | --- | --- | --- |
 | EIR-UI-01 | The system shall provide login and registration pages for visitors. | Must |
 | EIR-UI-02 | The system shall provide a protected dashboard for authenticated users. | Must |
-| EIR-UI-03 | The system shall provide a survey builder interface for creating sections and questions. | Must |
+| EIR-UI-03 | The system shall provide a survey builder interface for creating and editing sections and questions. | Must |
 | EIR-UI-04 | The system shall provide a survey list with management actions. | Must |
 | EIR-UI-05 | The system shall provide a sharing page with public link and QR code. | Should |
 | EIR-UI-06 | The system shall provide public response pages for published surveys. | Must |
@@ -282,7 +283,7 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-MGMT-04 | The system shall allow owners to archive published surveys. | Must |
 | FR-MGMT-05 | The system shall prevent archived surveys from being publicly answered. | Must |
 | FR-MGMT-06 | The system shall allow owners to delete their own surveys after confirmation. | Must |
-| FR-MGMT-07 | The system should allow owners to edit existing surveys after creation. | Future |
+| FR-MGMT-07 | The system shall allow owners to edit existing surveys after creation. | Must |
 
 #### 3.4.5 Sharing
 
@@ -292,12 +293,14 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-SHARE-02 | The system shall display share actions for the public link. | Must |
 | FR-SHARE-03 | The system shall display a QR code for the public survey URL. | Should |
 | FR-SHARE-04 | The system shall not make draft or archived surveys answerable merely because a link exists. | Must |
+| FR-SHARE-05 | The system shall allow survey owners to restrict a survey to a list of respondent email addresses. | Must |
+| FR-SHARE-06 | The system shall treat a survey with no allowed respondent emails as public. | Must |
 
 #### 3.4.6 Survey Response
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-RESP-01 | The system shall allow respondents to open published surveys without signing in. | Must |
+| FR-RESP-01 | The system shall allow respondents to open unrestricted published surveys without signing in. | Must |
 | FR-RESP-02 | The system shall reject public access to draft and archived surveys. | Must |
 | FR-RESP-03 | The system shall present survey sections one at a time. | Must |
 | FR-RESP-04 | The system shall allow respondents to navigate backward and forward between sections. | Should |
@@ -307,6 +310,10 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-RESP-08 | The system shall allow anonymous submissions with null user id. | Must |
 | FR-RESP-09 | The system shall associate a submission with a user id when the respondent is authenticated. | Should |
 | FR-RESP-10 | The system shall show a success message after submission. | Must |
+| FR-RESP-11 | The system shall require login before opening a restricted published survey. | Must |
+| FR-RESP-12 | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must |
+| FR-RESP-13 | The system shall provide a change-account option when a signed-in respondent is not allowed to access a restricted survey. | Should |
+| FR-RESP-14 | The system shall provide a logout option in the public survey entry and response areas when a respondent is signed in. | Should |
 
 #### 3.4.7 Analytics
 
@@ -340,8 +347,8 @@ No special memory constraints are defined. The system is expected to run within 
 | NFR-USAB-02 | The system shall clearly indicate validation errors and blocked required-question navigation. | Should |
 | NFR-DATA-01 | The system shall persist surveys, sections, questions, submissions, and answers according to the committed database schema. | Must |
 | NFR-DATA-02 | The system shall maintain survey state rules for draft, published, and archived surveys. | Must |
-| NFR-TEST-01 | Unit tests should cover helper functions, auth actions, survey store behavior, exports, chart aggregation, and route handlers. | Should |
-| NFR-TEST-02 | End-to-end tests should cover auth routing, public response behavior, survey builder flow, analytics, exports, and API routes. | Should |
+| NFR-TEST-01 | Unit tests should cover helper functions, auth actions, create/update survey actions, response submission, survey store behavior, publish and response validation, exports, chart aggregation, and route handlers. | Should |
+| NFR-TEST-02 | End-to-end tests should cover auth routing, public response behavior, create and edit survey builder flows, analytics, exports, and API routes. | Should |
 
 ### 3.6 Other
 
@@ -350,6 +357,7 @@ No special memory constraints are defined. The system is expected to run within 
 | Entity | Key attributes |
 | --- | --- |
 | Survey | `id`, `user_id`, `title`, `description`, `state`, `image`, `submission_count`, `view_count`, `created_at` |
+| SurveyAllowedRespondent | `id`, `survey_id`, `email`, `created_at` |
 | Section | `id`, `survey_id`, `order_index`, `title`, `description`, `end_behavior`, `config`, `created_at` |
 | Question | `id`, `section_id`, `order_index`, `title`, `description`, `question_type`, `config`, `required`, `created_at` |
 | Submission | `id`, `survey_id`, `user_id`, `submitted_at`, `created_at` |
@@ -367,8 +375,10 @@ No special memory constraints are defined. The system is expected to run within 
 
 - An unauthenticated user who opens `/dashboard` is redirected to login.
 - An authenticated user can create a survey with sections and questions.
+- A survey owner can open an existing survey in the edit builder and save changes.
 - A draft survey is not publicly answerable.
 - A published survey can be opened at `/surveys/{id}` and submitted.
+- A restricted published survey redirects unauthenticated respondents to login and offers account switching when a signed-in user's email is not listed.
 - Required questions block respondent progress until answered.
 - A survey owner can see view, submission, and conversion metrics.
 - A survey owner can export CSV response data for owned surveys.

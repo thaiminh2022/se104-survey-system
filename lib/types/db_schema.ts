@@ -30,6 +30,27 @@ export const surveyInsertSchema = z.object({
 export type SurveyRow = z.infer<typeof surveyRowSchema>;
 export type SurveyInsert = z.infer<typeof surveyInsertSchema>;
 
+export const surveyAllowedRespondentRowSchema = z.object({
+  id: z.uuid(),
+  survey_id: z.uuid(),
+  email: z.email(),
+  created_at: z.coerce.date(),
+});
+
+export const surveyAllowedRespondentInsertSchema = z.object({
+  id: z.uuid().optional(),
+  survey_id: z.uuid(),
+  email: z.email(),
+  created_at: z.coerce.date().optional(),
+});
+
+export type SurveyAllowedRespondentRow = z.infer<
+  typeof surveyAllowedRespondentRowSchema
+>;
+export type SurveyAllowedRespondentInsert = z.infer<
+  typeof surveyAllowedRespondentInsertSchema
+>;
+
 export const sectionRowSchema = z.object({
   id: z.uuid(),
   survey_id: z.uuid(),

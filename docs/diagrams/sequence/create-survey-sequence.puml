@@ -17,7 +17,7 @@ BuilderPage -> BuilderUI: Render builder
 BuilderUI -> SurveyStore: Initialize draft survey
 
 loop Build survey
-  Owner -> BuilderUI: Edit title, sections, questions, config
+  Owner -> BuilderUI: Edit title, access list, sections, questions, config
   BuilderUI -> SurveyStore: Update draft survey state
 end
 
@@ -29,6 +29,7 @@ alt user is authenticated
   SupabaseAuth --> CreateAction: User id
   CreateAction -> DB: Insert survey row
   DB --> CreateAction: Survey id
+  CreateAction -> DB: Insert allowed respondent rows if present
   CreateAction -> DB: Insert section rows
   DB --> CreateAction: Section ids
   CreateAction -> DB: Insert question rows

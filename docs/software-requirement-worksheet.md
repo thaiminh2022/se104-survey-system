@@ -29,12 +29,13 @@
 | FR-25 | Survey Management | The system shall allow owners to archive published surveys. | Must | SRS |
 | FR-26 | Survey Management | The system shall prevent archived surveys from being publicly answered. | Must | SRS |
 | FR-27 | Survey Management | The system shall allow owners to delete their own surveys after confirmation. | Must | SRS |
-| FR-28 | Survey Management | The system should allow owners to edit existing surveys after creation. | Future | SRS |
+| FR-28 | Survey Management | The system shall allow owners to edit existing surveys after creation. | Must | SRS |
 | FR-29 | Sharing | The system shall generate a public survey URL using the configured site URL and survey ID. | Must | SRS |
 | FR-30 | Sharing | The system shall display share actions for the public survey link. | Must | SRS |
 | FR-31 | Sharing | The system shall display a QR code for the public survey URL. | Should | SRS |
 | FR-32 | Sharing | The system shall not make draft or archived surveys answerable merely because a link exists. | Must | SRS |
-| FR-33 | Survey Response | The system shall allow respondents to open published surveys without signing in. | Must | SRS |
+| FR-32A | Sharing | The system shall allow survey owners to restrict a survey to allowed respondent email addresses. | Must | SRS |
+| FR-33 | Survey Response | The system shall allow respondents to open unrestricted published surveys without signing in. | Must | SRS |
 | FR-34 | Survey Response | The system shall reject public access to draft and archived surveys. | Must | SRS |
 | FR-35 | Survey Response | The system shall present survey sections one at a time. | Must | SRS |
 | FR-36 | Survey Response | The system shall allow respondents to navigate backward and forward between sections. | Should | SRS |
@@ -44,6 +45,8 @@
 | FR-40 | Survey Response | The system shall allow anonymous submissions with null user ID. | Must | SRS |
 | FR-41 | Survey Response | The system shall associate a submission with a user ID when the respondent is authenticated. | Should | SRS |
 | FR-42 | Survey Response | The system shall show a success message after survey submission. | Must | SRS |
+| FR-42A | Survey Response | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must | SRS |
+| FR-42B | Survey Response | The system shall provide change-account and logout options in public survey access flows when a respondent is signed in. | Should | SRS |
 | FR-43 | Analytics | The system shall show survey-level views, submissions, conversion, and state. | Must | SRS |
 | FR-44 | Analytics | The system shall calculate conversion as submissions divided by views, using zero when views are zero. | Must | SRS |
 | FR-45 | Analytics | The system shall show submission counts over time. | Should | SRS |
@@ -68,7 +71,7 @@
 | NFR-08 | Reliability | The system shall handle failed database operations with user-visible or route-level errors. | Must | SRS |
 | NFR-09 | Maintainability | The codebase shall use TypeScript types for survey, section, question, submission, answer, chart, and export shapes. | Must | SRS |
 | NFR-10 | Maintainability | The codebase shall organize actions, Supabase clients, stores, exports, charts, and types into clear modules. | Should | SRS |
-| NFR-11 | Testing | Unit tests should cover helpers, auth actions, survey store behavior, exports, chart aggregation, and route handlers. | Should | SRS |
-| NFR-12 | Testing | End-to-end tests should cover auth routing, public responses, survey builder, analytics, exports, and API routes. | Should | SRS |
+| NFR-11 | Testing | Unit tests should cover helpers, auth actions, create/update survey actions, response submission, survey store behavior, publish and response validation, exports, chart aggregation, and route handlers. | Should | SRS |
+| NFR-12 | Testing | End-to-end tests should cover auth routing, public responses, create and edit survey builder flows, analytics, exports, and API routes. | Should | SRS |
 | NFR-13 | Portability | The system shall run in environments that support Node.js, pnpm, and Next.js. | Must | SRS |
 | NFR-14 | Portability | The system shall support hosted Supabase or local Supabase development when configured. | Should | SRS |

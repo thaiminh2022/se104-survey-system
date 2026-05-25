@@ -35,8 +35,8 @@ A survey management system built with Next.js, React, Supabase, and shadcn-style
 
 - Authentication with Supabase.
 - Dashboard for owned surveys and workspace metrics.
-- Survey builder with sections, required questions, and multiple question types.
-- Public survey response pages for published surveys.
+- Survey builder for creating and editing surveys with sections, required questions, multiple question types, and optional respondent email allowlists.
+- Public survey response pages for published surveys, including restricted surveys that require an allowed signed-in email.
 - Analytics pages with submission counts, conversion, and answer charts.
 - CSV export for raw responses.
 - JSON chart report export and print-to-PDF chart report.
@@ -186,8 +186,8 @@ Playwright starts the app in E2E fixture mode on port `3100`. This avoids hittin
 
 ## Test Coverage Overview
 
-- Unit tests cover helper functions, auth actions, survey store behavior, CSV export, chart report generation, chart aggregation, and export route handlers.
-- E2E tests cover routing/auth, public response behavior, survey builder smoke flow, analytics, CSV export, print-to-PDF export, and API route behavior.
+- Unit tests cover helper functions, auth actions, create/update survey actions, response submission, survey store editing behavior, publish and response validation, CSV export, chart report generation, chart aggregation, and export route handlers.
+- E2E tests cover routing/auth, public response behavior, create and edit survey builder flows, analytics, CSV export, print-to-PDF export, and API route behavior.
 
 ## Project Documentation
 

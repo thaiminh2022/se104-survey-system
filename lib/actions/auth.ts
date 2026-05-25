@@ -109,3 +109,18 @@ export async function logout() {
   await supabase.auth.signOut();
   redirect("/auth/login");
 }
+
+export async function logoutAndReturn(formData: FormData) {
+  const returnUrl = sanitizeReturnUrl(formData.get("returnUrl"));
+  const loginUrl = `/auth/login?${new URLSearchParams({ returnUrl }).toString()}`;
+
+  if (isPlaywrightE2E()) {
+    const cookieStore = await cookies();
+    cookieStore.delete("e2e-auth");
+    redirect(loginUrl);
+  }
+
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect(loginUrl);
+}

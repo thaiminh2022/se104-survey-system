@@ -9,7 +9,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | ID | Rule |
 | --- | --- |
 | BR-ACTOR-01 | A visitor may register, log in, view the public homepage, and open published survey links. |
-| BR-ACTOR-02 | A respondent may submit answers to a published survey without signing in. |
+| BR-ACTOR-02 | A respondent may submit answers to an unrestricted published survey without signing in, or to a restricted published survey after signing in with an allowed email. |
 | BR-ACTOR-03 | A survey owner is an authenticated user who creates and manages surveys under their own account. |
 | BR-ACTOR-04 | Each survey belongs to exactly one survey owner through its `user_id`. |
 | BR-ACTOR-05 | A survey owner may only manage, analyze, and export surveys they own. |
@@ -39,6 +39,8 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-SURVEY-06 | Questions may be marked as required. |
 | BR-SURVEY-07 | Question configuration must match the selected question type. |
 | BR-SURVEY-08 | Supported question types are single choice, multiple choice, rating scale, Likert scale, short text, long text, dropdown, yes/no, matrix, ranking, date/time, consent, and number. |
+| BR-SURVEY-09 | A survey owner may edit the title, description, sections, questions, ordering, required flags, and question configuration of an owned survey. |
+| BR-SURVEY-10 | Editing a survey must preserve ownership and must not create sections or questions for a survey owned by another user. |
 
 ## 5. Survey State and Lifecycle
 
@@ -53,6 +55,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-STATE-07 | The current survey list action allows published surveys to become archived. |
 | BR-STATE-08 | The current UI does not allow archived surveys to be republished. |
 | BR-STATE-09 | Sharing a survey link or QR code does not override the survey state. |
+| BR-STATE-10 | Archived surveys must not display an action that implies they can be republished through the current UI. |
 
 ## 6. Sharing and Public Access
 
@@ -63,13 +66,17 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-SHARE-03 | Public survey pages must only load surveys in `published` state. |
 | BR-SHARE-04 | Opening a draft, archived, missing, or unauthorized survey through a public route must not expose answerable survey content. |
 | BR-SHARE-05 | Public access to a survey does not grant access to dashboard, analytics, or export pages. |
+| BR-SHARE-06 | A survey with no allowed respondent emails is public to anyone with the published link. |
+| BR-SHARE-07 | A survey with one or more allowed respondent emails is restricted and requires the respondent to sign in with a matching normalized email address. |
+| BR-SHARE-08 | Allowed respondent emails must be stored in lowercase trimmed form and must be unique per survey. |
+| BR-SHARE-09 | A signed-in respondent who is not allowed for a restricted survey must be offered a way to change accounts. |
 
 ## 7. Response Collection
 
 | ID | Rule |
 | --- | --- |
-| BR-RESP-01 | Respondents may answer published surveys without an account. |
-| BR-RESP-02 | Authenticated respondents may also submit responses to published surveys. |
+| BR-RESP-01 | Respondents may answer unrestricted published surveys without an account. |
+| BR-RESP-02 | Authenticated respondents may submit responses to published surveys when the survey is unrestricted or their email is allowed. |
 | BR-RESP-03 | The respondent flow presents survey sections one at a time. |
 | BR-RESP-04 | Required questions in the current section must be answered before the respondent can proceed or submit. |
 | BR-RESP-05 | A completed response creates one submission record for the survey. |
@@ -78,6 +85,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-RESP-08 | Authenticated submissions may store the respondent user id. |
 | BR-RESP-09 | Empty answer payloads must not be accepted as valid submissions. |
 | BR-RESP-10 | The survey submission count is maintained by the database trigger after submission changes. |
+| BR-RESP-11 | Response submission must re-check survey state and respondent allowlist access on the server before inserting submission or answer rows. |
 
 ## 8. Analytics and Reporting
 
@@ -118,9 +126,8 @@ This document defines the business rules that govern SE104 Survey System behavio
 
 | ID | Rule |
 | --- | --- |
-| BR-LIMIT-01 | Full post-creation survey editing is outside the current implemented scope. |
-| BR-LIMIT-02 | Team workspaces, organization roles, and collaboration permissions are outside the current implemented scope. |
-| BR-LIMIT-03 | Survey templates are outside the current implemented scope. |
-| BR-LIMIT-04 | Conditional branching is outside the current implemented respondent flow. |
-| BR-LIMIT-05 | Offline response collection is outside the current implemented scope. |
-| BR-LIMIT-06 | Native server-side PDF file generation is outside the current implemented scope. |
+| BR-LIMIT-01 | Team workspaces, organization roles, and collaboration permissions are outside the current implemented scope. |
+| BR-LIMIT-02 | Survey templates are outside the current implemented scope. |
+| BR-LIMIT-03 | Conditional branching is outside the current implemented respondent flow. |
+| BR-LIMIT-04 | Offline response collection is outside the current implemented scope. |
+| BR-LIMIT-05 | Native server-side PDF file generation is outside the current implemented scope. |

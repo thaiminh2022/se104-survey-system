@@ -5,6 +5,7 @@ import {
   QuestionInsert,
   SectionRow,
   SectionInsert,
+  SurveyAllowedRespondentInsert,
   SurveyInsert,
 } from "@/lib/types/db_schema";
 import { createError } from "@/lib/types/errors";
@@ -14,6 +15,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
+import { isValidEmail, normalizeEmailList } from "@/lib/helper";
 
 export async function submitSurvey(s: Survey, isDraft: boolean) {
   if (isPlaywrightE2E()) {
@@ -28,6 +30,11 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
     if (!validation.success) {
       return createError(null, validation.message);
     }
+  }
+
+  const allowedEmails = normalizeAllowedRespondentEmails(s);
+  if (!allowedEmails.success) {
+    return allowedEmails;
   }
 
   const supabase = await createClient();
@@ -60,6 +67,16 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
   }
 
   const surveyId = surveyInsertRes.data.id as string;
+
+  const allowedRespondentInsertRes = await insertAllowedRespondents(
+    supabase,
+    surveyId,
+    allowedEmails.data,
+  );
+
+  if (!allowedRespondentInsertRes.success) {
+    return allowedRespondentInsertRes;
+  }
 
   const sectionSchemas: SectionInsert[] = s.sections.map((sec, index) => ({
     id: sec.id,
@@ -115,12 +132,26 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
 }
 
 export async function updateSurvey(s: Survey, isDraft: boolean) {
+  if (isPlaywrightE2E()) {
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/surveys");
+    revalidatePath("/dashboard/analytics");
+    revalidatePath(`/dashboard/analytics/${s.id}`);
+    revalidatePath(`/surveys/${s.id}`);
+    redirect("/dashboard/surveys");
+  }
+
   if (!isDraft) {
     const validation = validateSurveyForPublish(s);
 
     if (!validation.success) {
       return createError(null, validation.message);
     }
+  }
+
+  const allowedEmails = normalizeAllowedRespondentEmails(s);
+  if (!allowedEmails.success) {
+    return allowedEmails;
   }
 
   const supabase = await createClient();
@@ -147,6 +178,16 @@ export async function updateSurvey(s: Survey, isDraft: boolean) {
       surveyUpdateRes.error,
       `Survey update error: ${surveyUpdateRes.error.message}`,
     );
+  }
+
+  const allowedRespondentReplaceRes = await replaceAllowedRespondents(
+    supabase,
+    s.id,
+    allowedEmails.data,
+  );
+
+  if (!allowedRespondentReplaceRes.success) {
+    return allowedRespondentReplaceRes;
   }
 
   const currentSectionsRes = await supabase
@@ -273,4 +314,67 @@ export async function updateSurvey(s: Survey, isDraft: boolean) {
   revalidatePath(`/dashboard/analytics/${s.id}`);
   revalidatePath(`/surveys/${s.id}`);
   redirect("/dashboard/surveys");
+}
+
+function normalizeAllowedRespondentEmails(survey: Survey) {
+  const emails = normalizeEmailList(survey.allowedRespondentEmails);
+  const invalidEmail = emails.find((email) => !isValidEmail(email));
+
+  if (invalidEmail) {
+    return createError(null, `Invalid allowed respondent email: ${invalidEmail}`);
+  }
+
+  return { success: true as const, data: emails };
+}
+
+async function replaceAllowedRespondents(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  surveyId: string,
+  emails: string[],
+) {
+  const deleteRes = await supabase
+    .from("survey_allowed_respondents")
+    .delete()
+    .eq("survey_id", surveyId);
+
+  if (deleteRes.error) {
+    return createError(
+      deleteRes.error,
+      `Allowed respondents delete error: ${deleteRes.error.message}`,
+    );
+  }
+
+  if (emails.length === 0) {
+    return { success: true as const, data: null };
+  }
+
+  return insertAllowedRespondents(supabase, surveyId, emails);
+}
+
+async function insertAllowedRespondents(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  surveyId: string,
+  emails: string[],
+) {
+  if (emails.length === 0) {
+    return { success: true as const, data: null };
+  }
+
+  const rows: SurveyAllowedRespondentInsert[] = emails.map((email) => ({
+    survey_id: surveyId,
+    email,
+  }));
+
+  const insertRes = await supabase
+    .from("survey_allowed_respondents")
+    .insert(rows);
+
+  if (insertRes.error) {
+    return createError(
+      insertRes.error,
+      `Allowed respondents insert error: ${insertRes.error.message}`,
+    );
+  }
+
+  return { success: true as const, data: null };
 }

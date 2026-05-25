@@ -15,10 +15,12 @@ export default function ChangeStateSurveyButton({
   surveyId,
   state,
 }: DeleteSurveyButtonProps) {
+  if (state === "archived") {
+    return null;
+  }
+
   async function handleChangeState() {
     let changeTo: SurveyStatus = "draft";
-
-    if (state == "archived") return;
 
     if (state == "draft") {
       changeTo = "published";

@@ -24,6 +24,7 @@ export type Survey = {
   description: string;
   sections: Section[];
   state: SurveyStatus;
+  allowedRespondentEmails?: string[];
 };
 
 export type Section = {

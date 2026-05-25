@@ -2,7 +2,7 @@
 
 ## 1. System Context
 
-SE104 Survey System is a web-based survey management application. Authenticated survey owners can create surveys, publish or archive them, share public links, collect responses, view analytics, and export results. Respondents can open published survey links and submit answers without needing an account.
+SE104 Survey System is a web-based survey management application. Authenticated survey owners can create and edit surveys, optionally restrict respondents by email, publish or archive surveys, share public links, collect responses, view analytics, and export results. Respondents can open unrestricted published survey links without an account or sign in to answer restricted surveys.
 
 Use case flows follow the ownership, survey state, response, analytics, and export rules defined in [Business Rules](business-rules.md).
 
@@ -12,7 +12,7 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | --- | --- |
 | Visitor | A person who has not signed in. They may view the public homepage, register, log in, or answer published surveys. |
 | Respondent | A visitor or signed-in user who opens a published survey and submits a response. |
-| Survey Owner | An authenticated user who creates, manages, shares, analyzes, and exports their own surveys. |
+| Survey Owner | An authenticated user who creates, edits, manages, shares, analyzes, and exports their own surveys. |
 | Supabase Auth | External authentication service used for registration, login, logout, and session validation. |
 | Supabase Database | External persistence layer for surveys, sections, questions, submissions, answers, counters, and row-level access control. |
 
@@ -25,9 +25,10 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | UC-03 | Log out | Survey Owner | End the current session. |
 | UC-04 | View dashboard | Survey Owner | See workspace-level survey metrics and recent surveys. |
 | UC-05 | Create survey | Survey Owner | Build and save a new survey as draft or published. |
+| UC-05A | Edit survey | Survey Owner | Update an existing owned survey. |
 | UC-06 | Manage survey status | Survey Owner | Publish a draft survey or archive a published survey. |
 | UC-07 | Delete survey | Survey Owner | Remove an owned survey. |
-| UC-08 | Share survey | Survey Owner | Copy a public survey link or use a QR code. |
+| UC-08 | Share survey | Survey Owner | Copy a public survey link or use a QR code, with access controlled by survey state and optional respondent emails. |
 | UC-09 | Submit survey response | Respondent | Complete a published survey. |
 | UC-10 | View analytics | Survey Owner | Inspect views, submissions, conversion, timeline, and answer charts. |
 | UC-11 | Export response data | Survey Owner | Download raw responses as CSV. |
@@ -85,10 +86,21 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | Primary actor | Survey Owner |
 | Preconditions | User is authenticated. |
 | Trigger | User opens the survey builder. |
-| Main flow | 1. User edits survey title and description. 2. User adds one or more sections. 3. User adds questions to sections. 4. User selects question types and configures options. 5. User marks questions as required when needed. 6. User saves the survey as a draft or publishes it. 7. System persists the survey, sections, and questions. 8. System redirects to the survey list. |
+| Main flow | 1. User edits survey title and description. 2. User optionally adds allowed respondent emails. 3. User adds one or more sections. 4. User adds questions to sections. 5. User selects question types and configures options. 6. User marks questions as required when needed. 7. User saves the survey as a draft or publishes it. 8. System persists the survey, access list, sections, and questions. 9. System redirects to the survey list. |
 | Supported question types | Single choice, multiple choice, rating scale, Likert scale, short text, long text, dropdown, yes/no, matrix, ranking, date/time, consent, and number. |
 | Alternate flows | A1. User is unauthenticated: system redirects to login. A2. Database insert fails: system returns an error. |
 | Postconditions | A new survey exists with state `draft` or `published`. |
+
+### UC-05A: Edit Survey
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Survey Owner |
+| Preconditions | User is authenticated and owns the survey. |
+| Trigger | User opens the edit page for an existing survey. |
+| Main flow | 1. System loads the owned survey into the builder. 2. User updates survey title, description, allowed respondent emails, sections, questions, order, required flags, or question configuration. 3. User saves the updated survey. 4. System validates ownership and builder data. 5. System updates the survey row, replaces the access list, removes deleted sections and questions, upserts current sections and questions, and redirects to the survey list. |
+| Alternate flows | A1. User is unauthenticated: system redirects to login. A2. User does not own the survey or the survey cannot be found: system returns an error. A3. Validation fails: system shows the validation error. A4. Database update fails: system returns an error. |
+| Postconditions | The owned survey reflects the saved builder changes. |
 
 ### UC-06: Manage Survey Status
 
@@ -120,7 +132,7 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | Primary actor | Survey Owner |
 | Preconditions | User owns the survey. |
 | Trigger | User opens the Share page for a survey. |
-| Main flow | 1. System builds a public URL in the form `/surveys/{id}`. 2. System displays share actions for the link. 3. System displays a QR code containing the same URL. |
+| Main flow | 1. System builds a public URL in the form `/surveys/{id}`. 2. System displays share actions for the link. 3. System displays a QR code containing the same URL. 4. If allowed respondent emails exist, only matching signed-in users can open and submit the survey. |
 | Business rules | See [Business Rules](business-rules.md), especially sharing and public access rules. Sharing a link does not override survey state, and only published surveys are publicly accessible. |
 | Postconditions | User can distribute the link or QR code to respondents. |
 
@@ -131,8 +143,8 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | Primary actor | Respondent |
 | Preconditions | Survey exists and is published. |
 | Trigger | Respondent opens a public survey link. |
-| Main flow | 1. System loads the published survey. 2. System increments the survey view count. 3. Respondent answers questions section by section. 4. System prevents navigation or submission when required questions in the current section are unanswered. 5. Respondent submits the final section. 6. System creates a submission and answer rows. 7. System displays a submitted confirmation. |
-| Alternate flows | A1. Survey is draft or archived: system denies access. A2. Survey cannot be found: system shows an error. A3. No answers are submitted: system returns an error. |
+| Main flow | 1. System checks that the survey is published and that the respondent is allowed by the email access rule. 2. System loads the survey. 3. System increments the survey view count. 4. Respondent answers questions section by section. 5. System prevents navigation or submission when required questions in the current section are unanswered. 6. Respondent submits the final section. 7. System re-checks access, creates a submission and answer rows, and displays a submitted confirmation. |
+| Alternate flows | A1. Survey is draft or archived: system denies access. A2. Survey cannot be found: system shows an error. A3. Restricted survey and respondent is not signed in: system redirects to login. A4. Restricted survey and respondent email is not allowed: system shows the signed-in email and provides a change-account option. A5. Signed-in respondent chooses logout from the public survey area: system signs out and returns to login with the survey return URL. A6. No answers are submitted: system returns an error. |
 | Postconditions | Submission and answers are stored. Survey submission count is maintained by database trigger. |
 
 ### UC-10: View Analytics
@@ -172,7 +184,6 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 
 | Use Case | Current status |
 | --- | --- |
-| Edit an existing survey after creation | Route exists, but the edit UI is currently a placeholder. |
 | Republish archived survey | Current status flow does not allow archived surveys to return to published. |
 | Team collaboration | No team, role, or organization model is implemented. |
 | Survey templates | No template management is implemented. |

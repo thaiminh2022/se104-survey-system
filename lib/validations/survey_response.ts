@@ -95,8 +95,40 @@ function hasValidRequiredAnswer(question: Question, answer: Answer | undefined) 
     case "consent":
       return answer.config.accepted === true;
     case "number":
-      return true;
+      return hasValidNumberAnswer(question as Question<"number">, answer);
   }
+}
+
+function hasValidNumberAnswer(
+  question: Question<"number">,
+  answer: Answer<"number">,
+) {
+  const config = question.config;
+
+  if (answer.config.is_range) {
+    const { from, to } = answer.config;
+
+    return (
+      isAllowedNumber(from, config) &&
+      isAllowedNumber(to, config) &&
+      from <= to
+    );
+  }
+
+  return isAllowedNumber(answer.config.answer, config);
+}
+
+function isAllowedNumber(
+  value: unknown,
+  config: Question<"number">["config"],
+) {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= config.min &&
+    value <= config.max &&
+    (!config.isInteger || Number.isInteger(value))
+  );
 }
 
 function getValidationMessage(survey: Survey, missingQuestionIds: string[]) {

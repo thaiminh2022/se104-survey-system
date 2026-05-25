@@ -1,0 +1,49 @@
+@startuml
+title SE104 Survey System - Edit Survey Sequence
+
+skinparam shadowing false
+autonumber
+
+actor "Survey Owner" as Owner
+participant "Edit Survey Page\n/app/dashboard/surveys/[id]/edit" as EditPage
+participant "Read Survey Action\nlib/actions/read_survey.ts" as ReadAction
+participant "Survey Builder Components" as BuilderUI
+participant "Survey Store\nlib/stores/survey_store.ts" as SurveyStore
+participant "Update Survey Action\nlib/actions/create_survey.ts" as UpdateAction
+participant "Supabase Auth" as SupabaseAuth
+database "Supabase Database" as DB
+
+Owner -> EditPage: Open edit survey page
+EditPage -> ReadAction: getSurveyById(surveyId)
+ReadAction -> SupabaseAuth: Get current user
+SupabaseAuth --> ReadAction: User id
+ReadAction -> DB: Select owned survey, sections, questions
+
+alt survey exists and is owned
+  DB --> ReadAction: Survey structure
+  ReadAction --> EditPage: Initial survey data
+  EditPage -> BuilderUI: Render builder in edit mode
+  BuilderUI -> SurveyStore: setSurvey(initialSurvey)
+
+  loop Edit survey
+    Owner -> BuilderUI: Change title, access list, sections, questions, order, config
+    BuilderUI -> SurveyStore: Update builder state
+  end
+
+  Owner -> BuilderUI: Save draft
+  BuilderUI -> UpdateAction: updateSurvey(surveyId, survey)
+  UpdateAction -> SupabaseAuth: Get current user
+  SupabaseAuth --> UpdateAction: User id
+  UpdateAction -> DB: Update owned survey row
+  UpdateAction -> DB: Replace allowed respondent rows
+  UpdateAction -> DB: Delete removed questions and sections
+  UpdateAction -> DB: Upsert current sections
+  UpdateAction -> DB: Upsert current questions
+  DB --> UpdateAction: Update success
+  UpdateAction --> Owner: Redirect to /dashboard/surveys
+else survey missing or not owned
+  DB --> ReadAction: No row
+  ReadAction --> EditPage: Not found or unauthorized
+end
+
+@enduml
