@@ -41,7 +41,7 @@ import {
   e2eSurveyRows,
   isPlaywrightE2E,
 } from "@/lib/e2e/fixtures";
-import { normalizeEmail } from "@/lib/utils";
+import { normalizeEmail } from "@/lib/helper";
 
 export type SurveyDashboardRow = SurveyRow & {
   last_response_at: Date | null;

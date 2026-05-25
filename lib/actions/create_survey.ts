@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
-import { isValidEmail, normalizeEmailList } from "@/lib/utils";
+import { isValidEmail, normalizeEmailList } from "@/lib/helper";
 
 export async function submitSurvey(s: Survey, isDraft: boolean) {
   if (isPlaywrightE2E()) {

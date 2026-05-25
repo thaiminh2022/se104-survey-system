@@ -15,7 +15,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useSurveyStore } from "@/lib/stores/survey_store";
-import { isValidEmail, normalizeEmail, normalizeEmailList } from "@/lib/utils";
+import { isValidEmail, normalizeEmail, normalizeEmailList } from "@/lib/helper";
 
 export default function SurveyAccessCard() {
   const survey = useSurveyStore((s) => s.survey);
