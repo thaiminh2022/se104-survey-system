@@ -100,6 +100,7 @@ class SurveyStore {
   +survey: SurveyDraft
   +setSurvey(survey)
   +resetSurvey()
+  +updateAllowedRespondentEmails(emails)
   +addSection()
   +deleteSection(sectionId)
   +reorderSections(sourceIndex, destinationIndex)
@@ -164,6 +165,14 @@ end note
 note bottom of Survey
 submission_count is maintained
 by a database trigger.
+end note
+
+note right of SurveyAllowedRespondent
+Emails are normalized to
+lowercase trimmed values.
+Any rows make the survey
+restricted to matching
+authenticated respondents.
 end note
 
 note right of QuestionType

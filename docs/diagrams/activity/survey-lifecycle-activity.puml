@@ -44,6 +44,12 @@ partition "System" {
     :Block public access;
     stop
   else (yes)
+    if (Allowed respondent list exists?) then (yes)
+      if (Respondent signed in with allowed email?) then (no)
+        :Require login or show change-account option;
+        stop
+      endif
+    endif
     :Load survey sections and questions;
   endif
 }
@@ -58,6 +64,7 @@ partition "Respondent" {
 }
 
 partition "System" {
+  :Re-check survey state and access list;
   :Create submission;
   :Create answer records;
   :Update submission count;

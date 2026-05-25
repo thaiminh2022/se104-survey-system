@@ -1,0 +1,44 @@
+@startuml
+title SE104 Survey System - Restricted Survey Access Sequence
+
+skinparam shadowing false
+autonumber
+
+actor Respondent
+participant "Public Survey Page\n/app/surveys/[id]" as PublicPage
+participant "Read User Action\nlib/actions/read_user.ts" as ReadUser
+participant "Read Survey Action\nlib/actions/read_survey.ts" as ReadSurvey
+participant "Auth Action\nlib/actions/auth.ts" as AuthAction
+participant "Login Page\n/app/auth/login" as LoginPage
+participant "Supabase Auth" as SupabaseAuth
+database "Supabase Database" as DB
+
+Respondent -> PublicPage: Open restricted survey link
+PublicPage -> ReadUser: getUserData()
+ReadUser -> SupabaseAuth: Get current user
+PublicPage -> ReadSurvey: getPublishedSurveyById(id)
+ReadSurvey -> DB: get_published_survey_access_status(id)
+
+alt respondent is not signed in
+  DB --> ReadSurvey: auth_required
+  PublicPage --> Respondent: Redirect to /auth/login?returnUrl=/surveys/{id}
+  Respondent -> LoginPage: Sign in with allowed account
+  LoginPage -> AuthAction: login(formData)
+  AuthAction -> SupabaseAuth: signInWithPassword(email, password)
+  SupabaseAuth --> AuthAction: Session created
+  AuthAction --> Respondent: Redirect to /surveys/{id}
+else signed-in email is not allowed
+  DB --> ReadSurvey: denied
+  PublicPage --> Respondent: Show account not allowed card
+  Respondent -> PublicPage: Click Change account
+  PublicPage -> AuthAction: logoutAndReturn(returnUrl)
+  AuthAction -> SupabaseAuth: signOut()
+  AuthAction --> Respondent: Redirect to login with returnUrl
+else signed-in email is allowed
+  DB --> ReadSurvey: allowed
+  ReadSurvey -> DB: Select survey, sections, questions
+  ReadSurvey --> PublicPage: Success(Survey)
+  PublicPage --> Respondent: Render response form with logout option
+end
+
+@enduml

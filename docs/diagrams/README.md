@@ -17,6 +17,7 @@ The set is intentionally limited to diagrams that add distinct design value:
 | `sequence/login-sequence.puml` | Login and protected dashboard access sequence diagram. |
 | `sequence/create-survey-sequence.puml` | Survey builder and persistence sequence diagram. |
 | `sequence/edit-survey-sequence.puml` | Existing survey edit and update persistence sequence diagram. |
+| `sequence/restricted-survey-access-sequence.puml` | Restricted public survey access and account switching sequence diagram. |
 | `sequence/submit-survey-sequence.puml` | Public survey submission sequence diagram. |
 | `state/survey-state-diagram.puml` | Survey lifecycle state diagram. |
 | `activity/survey-lifecycle-activity.puml` | End-to-end survey lifecycle activity diagram. |

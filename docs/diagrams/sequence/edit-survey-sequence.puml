@@ -9,6 +9,7 @@ participant "Edit Survey Page\n/app/dashboard/surveys/[id]/edit" as EditPage
 participant "Read Survey Action\nlib/actions/read_survey.ts" as ReadAction
 participant "Survey Builder Components" as BuilderUI
 participant "Survey Store\nlib/stores/survey_store.ts" as SurveyStore
+participant "Helper Utilities\nlib/helper.ts" as Helper
 participant "Update Survey Action\nlib/actions/create_survey.ts" as UpdateAction
 participant "Supabase Auth" as SupabaseAuth
 database "Supabase Database" as DB
@@ -32,6 +33,7 @@ alt survey exists and is owned
 
   Owner -> BuilderUI: Save draft
   BuilderUI -> UpdateAction: updateSurvey(surveyId, survey)
+  UpdateAction -> Helper: Normalize and validate allowed emails
   UpdateAction -> SupabaseAuth: Get current user
   SupabaseAuth --> UpdateAction: User id
   UpdateAction -> DB: Update owned survey row

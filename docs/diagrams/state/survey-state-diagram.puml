@@ -18,6 +18,11 @@ state Published {
   Active : Public survey page is answerable
   Active : Views and submissions are collected
   Active : Analytics and exports are available to owner
+  Active --> Unrestricted : No allowed respondent emails
+  Active --> Restricted : Allowed respondent emails exist
+  Unrestricted : Anyone with the link can respond
+  Restricted : Matching signed-in email required
+  Restricted : Wrong signed-in account can change account
 }
 
 state Archived {
@@ -43,6 +48,13 @@ end note
 note bottom of Draft
 Sharing a link or QR code
 does not change survey state.
+end note
+
+note right of Published
+Access list changes do not
+change the survey lifecycle state;
+they only affect who may open
+and submit the published survey.
 end note
 
 @enduml

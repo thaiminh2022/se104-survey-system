@@ -8,6 +8,7 @@ actor "Survey Owner" as Owner
 participant "Survey Builder Page\n/app/dashboard/surveys/create" as BuilderPage
 participant "Survey Builder Components" as BuilderUI
 participant "Survey Store\nlib/stores/survey_store.ts" as SurveyStore
+participant "Helper Utilities\nlib/helper.ts" as Helper
 participant "Create Survey Action\nlib/actions/create_survey.ts" as CreateAction
 participant "Supabase Auth" as SupabaseAuth
 database "Supabase Database" as DB
@@ -23,6 +24,7 @@ end
 
 Owner -> BuilderUI: Save draft or publish
 BuilderUI -> CreateAction: submitSurvey(survey, publish)
+CreateAction -> Helper: Normalize and validate allowed emails
 CreateAction -> SupabaseAuth: Get current user
 
 alt user is authenticated
