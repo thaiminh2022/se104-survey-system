@@ -1,0 +1,36 @@
+@startuml
+title SE104 Survey System - Login Sequence
+
+skinparam shadowing false
+autonumber
+
+actor Visitor
+participant "Login Page\n/app/auth/login" as LoginPage
+participant "Login Form\ncomponents/auth/login-form" as LoginForm
+participant "Auth Action\nlib/actions/auth.ts" as AuthAction
+participant "Supabase Auth" as SupabaseAuth
+participant "Route Protection\nproxy.ts" as Proxy
+participant "Dashboard Page\n/app/dashboard" as Dashboard
+
+Visitor -> LoginPage: Open /auth/login?returnUrl=/dashboard
+LoginPage -> LoginForm: Render login form
+Visitor -> LoginForm: Enter email and password
+Visitor -> LoginForm: Submit
+LoginForm -> AuthAction: login(formData)
+AuthAction -> AuthAction: Validate and sanitize return URL
+AuthAction -> SupabaseAuth: signInWithPassword(email, password)
+
+alt credentials are valid
+  SupabaseAuth --> AuthAction: Session created
+  AuthAction --> Visitor: Redirect to safe return URL
+  Visitor -> Proxy: Request /dashboard
+  Proxy -> SupabaseAuth: Read current session
+  SupabaseAuth --> Proxy: Valid session
+  Proxy -> Dashboard: Allow request
+  Dashboard --> Visitor: Render dashboard
+else credentials are invalid
+  SupabaseAuth --> AuthAction: Authentication error
+  AuthAction --> Visitor: Redirect to login with error
+end
+
+@enduml

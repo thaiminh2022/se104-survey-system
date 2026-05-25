@@ -1,0 +1,42 @@
+@startuml
+title SE104 Survey System - Create Survey Sequence
+
+skinparam shadowing false
+autonumber
+
+actor "Survey Owner" as Owner
+participant "Survey Builder Page\n/app/dashboard/surveys/create" as BuilderPage
+participant "Survey Builder Components" as BuilderUI
+participant "Survey Store\nlib/stores/survey_store.ts" as SurveyStore
+participant "Create Survey Action\nlib/actions/create_survey.ts" as CreateAction
+participant "Supabase Auth" as SupabaseAuth
+database "Supabase Database" as DB
+
+Owner -> BuilderPage: Open create survey page
+BuilderPage -> BuilderUI: Render builder
+BuilderUI -> SurveyStore: Initialize draft survey
+
+loop Build survey
+  Owner -> BuilderUI: Edit title, sections, questions, config
+  BuilderUI -> SurveyStore: Update draft survey state
+end
+
+Owner -> BuilderUI: Save draft or publish
+BuilderUI -> CreateAction: submitSurvey(survey, publish)
+CreateAction -> SupabaseAuth: Get current user
+
+alt user is authenticated
+  SupabaseAuth --> CreateAction: User id
+  CreateAction -> DB: Insert survey row
+  DB --> CreateAction: Survey id
+  CreateAction -> DB: Insert section rows
+  DB --> CreateAction: Section ids
+  CreateAction -> DB: Insert question rows
+  DB --> CreateAction: Insert success
+  CreateAction --> Owner: Redirect to /dashboard/surveys
+else user is not authenticated
+  SupabaseAuth --> CreateAction: No session
+  CreateAction --> Owner: Return authentication error
+end
+
+@enduml

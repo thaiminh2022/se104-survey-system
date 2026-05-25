@@ -1,0 +1,48 @@
+@startuml
+title SE104 Survey System - Survey State Diagram
+
+skinparam shadowing false
+
+[*] --> Draft : Create survey\nSave as draft
+[*] --> Published : Create survey\nPublish immediately
+
+state Draft {
+  [*] --> Editable
+  Editable : Owner can view in dashboard
+  Editable : Owner can manage or delete
+  Editable : Public link is not answerable
+}
+
+state Published {
+  [*] --> Active
+  Active : Public survey page is answerable
+  Active : Views and submissions are collected
+  Active : Analytics and exports are available to owner
+}
+
+state Archived {
+  [*] --> Retained
+  Retained : Public survey page is not answerable
+  Retained : Owner can retain management and analytics access
+}
+
+Draft --> Published : Owner publishes draft
+Published --> Archived : Owner archives published survey
+
+Draft --> Deleted : Owner confirms delete
+Published --> Deleted : Owner confirms delete
+Archived --> Deleted : Owner confirms delete
+
+Deleted --> [*]
+
+note right of Archived
+Current UI does not support
+republishing archived surveys.
+end note
+
+note bottom of Draft
+Sharing a link or QR code
+does not change survey state.
+end note
+
+@enduml

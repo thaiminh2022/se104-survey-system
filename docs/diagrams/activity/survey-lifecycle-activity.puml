@@ -1,0 +1,75 @@
+@startuml
+title SE104 Survey System - Survey Lifecycle Activity Diagram
+
+skinparam shadowing false
+
+start
+
+partition "Survey Owner" {
+  :Open application;
+  if (Authenticated?) then (no)
+    :Register or log in;
+  endif
+  :Open dashboard;
+  :Create survey;
+  :Enter title and description;
+  :Add sections;
+  :Add questions;
+  :Configure question types and required flags;
+
+  if (Ready to publish?) then (no)
+    :Save survey as draft;
+    :Review draft in survey list;
+    :Publish draft later;
+  else (yes)
+    :Publish survey;
+  endif
+
+  :Open share page;
+  :Copy public link or QR code;
+}
+
+partition "Respondent" {
+  :Open public survey link;
+}
+
+partition "System" {
+  if (Survey is published?) then (no)
+    :Block public access;
+    stop
+  else (yes)
+    :Load survey sections and questions;
+  endif
+}
+
+partition "Respondent" {
+  repeat
+    :Answer current section questions;
+    :Click next or submit;
+  repeat while (Required answers missing?) is (yes)
+  -> no;
+  :Submit final response;
+}
+
+partition "System" {
+  :Create submission;
+  :Create answer records;
+  :Update submission count;
+  :Show submission confirmation;
+}
+
+partition "Survey Owner" {
+  :Open analytics;
+  :Review views, submissions, conversion, and charts;
+  if (Need export?) then (yes)
+    :Choose CSV, JSON, or print-ready PDF report;
+    :Download or print report;
+  endif
+  if (Survey should close?) then (yes)
+    :Archive survey;
+  endif
+}
+
+stop
+
+@enduml

@@ -1,0 +1,160 @@
+@startuml
+title SE104 Survey System - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+class User {
+  +id: uuid
+  +email: string
+}
+
+class Survey {
+  +id: uuid
+  +user_id: uuid
+  +title: string
+  +description: string?
+  +state: SurveyStatus
+  +image: string?
+  +submission_count: int
+  +view_count: int
+  +created_at: datetime
+}
+
+class Section {
+  +id: uuid
+  +survey_id: uuid
+  +order_index: int
+  +title: string
+  +description: string?
+  +end_behavior: SectionEndBehavior
+  +config: json
+  +created_at: datetime
+}
+
+class Question {
+  +id: uuid
+  +section_id: uuid
+  +order_index: int
+  +title: string
+  +description: string?
+  +question_type: QuestionType
+  +config: json
+  +required: boolean
+  +created_at: datetime
+}
+
+class Submission {
+  +id: uuid
+  +survey_id: uuid
+  +user_id: uuid?
+  +created_at: datetime
+  +submitted_at: datetime
+}
+
+class Answer {
+  +id: uuid
+  +submission_id: uuid
+  +question_id: uuid
+  +answer_data: json
+  +created_at: datetime
+}
+
+enum SurveyStatus {
+  draft
+  published
+  archived
+}
+
+enum SectionEndBehavior {
+  continue
+  submit
+  jump
+}
+
+enum QuestionType {
+  single_choice
+  multiple_choice
+  rating_scale
+  likert_scale
+  short_text
+  long_text
+  dropdown
+  yes_no
+  matrix
+  ranking
+  date_time
+  consent
+  number
+}
+
+class SurveyStore {
+  +survey: SurveyDraft
+  +addSection()
+  +deleteSection(sectionId)
+  +addQuestion(sectionId, type)
+  +deleteQuestion(sectionId, questionId)
+  +updateQuestionType(sectionId, questionId, type)
+  +updateQuestionConfig(sectionId, questionId, config)
+  +updateQuestionRequired(sectionId, questionId, value)
+}
+
+class SurveyDraft {
+  +id: string
+  +title: string
+  +description: string
+  +state: SurveyStatus
+  +sections: SectionDraft[]
+}
+
+class SectionDraft {
+  +id: string
+  +title: string
+  +description: string
+  +questions: QuestionDraft[]
+}
+
+class QuestionDraft {
+  +id: string
+  +title: string
+  +description: string
+  +question_type: QuestionType
+  +config: object
+  +required: boolean
+}
+
+User "1" -- "0..*" Survey : owns
+Survey "1" *-- "1..*" Section : contains
+Section "1" *-- "0..*" Question : contains
+Survey "1" *-- "0..*" Submission : receives
+Submission "1" *-- "1..*" Answer : contains
+Question "1" -- "0..*" Answer : answered by
+User "0..1" -- "0..*" Submission : submits
+
+Survey --> SurveyStatus
+Section --> SectionEndBehavior
+Question --> QuestionType
+
+SurveyStore o-- SurveyDraft
+SurveyDraft *-- SectionDraft
+SectionDraft *-- QuestionDraft
+QuestionDraft --> QuestionType
+SurveyDraft --> SurveyStatus
+
+note right of Submission
+Anonymous responses store
+user_id as null.
+end note
+
+note bottom of Survey
+submission_count is maintained
+by a database trigger.
+end note
+
+note right of QuestionType
+Enum labels map to app values such as
+"single-choice" and "date-time".
+end note
+
+@enduml

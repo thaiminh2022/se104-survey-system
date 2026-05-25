@@ -1,0 +1,51 @@
+@startuml
+title SE104 Survey System - Public Survey Submission Sequence
+
+skinparam shadowing false
+autonumber
+
+actor Respondent
+participant "Public Survey Page\n/app/surveys/[id]" as PublicPage
+participant "Read Survey Action\nread_survey.ts" as ReadSurvey
+participant "Survey Response Form\nSurveyResponseForm" as ResponseForm
+participant "Submit Response Action\nsubmit_survey_response.ts" as SubmitAction
+database "Supabase Database" as DB
+
+Respondent -> PublicPage: Open /surveys/{id}
+PublicPage -> ReadSurvey: getPublishedSurveyById(id)
+ReadSurvey -> DB: Select survey, sections, questions\nwhere state = published
+
+alt survey exists and is published
+  DB --> ReadSurvey: Survey data
+  ReadSurvey --> PublicPage: Success(Survey)
+  PublicPage -> ResponseForm: Render survey sections
+  ResponseForm --> Respondent: Show current section
+
+  loop For each section
+    Respondent -> ResponseForm: Enter answers
+    Respondent -> ResponseForm: Click Next or Submit
+    ResponseForm -> ResponseForm: Validate required answers
+
+    alt required answers missing
+      ResponseForm --> Respondent: Show validation feedback
+    else current section valid
+      ResponseForm --> Respondent: Move to next section
+    end
+  end
+
+  Respondent -> ResponseForm: Submit final section
+  ResponseForm -> SubmitAction: submitSurveyResponse(surveyId, answers)
+  SubmitAction -> DB: Insert submission
+  DB --> SubmitAction: submission id
+  SubmitAction -> DB: Insert answer rows
+  DB --> SubmitAction: Insert success
+  DB -> DB: Trigger updates submission_count
+  SubmitAction --> ResponseForm: Success
+  ResponseForm --> Respondent: Show submission confirmation
+else survey missing, draft, or archived
+  DB --> ReadSurvey: No public survey
+  ReadSurvey --> PublicPage: Error
+  PublicPage --> Respondent: Show not allowed or not found message
+end
+
+@enduml
