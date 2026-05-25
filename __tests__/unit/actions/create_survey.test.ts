@@ -57,6 +57,7 @@ function makeDeleteQuery(result: unknown) {
   const query = {
     delete: vi.fn(() => query),
     in: vi.fn(async () => result),
+    eq: vi.fn(async () => result),
   };
 
   return query;
@@ -318,12 +319,16 @@ describe("updateSurvey action", () => {
     });
     const questionDeleteQuery = makeDeleteQuery({ error: null });
     const questionUpsertQuery = makeUpsertQuery({ error: null });
+    const allowedRespondentsDeleteQuery = makeDeleteQuery({ error: null });
     const tableCalls = new Map<string, number>();
     const from = vi.fn((table: string) => {
       const call = tableCalls.get(table) ?? 0;
       tableCalls.set(table, call + 1);
 
       if (table === "surveys") return surveyUpdateQuery;
+      if (table === "survey_allowed_respondents") {
+        return allowedRespondentsDeleteQuery;
+      }
       if (table === "sections" && call === 0) return sectionSelectQuery;
       if (table === "sections" && call === 1) return sectionDeleteQuery;
       if (table === "sections" && call === 2) return sectionUpsertQuery;
@@ -356,6 +361,10 @@ describe("updateSurvey action", () => {
     });
     expect(surveyUpdateQuery.eq).toHaveBeenNthCalledWith(1, "id", "survey-1");
     expect(surveyUpdateQuery.eq).toHaveBeenNthCalledWith(2, "user_id", "user-1");
+    expect(allowedRespondentsDeleteQuery.eq).toHaveBeenCalledWith(
+      "survey_id",
+      "survey-1",
+    );
     expect(sectionDeleteQuery.in).toHaveBeenCalledWith("id", ["section-removed"]);
     expect(sectionUpsertQuery.upsert).toHaveBeenCalledWith(
       [
@@ -416,5 +425,73 @@ describe("updateSurvey action", () => {
       message: "Survey title cannot be empty.",
     });
     expect(createClient).not.toHaveBeenCalled();
+  });
+
+  test("replaces allowed respondent emails when editing access", async () => {
+    const editedSurvey: Survey = {
+      ...survey,
+      id: "survey-1",
+      allowedRespondentEmails: [
+        " Student@Example.com ",
+        "student@example.com",
+        "teacher@example.com",
+      ],
+    };
+    const surveyUpdateQuery = makeUpdateQuery({ error: null });
+    const allowedRespondentsDeleteQuery = makeDeleteQuery({ error: null });
+    const allowedRespondentsInsertQuery = makeInsertOnlyQuery({ error: null });
+    const sectionSelectQuery = makeSectionSelectQuery({
+      data: [{ id: "section-1" }, { id: "section-2" }],
+      error: null,
+    });
+    const sectionUpsertQuery = makeUpsertQuery({ error: null });
+    const questionSelectQuery = makeQuestionSelectQuery({
+      data: [{ id: "question-1" }, { id: "question-2" }],
+      error: null,
+    });
+    const questionUpsertQuery = makeUpsertQuery({ error: null });
+    const tableCalls = new Map<string, number>();
+    const from = vi.fn((table: string) => {
+      const call = tableCalls.get(table) ?? 0;
+      tableCalls.set(table, call + 1);
+
+      if (table === "surveys") return surveyUpdateQuery;
+      if (table === "survey_allowed_respondents" && call === 0) {
+        return allowedRespondentsDeleteQuery;
+      }
+      if (table === "survey_allowed_respondents" && call === 1) {
+        return allowedRespondentsInsertQuery;
+      }
+      if (table === "sections" && call === 0) return sectionSelectQuery;
+      if (table === "sections" && call === 1) return sectionUpsertQuery;
+      if (table === "questions" && call === 0) return questionSelectQuery;
+      if (table === "questions" && call === 1) return questionUpsertQuery;
+      throw new Error(`Unexpected ${table} call ${call}`);
+    });
+
+    createClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn(async () => ({
+          data: { user: { id: "user-1" } },
+          error: null,
+        })),
+      },
+      from,
+    });
+
+    const { updateSurvey } = await import("@/lib/actions/create_survey");
+
+    await expect(updateSurvey(editedSurvey, true)).rejects.toThrow(
+      "redirect:/dashboard/surveys",
+    );
+
+    expect(allowedRespondentsDeleteQuery.eq).toHaveBeenCalledWith(
+      "survey_id",
+      "survey-1",
+    );
+    expect(allowedRespondentsInsertQuery.insert).toHaveBeenCalledWith([
+      { survey_id: "survey-1", email: "student@example.com" },
+      { survey_id: "survey-1", email: "teacher@example.com" },
+    ]);
   });
 });

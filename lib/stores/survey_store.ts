@@ -126,6 +126,7 @@ function getDefaultSurvey(): Survey {
     title: "New survey",
     state: "draft",
     description: "",
+    allowedRespondentEmails: [],
     sections: [getDefaultSection()],
   };
 }
@@ -163,6 +164,7 @@ type SurveyStore = {
   ) => void;
   updateSurveyTitle: (title: string) => void;
   updateSurveyDescription: (description: string) => void;
+  updateAllowedRespondentEmails: (emails: string[]) => void;
   updateSectionTitle: (sectionID: string, title: string) => void;
   updateSectionDescription: (sectionID: string, description: string) => void;
   updateQuestionTitle: (
@@ -370,6 +372,11 @@ export const useSurveyStore = create<SurveyStore>()(
     updateSurveyDescription: (description) =>
       set((state) => {
         state.survey.description = description;
+      }),
+
+    updateAllowedRespondentEmails: (emails) =>
+      set((state) => {
+        state.survey.allowedRespondentEmails = emails;
       }),
 
     updateQuestionRequired: (sectionID, questionID, newValue) => {

@@ -66,13 +66,16 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-SHARE-03 | Public survey pages must only load surveys in `published` state. |
 | BR-SHARE-04 | Opening a draft, archived, missing, or unauthorized survey through a public route must not expose answerable survey content. |
 | BR-SHARE-05 | Public access to a survey does not grant access to dashboard, analytics, or export pages. |
+| BR-SHARE-06 | A survey with no allowed respondent emails is public to anyone with the published link. |
+| BR-SHARE-07 | A survey with one or more allowed respondent emails is restricted and requires the respondent to sign in with a matching normalized email address. |
+| BR-SHARE-08 | Allowed respondent emails must be stored in lowercase trimmed form and must be unique per survey. |
 
 ## 7. Response Collection
 
 | ID | Rule |
 | --- | --- |
-| BR-RESP-01 | Respondents may answer published surveys without an account. |
-| BR-RESP-02 | Authenticated respondents may also submit responses to published surveys. |
+| BR-RESP-01 | Respondents may answer unrestricted published surveys without an account. |
+| BR-RESP-02 | Authenticated respondents may submit responses to published surveys when the survey is unrestricted or their email is allowed. |
 | BR-RESP-03 | The respondent flow presents survey sections one at a time. |
 | BR-RESP-04 | Required questions in the current section must be answered before the respondent can proceed or submit. |
 | BR-RESP-05 | A completed response creates one submission record for the survey. |
@@ -81,6 +84,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-RESP-08 | Authenticated submissions may store the respondent user id. |
 | BR-RESP-09 | Empty answer payloads must not be accepted as valid submissions. |
 | BR-RESP-10 | The survey submission count is maintained by the database trigger after submission changes. |
+| BR-RESP-11 | Response submission must re-check survey state and respondent allowlist access on the server before inserting submission or answer rows. |
 
 ## 8. Analytics and Reporting
 

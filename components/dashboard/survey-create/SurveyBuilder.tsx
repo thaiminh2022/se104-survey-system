@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import SurveyHeader from "@/components/dashboard/survey-create/SurveyHeader";
 import SurveySection from "@/components/dashboard/survey-create/SurveySection";
 import SurveyToolbar from "@/components/dashboard/survey-create/SurveyToolbar";
+import SurveyAccessCard from "@/components/dashboard/survey-create/SurveyAccessCard";
 import { useSurveyStore } from "@/lib/stores/survey_store";
 import type { Survey } from "@/lib/types/question-type";
 import {
@@ -85,6 +86,7 @@ export default function SurveyBuilder({
           </div>
 
           <SurveyHeader mode={mode} />
+          <SurveyAccessCard />
 
           <DndContext
             sensors={sensors}

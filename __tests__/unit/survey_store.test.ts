@@ -25,6 +25,7 @@ describe("survey store", () => {
       title: "New survey",
       state: "draft",
       description: "",
+      allowedRespondentEmails: [],
       sections: [
         {
           id: "uuid-2",
@@ -92,6 +93,9 @@ describe("survey store", () => {
 
     useSurveyStore.getState().updateSurveyTitle("Published survey");
     useSurveyStore.getState().updateSurveyDescription("Course feedback");
+    useSurveyStore
+      .getState()
+      .updateAllowedRespondentEmails(["student@example.com"]);
     useSurveyStore.getState().updateSectionTitle(sectionId, "Basics");
     useSurveyStore.getState().updateSectionDescription(sectionId, "About the course");
     useSurveyStore.getState().updateQuestionTitle(sectionId, questionId, "Your name");
@@ -103,6 +107,7 @@ describe("survey store", () => {
     expect(useSurveyStore.getState().survey).toMatchObject({
       title: "Published survey",
       description: "Course feedback",
+      allowedRespondentEmails: ["student@example.com"],
       sections: [
         {
           title: "Basics",

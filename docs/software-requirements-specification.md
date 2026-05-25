@@ -57,6 +57,7 @@ The system includes these user-facing interfaces:
 - Dashboard overview.
 - Survey list and survey actions menu.
 - Survey create/edit builder.
+- Survey access controls for optional respondent email allowlists.
 - Survey sharing page with link and QR code.
 - Public survey response page.
 - Analytics list and survey analytics detail pages.
@@ -92,6 +93,7 @@ No special memory constraints are defined. The system is expected to run within 
 - The application must run with Node.js and pnpm.
 - Dashboard routes must require an authenticated session.
 - Public survey response pages must only load surveys in `published` state.
+- Restricted surveys must require a signed-in respondent whose email is listed by the survey owner.
 - Survey ownership must be enforced for dashboard reads, mutations, analytics, and exports.
 - Server-side mutations must verify authentication and authorization.
 - The application must rely on Supabase row-level security policies and application-level owner filters.
@@ -111,7 +113,7 @@ No special memory constraints are defined. The system is expected to run within 
 | --- | --- |
 | Authentication | Register, log in, log out, protect dashboard routes, and sanitize return URLs. |
 | Dashboard | Show workspace metrics, recent surveys, and navigation. |
-| Survey creation | Build surveys with title, description, sections, questions, required flags, and type-specific settings. |
+| Survey creation | Build surveys with title, description, sections, questions, required flags, type-specific settings, and optional respondent email allowlists. |
 | Survey management | List owned surveys, edit existing surveys, publish drafts, archive published surveys, and delete surveys after confirmation. |
 | Sharing | Generate a public survey URL and QR code for distribution. |
 | Public response collection | Display published surveys, validate required answers, store submissions, and show confirmation. |
@@ -291,12 +293,14 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-SHARE-02 | The system shall display share actions for the public link. | Must |
 | FR-SHARE-03 | The system shall display a QR code for the public survey URL. | Should |
 | FR-SHARE-04 | The system shall not make draft or archived surveys answerable merely because a link exists. | Must |
+| FR-SHARE-05 | The system shall allow survey owners to restrict a survey to a list of respondent email addresses. | Must |
+| FR-SHARE-06 | The system shall treat a survey with no allowed respondent emails as public. | Must |
 
 #### 3.4.6 Survey Response
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-RESP-01 | The system shall allow respondents to open published surveys without signing in. | Must |
+| FR-RESP-01 | The system shall allow respondents to open unrestricted published surveys without signing in. | Must |
 | FR-RESP-02 | The system shall reject public access to draft and archived surveys. | Must |
 | FR-RESP-03 | The system shall present survey sections one at a time. | Must |
 | FR-RESP-04 | The system shall allow respondents to navigate backward and forward between sections. | Should |
@@ -306,6 +310,8 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-RESP-08 | The system shall allow anonymous submissions with null user id. | Must |
 | FR-RESP-09 | The system shall associate a submission with a user id when the respondent is authenticated. | Should |
 | FR-RESP-10 | The system shall show a success message after submission. | Must |
+| FR-RESP-11 | The system shall require login before opening a restricted published survey. | Must |
+| FR-RESP-12 | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must |
 
 #### 3.4.7 Analytics
 
@@ -349,6 +355,7 @@ No special memory constraints are defined. The system is expected to run within 
 | Entity | Key attributes |
 | --- | --- |
 | Survey | `id`, `user_id`, `title`, `description`, `state`, `image`, `submission_count`, `view_count`, `created_at` |
+| SurveyAllowedRespondent | `id`, `survey_id`, `email`, `created_at` |
 | Section | `id`, `survey_id`, `order_index`, `title`, `description`, `end_behavior`, `config`, `created_at` |
 | Question | `id`, `section_id`, `order_index`, `title`, `description`, `question_type`, `config`, `required`, `created_at` |
 | Submission | `id`, `survey_id`, `user_id`, `submitted_at`, `created_at` |
@@ -369,6 +376,7 @@ No special memory constraints are defined. The system is expected to run within 
 - A survey owner can open an existing survey in the edit builder and save changes.
 - A draft survey is not publicly answerable.
 - A published survey can be opened at `/surveys/{id}` and submitted.
+- A restricted published survey redirects unauthenticated respondents to login and rejects signed-in users whose email is not listed.
 - Required questions block respondent progress until answered.
 - A survey owner can see view, submission, and conversion metrics.
 - A survey owner can export CSV response data for owned surveys.

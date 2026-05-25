@@ -4,6 +4,7 @@ import {
   QuestionRow,
   SectionRow,
   SubmissionRow,
+  SurveyAllowedRespondentRow,
   SurveyRow,
   SurveyStatus,
 } from "@/lib/types/db_schema";
@@ -40,6 +41,7 @@ import {
   e2eSurveyRows,
   isPlaywrightE2E,
 } from "@/lib/e2e/fixtures";
+import { normalizeEmail } from "@/lib/utils";
 
 export type SurveyDashboardRow = SurveyRow & {
   last_response_at: Date | null;
@@ -263,6 +265,7 @@ export async function getSurveyById(id: string) {
       title: surveyRow.title,
       state: surveyRow.state,
       description: surveyRow.description ?? "",
+      allowedRespondentEmails: [],
       sections: e2eSections.map((section) => ({
         id: section.id,
         title: section.title,
@@ -335,6 +338,7 @@ export async function getSurveyById(id: string) {
     title: surveyRow.title,
     state: surveyRow.state,
     description: surveyRow.description ?? "",
+    allowedRespondentEmails: await getAllowedRespondentEmails(supabase, id),
     sections: sections,
   };
   return createSuccess(s);
@@ -349,6 +353,7 @@ export async function getPublishedSurveyById(id: string) {
       title: surveyRow.title,
       state: surveyRow.state,
       description: surveyRow.description ?? "",
+      allowedRespondentEmails: [],
       sections: e2eSections.map((section) => ({
         id: section.id,
         title: section.title,
@@ -359,6 +364,24 @@ export async function getPublishedSurveyById(id: string) {
   }
 
   const supabase = await createClient();
+  const accessRes = await getPublishedSurveyAccessStatus(supabase, id);
+
+  if (!accessRes.success) {
+    return accessRes;
+  }
+
+  if (accessRes.data === "auth_required") {
+    return createError(null, "Authentication required for this survey.");
+  }
+
+  if (accessRes.data === "denied") {
+    return createError(null, "You are not allowed to view this survey.");
+  }
+
+  if (accessRes.data === "not_found") {
+    return createError(null, "Survey not found");
+  }
+
   const { data: surveyData, error: surveyError } = await supabase
     .from("surveys")
     .select("*")
@@ -420,6 +443,7 @@ export async function getPublishedSurveyById(id: string) {
     title: surveyRow.title,
     state: surveyRow.state,
     description: surveyRow.description ?? "",
+    allowedRespondentEmails: [],
     sections,
   });
 }
@@ -543,9 +567,51 @@ export async function getFakeSurveyById(id: string) {
     title: "Fake Survey",
     description: "This is a fake survey for testing",
     state: "published",
+    allowedRespondentEmails: [],
     sections: sections,
   };
   return createSuccess(survey);
+}
+
+async function getAllowedRespondentEmails(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  surveyId: string,
+) {
+  const { data, error } = await supabase
+    .from("survey_allowed_respondents")
+    .select("email")
+    .eq("survey_id", surveyId)
+    .order("email", { ascending: true });
+
+  if (error) {
+    return [];
+  }
+
+  return (data as Pick<SurveyAllowedRespondentRow, "email">[]).map((row) =>
+    normalizeEmail(row.email),
+  );
+}
+
+export type PublishedSurveyAccessStatus =
+  | "allowed"
+  | "auth_required"
+  | "denied"
+  | "not_found";
+
+export async function getPublishedSurveyAccessStatus(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  surveyId: string,
+) {
+  const { data, error } = await supabase.rpc(
+    "get_published_survey_access_status",
+    { p_survey_id: surveyId },
+  );
+
+  if (error) {
+    return createError(error, error.message);
+  }
+
+  return createSuccess(data as PublishedSurveyAccessStatus);
 }
 
 function toQuestion(questionRow: QuestionRow): Question {

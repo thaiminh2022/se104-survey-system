@@ -99,6 +99,13 @@ function makeValidationQueries() {
   };
 }
 
+function makeSupabaseClient(from: ReturnType<typeof vi.fn>, access = "allowed") {
+  return {
+    from,
+    rpc: vi.fn(async () => ({ data: access, error: null })),
+  };
+}
+
 describe("submitSurveyResponse action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -136,7 +143,7 @@ describe("submitSurveyResponse action", () => {
       throw new Error(`Unexpected table ${table}`);
     });
 
-    createClient.mockResolvedValue({ from });
+    createClient.mockResolvedValue(makeSupabaseClient(from));
 
     const { submitSurveyResponse } = await import(
       "@/lib/actions/submit_survey_response"
@@ -188,7 +195,7 @@ describe("submitSurveyResponse action", () => {
       throw new Error(`Unexpected table ${table}`);
     });
 
-    createClient.mockResolvedValue({ from });
+    createClient.mockResolvedValue(makeSupabaseClient(from));
 
     const { submitSurveyResponse } = await import(
       "@/lib/actions/submit_survey_response"
@@ -226,7 +233,7 @@ describe("submitSurveyResponse action", () => {
       throw new Error(`Unexpected table ${table}`);
     });
 
-    createClient.mockResolvedValue({ from });
+    createClient.mockResolvedValue(makeSupabaseClient(from));
 
     const { submitSurveyResponse } = await import(
       "@/lib/actions/submit_survey_response"
@@ -267,7 +274,7 @@ describe("submitSurveyResponse action", () => {
       throw new Error(`Unexpected table ${table}`);
     });
 
-    createClient.mockResolvedValue({ from });
+    createClient.mockResolvedValue(makeSupabaseClient(from));
 
     const { submitSurveyResponse } = await import(
       "@/lib/actions/submit_survey_response"
@@ -287,5 +294,42 @@ describe("submitSurveyResponse action", () => {
       error: { message: "answer insert failed" },
       message: "answer insert failed",
     });
+  });
+
+  test("rejects submission when the respondent email is not allowed", async () => {
+    const validationQueries = makeValidationQueries();
+    const submissionQuery = makeSubmissionQuery({
+      data: { id: "submission-1" },
+      error: null,
+    });
+    const from = vi.fn((table: string) => {
+      if (table === "surveys") return validationQueries.surveyQuery;
+      if (table === "sections") return validationQueries.sectionsQuery;
+      if (table === "questions") return validationQueries.questionsQuery;
+      if (table === "submissions") return submissionQuery;
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    createClient.mockResolvedValue(makeSupabaseClient(from, "denied"));
+
+    const { submitSurveyResponse } = await import(
+      "@/lib/actions/submit_survey_response"
+    );
+
+    const result = await submitSurveyResponse("survey-1", {
+      answers: {
+        "question-1": {
+          answer_type: "short-text",
+          config: { text: "Answer" },
+        },
+      },
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: null,
+      message: "You are not allowed to submit this survey.",
+    });
+    expect(submissionQuery.insert).not.toHaveBeenCalled();
   });
 });

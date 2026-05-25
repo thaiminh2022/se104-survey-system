@@ -15,6 +15,7 @@ import { ActionState } from "@/lib/types/errors";
 import { Survey } from "@/lib/types/question-type";
 import { IconFileReport } from "@tabler/icons-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -30,6 +31,11 @@ export default async function Page(props: Props) {
   }
 
   if (!surveyRes.success) {
+    if (surveyRes.message === "Authentication required for this survey.") {
+      const params = new URLSearchParams({ returnUrl: `/surveys/${id}` });
+      redirect(`/auth/login?${params.toString()}`);
+    }
+
     return <>Cannot fetch survey: {surveyRes.message}</>;
   }
   const survey = surveyRes.data;

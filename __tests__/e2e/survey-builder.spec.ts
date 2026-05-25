@@ -18,6 +18,11 @@ test("survey builder edits fields, adds a section, marks required, and saves dra
   await page
     .getByPlaceholder("Tell respondents what this survey is about.")
     .fill("A browser-created survey draft.");
+  await page
+    .getByPlaceholder("student@example.com")
+    .fill("allowed@example.com");
+  await page.getByRole("button", { name: "Add" }).click();
+  await expect(page.getByText("allowed@example.com")).toBeVisible();
 
   await page.getByText("Section 1").click();
   await page.getByRole("button", { name: "Section", exact: true }).click();

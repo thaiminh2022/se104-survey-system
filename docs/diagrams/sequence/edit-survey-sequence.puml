@@ -26,7 +26,7 @@ alt survey exists and is owned
   BuilderUI -> SurveyStore: setSurvey(initialSurvey)
 
   loop Edit survey
-    Owner -> BuilderUI: Change title, sections, questions, order, config
+    Owner -> BuilderUI: Change title, access list, sections, questions, order, config
     BuilderUI -> SurveyStore: Update builder state
   end
 
@@ -35,6 +35,7 @@ alt survey exists and is owned
   UpdateAction -> SupabaseAuth: Get current user
   SupabaseAuth --> UpdateAction: User id
   UpdateAction -> DB: Update owned survey row
+  UpdateAction -> DB: Replace allowed respondent rows
   UpdateAction -> DB: Delete removed questions and sections
   UpdateAction -> DB: Upsert current sections
   UpdateAction -> DB: Upsert current questions

@@ -51,10 +51,10 @@ The app has two primary runtime flows:
 | --- | --- |
 | Authentication | Supabase Auth handles identity and sessions. `lib/actions/auth.ts` processes login, registration, logout, and safe return redirects. |
 | Route protection | `proxy.ts` redirects unauthenticated users away from dashboard routes and preserves safe return URLs. |
-| Survey builder | Client components use `useSurveyStore` in `lib/stores/survey_store.ts` to manage survey, section, question, required flag, ordering, and question configuration state before persistence. |
-| Survey persistence | `lib/actions/create_survey.ts` converts builder state into survey, section, and question inserts or updates. Existing survey edits update the survey row, delete removed child rows, and upsert the current section and question rows. |
+| Survey builder | Client components use `useSurveyStore` in `lib/stores/survey_store.ts` to manage survey, section, question, required flag, ordering, question configuration, and allowed respondent email state before persistence. |
+| Survey persistence | `lib/actions/create_survey.ts` converts builder state into survey, section, question, and allowed respondent inserts or updates. Existing survey edits update the survey row, replace the allowlist, delete removed child rows, and upsert the current section and question rows. |
 | Survey reads | `lib/actions/read_survey.ts` loads owned surveys, recent surveys, fake E2E survey data, and published public surveys. |
-| Response collection | Public response components collect answers and call `lib/actions/submit_survey_response.ts` to create submissions and answers. |
+| Response collection | Public response components collect answers and call `lib/actions/submit_survey_response.ts` to enforce public access rules, validate answers, and create submissions and answers. |
 | Analytics | `lib/actions/read_analytics.ts` loads owner-scoped analytics data; `lib/charts/` transforms persisted data into chart-ready series. |
 | Exports | CSV and chart report utilities in `lib/exports/` generate downloadable data. Route handlers under `app/dashboard/analytics/[id]/export/` expose CSV and JSON exports. |
 | UI components | `components/ui/` contains reusable shadcn-style primitives; feature components are grouped by dashboard, survey creation, survey response, auth, and homepage areas. |
@@ -78,6 +78,7 @@ The core relational model is:
 | Entity | Key attributes | Relationships |
 | --- | --- | --- |
 | Survey | `id`, `user_id`, `title`, `description`, `state`, `image`, `submission_count`, `view_count`, `created_at` | Owned by one user; has many sections and submissions. |
+| SurveyAllowedRespondent | `id`, `survey_id`, `email`, `created_at` | Belongs to one survey; presence of rows restricts response access to matching authenticated emails. |
 | Section | `id`, `survey_id`, `order_index`, `title`, `description`, `end_behavior`, `config`, `created_at` | Belongs to one survey; has many questions. |
 | Question | `id`, `section_id`, `order_index`, `title`, `description`, `question_type`, `config`, `required`, `created_at` | Belongs to one section; has many answers. |
 | Submission | `id`, `survey_id`, `user_id`, `submitted_at`, `created_at` | Belongs to one survey; may belong to a respondent user; has many answers. |
@@ -107,6 +108,7 @@ Application data shapes are defined in `lib/types/`:
 
 - Supabase row-level security protects database-level access.
 - Application actions add owner filters for management, analytics, and exports.
+- Restricted survey access is enforced by the public survey loader, response submission action, and Supabase policies using the allowed respondent table.
 - Database constraints keep `submission_count` and `view_count` non-negative.
 - A database trigger maintains survey submission counts when submissions change.
 - Survey deletion cascades through dependent sections, questions, submissions, and answers.
@@ -151,7 +153,7 @@ Application data shapes are defined in `lib/types/`:
 | Action module | Responsibility |
 | --- | --- |
 | `auth.ts` | Register, login, logout, and return URL handling. |
-| `create_survey.ts` | Create new surveys and update existing builder surveys as survey, section, and question rows. |
+| `create_survey.ts` | Create new surveys and update existing builder surveys as survey, allowed respondent, section, and question rows. |
 | `read_survey.ts` | Load owned surveys, recent surveys, and published public surveys. |
 | `submit_survey_response.ts` | Persist submissions and answers. |
 | `read_analytics.ts` | Load owner-scoped analytics data and answer distributions. |
@@ -172,11 +174,13 @@ Application data shapes are defined in `lib/types/`:
 
 ### 5.2 Survey Builder Design
 
-The survey builder uses `useSurveyStore` as the primary client-side state holder. Its state contains one survey, a list of sections, and each section's questions. Store actions add and delete sections, add and delete questions, update question type, update question config, update titles and descriptions, and toggle required status.
+The survey builder uses `useSurveyStore` as the primary client-side state holder. Its state contains one survey, an optional allowed respondent email list, a list of sections, and each section's questions. Store actions add and delete sections, add and delete questions, update question type, update question config, update titles and descriptions, update allowed respondent emails, and toggle required status.
 
 When the owner creates a survey, the builder state is submitted to `submitSurvey` in `lib/actions/create_survey.ts`. That action inserts the survey first, then inserts sections and questions with order indexes and the generated survey or section identifiers.
 
 When the owner edits an existing survey, the edit route loads the owned survey and hydrates `useSurveyStore` with `setSurvey`. Saving submits the current builder state to `updateSurvey`, which updates the survey row, removes sections and questions no longer present, upserts the remaining section and question rows, revalidates affected routes, and redirects back to the survey list.
+
+Allowed respondent emails are normalized before persistence. During updates the previous allowlist is replaced with the current builder list. An empty list means the published survey remains public; a non-empty list makes the public route and submission action require a signed-in user with a matching email.
 
 ### 5.3 Response Form Design
 
@@ -215,6 +219,7 @@ The survey builder provides:
 - Toolbar actions for adding sections and questions.
 - Save as draft or publish actions.
 - Edit mode for updating an existing owned survey.
+- Access controls for adding or removing allowed respondent emails.
 
 ### 6.4 Respondent UI
 

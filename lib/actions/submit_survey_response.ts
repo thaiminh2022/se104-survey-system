@@ -19,6 +19,7 @@ import {
 import { validateSurveyResponse } from "@/lib/validations/survey_response";
 import { createClient } from "../supabase/server";
 import { getUser } from "./read_user";
+import { getPublishedSurveyAccessStatus } from "./read_survey";
 import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
 
 export async function fakeSubmitSurveyResponse(
@@ -78,6 +79,24 @@ export async function submitSurveyResponse(
   );
 
   const supabase = await createClient();
+  const accessRes = await getPublishedSurveyAccessStatus(supabase, surveyId);
+
+  if (!accessRes.success) {
+    return accessRes;
+  }
+
+  if (accessRes.data === "auth_required") {
+    return createError(null, "Authentication required for this survey.");
+  }
+
+  if (accessRes.data === "denied") {
+    return createError(null, "You are not allowed to submit this survey.");
+  }
+
+  if (accessRes.data === "not_found") {
+    return createError(null, "Survey not found");
+  }
+
   const surveyRes = await getPublishedSurveyForResponseValidation(
     supabase,
     surveyId,

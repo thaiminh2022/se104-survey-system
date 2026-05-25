@@ -34,7 +34,8 @@
 | FR-30 | Sharing | The system shall display share actions for the public survey link. | Must | SRS |
 | FR-31 | Sharing | The system shall display a QR code for the public survey URL. | Should | SRS |
 | FR-32 | Sharing | The system shall not make draft or archived surveys answerable merely because a link exists. | Must | SRS |
-| FR-33 | Survey Response | The system shall allow respondents to open published surveys without signing in. | Must | SRS |
+| FR-32A | Sharing | The system shall allow survey owners to restrict a survey to allowed respondent email addresses. | Must | SRS |
+| FR-33 | Survey Response | The system shall allow respondents to open unrestricted published surveys without signing in. | Must | SRS |
 | FR-34 | Survey Response | The system shall reject public access to draft and archived surveys. | Must | SRS |
 | FR-35 | Survey Response | The system shall present survey sections one at a time. | Must | SRS |
 | FR-36 | Survey Response | The system shall allow respondents to navigate backward and forward between sections. | Should | SRS |
@@ -44,6 +45,7 @@
 | FR-40 | Survey Response | The system shall allow anonymous submissions with null user ID. | Must | SRS |
 | FR-41 | Survey Response | The system shall associate a submission with a user ID when the respondent is authenticated. | Should | SRS |
 | FR-42 | Survey Response | The system shall show a success message after survey submission. | Must | SRS |
+| FR-42A | Survey Response | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must | SRS |
 | FR-43 | Analytics | The system shall show survey-level views, submissions, conversion, and state. | Must | SRS |
 | FR-44 | Analytics | The system shall calculate conversion as submissions divided by views, using zero when views are zero. | Must | SRS |
 | FR-45 | Analytics | The system shall show submission counts over time. | Should | SRS |

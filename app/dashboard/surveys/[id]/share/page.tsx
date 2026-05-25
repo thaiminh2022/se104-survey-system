@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getSiteUrl } from "@/lib/helper";
+import { getSurveyById } from "@/lib/actions/read_survey";
 import { IconQrcode, IconShare2 } from "@tabler/icons-react";
 
 type Props = { params: Promise<{ id: string }> };
@@ -16,6 +17,11 @@ export default async function (props: Props) {
   const params = await props.params;
   const id = params.id;
   const qrValue = `${getSiteUrl()}/surveys/${id}`;
+  const surveyResult = await getSurveyById(id);
+  const allowedEmails = surveyResult.success
+    ? (surveyResult.data.allowedRespondentEmails ?? [])
+    : [];
+  const isRestricted = allowedEmails.length > 0;
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 lg:px-8">
@@ -38,7 +44,9 @@ export default async function (props: Props) {
               <CardTitle>Share link</CardTitle>
             </div>
             <CardDescription>
-              Anyone with this link can open the public survey page.
+              {isRestricted
+                ? "Only signed-in respondents with an allowed email can open this survey."
+                : "Anyone with this link can open the public survey page."}
             </CardDescription>
           </CardHeader>
           <CardContent>
