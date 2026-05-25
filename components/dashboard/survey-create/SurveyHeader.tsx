@@ -7,6 +7,7 @@ import { IconDeviceFloppy, IconLoader2, IconSend } from "@tabler/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import SurveyPreviewDialog from "@/components/dashboard/survey-create/SurveyPreviewDialog";
 import {
   Card,
   CardAction,
@@ -74,7 +75,8 @@ export default function SurveyHeader({ mode = "create" }: SurveyHeaderProps) {
             onChange={(event) => updateSurveyTitle(event.target.value)}
           />
         </CardTitle>
-        <CardAction className="flex gap-2">
+        <CardAction className="flex flex-wrap gap-2">
+          <SurveyPreviewDialog survey={survey} />
           <Button
             variant="outline"
             className="rounded-md"

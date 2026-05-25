@@ -1,5 +1,8 @@
 "use client";
 
+import EmptyState, {
+  EmptyStateAction,
+} from "@/components/dashboard/EmptyState";
 import ChangeStateSurveyButton from "@/components/dashboard/surveys/ChangeStateSurveyBtn";
 import SurveyActionsDropdown from "@/components/dashboard/surveys/SurveyActionsDropdown";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +15,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { SurveyStatus } from "@/lib/types/db_schema";
-import { IconClock, IconMessageCircle, IconSearch } from "@tabler/icons-react";
+import {
+  IconClock,
+  IconFilePlus,
+  IconMessageCircle,
+  IconSearch,
+} from "@tabler/icons-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export type SurveyListRow = {
@@ -64,6 +73,19 @@ export default function SurveyList({ surveys }: SurveyListProps) {
         filteredSurveys.map((survey) => (
           <SurveyCard key={survey.id} survey={survey} />
         ))
+      ) : surveys.length === 0 ? (
+        <EmptyState
+          title="No surveys yet"
+          description="Create your first survey to start collecting responses and analytics."
+          action={
+            <EmptyStateAction>
+              <Link href="/dashboard/surveys/create">
+                <IconFilePlus />
+                Create survey
+              </Link>
+            </EmptyStateAction>
+          }
+        />
       ) : (
         <Card className="mt-3 border-dashed">
           <CardHeader>

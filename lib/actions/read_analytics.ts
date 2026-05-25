@@ -43,14 +43,46 @@ export async function getSurveyAnalyticsRowsForUser() {
     .from("surveys")
     .select("*")
     .eq("user_id", user.id)
-    .order("submission_count", { ascending: false })
-    .order("view_count", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     return createError(error, error.message);
   }
 
-  return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
+  const surveyIds = (surveysRows ?? []).map((survey) => survey.id);
+  const submissionsRes =
+    surveyIds.length > 0
+      ? await supabase
+          .from("submissions")
+          .select("id, survey_id, submitted_at")
+          .in("survey_id", surveyIds)
+      : { data: [], error: null };
+
+  if (submissionsRes.error) {
+    return createError(submissionsRes.error, submissionsRes.error.message);
+  }
+
+  const submissionCounts = new Map<string, number>();
+  for (const submission of submissionsRes.data ?? []) {
+    const count = submissionCounts.get(submission.survey_id) ?? 0;
+    submissionCounts.set(submission.survey_id, count + 1);
+  }
+
+  const surveys = (surveysRows ?? [])
+    .map((survey) =>
+      normalizeSurveyMetrics(
+        survey as Partial<SurveyRow>,
+        submissionCounts.get(survey.id) ?? 0,
+      ),
+    )
+    .sort(
+      (a, b) =>
+        b.submission_count - a.submission_count ||
+        b.view_count - a.view_count ||
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+  return createSuccess<SurveyRow[]>(surveys);
 }
 
 export async function getSurveyAnalytics(surveyId: string) {
@@ -88,7 +120,13 @@ export async function getSurveyAnalytics(surveyId: string) {
     return createSuccess(null);
   }
 
-  return createSuccess(res.data as SurveyRowJoinSubmissionRow);
+  const survey = res.data as Partial<SurveyRowJoinSubmissionRow>;
+  const submissions = survey.submissions ?? [];
+
+  return createSuccess({
+    ...normalizeSurveyMetrics(survey, submissions.length),
+    submissions,
+  } as SurveyRowJoinSubmissionRow);
 }
 
 export async function getQuestionAnswerAnalytics(surveyId: string) {
@@ -193,4 +231,17 @@ export async function getQuestionAnswerAnalytics(surveyId: string) {
       ),
     })),
   );
+}
+
+function normalizeSurveyMetrics(
+  survey: Partial<SurveyRow>,
+  fallbackSubmissionCount = 0,
+): SurveyRow {
+  return {
+    ...(survey as SurveyRow),
+    submission_count: Number(
+      survey.submission_count ?? fallbackSubmissionCount ?? 0,
+    ),
+    view_count: Number(survey.view_count ?? 0),
+  };
 }

@@ -29,7 +29,7 @@ type Props = {
 
 export function OptionListEditor({ options, label = "Option", onChange }: Props) {
   const values = options.length > 0 ? options : [`${label} 1`];
-  const itemIds = values.map((option, index) => getOptionItemId(index, option));
+  const itemIds = values.map((_, index) => getOptionItemId(index));
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -162,12 +162,12 @@ function SortableOption({
   );
 }
 
-function getOptionItemId(index: number, option: string) {
-  return `${index}:${option}`;
+function getOptionItemId(index: number) {
+  return `option-${index}`;
 }
 
 function getOptionIndexFromId(id: string) {
-  return Number(id.split(":", 1)[0]);
+  return Number(id.replace("option-", ""));
 }
 
 function reorderByIndex<T>(items: T[], activeIndex: number, overIndex: number) {
