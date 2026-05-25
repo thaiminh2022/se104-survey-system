@@ -39,6 +39,8 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-SURVEY-06 | Questions may be marked as required. |
 | BR-SURVEY-07 | Question configuration must match the selected question type. |
 | BR-SURVEY-08 | Supported question types are single choice, multiple choice, rating scale, Likert scale, short text, long text, dropdown, yes/no, matrix, ranking, date/time, consent, and number. |
+| BR-SURVEY-09 | A survey owner may edit the title, description, sections, questions, ordering, required flags, and question configuration of an owned survey. |
+| BR-SURVEY-10 | Editing a survey must preserve ownership and must not create sections or questions for a survey owned by another user. |
 
 ## 5. Survey State and Lifecycle
 
@@ -53,6 +55,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-STATE-07 | The current survey list action allows published surveys to become archived. |
 | BR-STATE-08 | The current UI does not allow archived surveys to be republished. |
 | BR-STATE-09 | Sharing a survey link or QR code does not override the survey state. |
+| BR-STATE-10 | Archived surveys must not display an action that implies they can be republished through the current UI. |
 
 ## 6. Sharing and Public Access
 
@@ -118,9 +121,8 @@ This document defines the business rules that govern SE104 Survey System behavio
 
 | ID | Rule |
 | --- | --- |
-| BR-LIMIT-01 | Full post-creation survey editing is outside the current implemented scope. |
-| BR-LIMIT-02 | Team workspaces, organization roles, and collaboration permissions are outside the current implemented scope. |
-| BR-LIMIT-03 | Survey templates are outside the current implemented scope. |
-| BR-LIMIT-04 | Conditional branching is outside the current implemented respondent flow. |
-| BR-LIMIT-05 | Offline response collection is outside the current implemented scope. |
-| BR-LIMIT-06 | Native server-side PDF file generation is outside the current implemented scope. |
+| BR-LIMIT-01 | Team workspaces, organization roles, and collaboration permissions are outside the current implemented scope. |
+| BR-LIMIT-02 | Survey templates are outside the current implemented scope. |
+| BR-LIMIT-03 | Conditional branching is outside the current implemented respondent flow. |
+| BR-LIMIT-04 | Offline response collection is outside the current implemented scope. |
+| BR-LIMIT-05 | Native server-side PDF file generation is outside the current implemented scope. |

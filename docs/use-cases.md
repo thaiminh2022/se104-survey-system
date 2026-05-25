@@ -2,7 +2,7 @@
 
 ## 1. System Context
 
-SE104 Survey System is a web-based survey management application. Authenticated survey owners can create surveys, publish or archive them, share public links, collect responses, view analytics, and export results. Respondents can open published survey links and submit answers without needing an account.
+SE104 Survey System is a web-based survey management application. Authenticated survey owners can create and edit surveys, publish or archive them, share public links, collect responses, view analytics, and export results. Respondents can open published survey links and submit answers without needing an account.
 
 Use case flows follow the ownership, survey state, response, analytics, and export rules defined in [Business Rules](business-rules.md).
 
@@ -12,7 +12,7 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | --- | --- |
 | Visitor | A person who has not signed in. They may view the public homepage, register, log in, or answer published surveys. |
 | Respondent | A visitor or signed-in user who opens a published survey and submits a response. |
-| Survey Owner | An authenticated user who creates, manages, shares, analyzes, and exports their own surveys. |
+| Survey Owner | An authenticated user who creates, edits, manages, shares, analyzes, and exports their own surveys. |
 | Supabase Auth | External authentication service used for registration, login, logout, and session validation. |
 | Supabase Database | External persistence layer for surveys, sections, questions, submissions, answers, counters, and row-level access control. |
 
@@ -25,6 +25,7 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | UC-03 | Log out | Survey Owner | End the current session. |
 | UC-04 | View dashboard | Survey Owner | See workspace-level survey metrics and recent surveys. |
 | UC-05 | Create survey | Survey Owner | Build and save a new survey as draft or published. |
+| UC-05A | Edit survey | Survey Owner | Update an existing owned survey. |
 | UC-06 | Manage survey status | Survey Owner | Publish a draft survey or archive a published survey. |
 | UC-07 | Delete survey | Survey Owner | Remove an owned survey. |
 | UC-08 | Share survey | Survey Owner | Copy a public survey link or use a QR code. |
@@ -89,6 +90,17 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | Supported question types | Single choice, multiple choice, rating scale, Likert scale, short text, long text, dropdown, yes/no, matrix, ranking, date/time, consent, and number. |
 | Alternate flows | A1. User is unauthenticated: system redirects to login. A2. Database insert fails: system returns an error. |
 | Postconditions | A new survey exists with state `draft` or `published`. |
+
+### UC-05A: Edit Survey
+
+| Field | Description |
+| --- | --- |
+| Primary actor | Survey Owner |
+| Preconditions | User is authenticated and owns the survey. |
+| Trigger | User opens the edit page for an existing survey. |
+| Main flow | 1. System loads the owned survey into the builder. 2. User updates survey title, description, sections, questions, order, required flags, or question configuration. 3. User saves the updated survey. 4. System validates ownership and builder data. 5. System updates the survey row, removes deleted sections and questions, upserts current sections and questions, and redirects to the survey list. |
+| Alternate flows | A1. User is unauthenticated: system redirects to login. A2. User does not own the survey or the survey cannot be found: system returns an error. A3. Validation fails: system shows the validation error. A4. Database update fails: system returns an error. |
+| Postconditions | The owned survey reflects the saved builder changes. |
 
 ### UC-06: Manage Survey Status
 
@@ -172,7 +184,6 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 
 | Use Case | Current status |
 | --- | --- |
-| Edit an existing survey after creation | Route exists, but the edit UI is currently a placeholder. |
 | Republish archived survey | Current status flow does not allow archived surveys to return to published. |
 | Team collaboration | No team, role, or organization model is implemented. |
 | Survey templates | No template management is implemented. |

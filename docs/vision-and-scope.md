@@ -40,12 +40,13 @@ SE104 Survey System addresses this opportunity by providing a focused survey wor
 | SM-01 | A visitor can register or log in and reach the dashboard. |
 | SM-02 | A survey owner can create a survey with at least one section and multiple question types. |
 | SM-03 | A survey owner can save a survey as draft or publish it during creation. |
-| SM-04 | A respondent can open and submit a published survey without signing in. |
-| SM-05 | Draft and archived surveys are not publicly answerable. |
-| SM-06 | Required questions block respondent progress until answered. |
-| SM-07 | Survey owners can review survey-level metrics and answer charts for owned surveys. |
-| SM-08 | Survey owners can export raw responses and analytics reports for owned surveys. |
-| SM-09 | Automated unit and end-to-end tests cover the main authentication, creation, response, analytics, and export flows. |
+| SM-04 | A survey owner can open an existing survey, edit its content, and save the updated version. |
+| SM-05 | A respondent can open and submit a published survey without signing in. |
+| SM-06 | Draft and archived surveys are not publicly answerable. |
+| SM-07 | Required questions block respondent progress until answered. |
+| SM-08 | Survey owners can review survey-level metrics and answer charts for owned surveys. |
+| SM-09 | Survey owners can export raw responses and analytics reports for owned surveys. |
+| SM-10 | Automated unit and end-to-end tests cover the main authentication, creation, editing, response, analytics, and export flows. |
 
 ### Business Risk
 
@@ -54,7 +55,7 @@ SE104 Survey System addresses this opportunity by providing a focused survey wor
 | Supabase service dependency | Authentication, database access, and row-level security depend on Supabase availability and correct configuration. | Document required environment variables and support hosted or local Supabase setup. |
 | Data access mistakes | Survey data could be exposed to the wrong user if ownership checks are incomplete. | Use protected dashboard routes, server-side owner filters, and Supabase row-level security policies. |
 | Public survey state confusion | Owners may share links for draft or archived surveys and expect them to work. | Enforce published-only access in the public survey loader. |
-| Incomplete editing support | Users may expect to edit existing surveys after creation. | Treat full editing as future scope and keep the current edit placeholder out of initial-release commitments. |
+| Editing consistency | Updating a survey could leave stale or orphaned sections and questions if persistence is incomplete. | Update surveys through owner-scoped actions that delete removed rows, upsert current rows, and are covered by unit and E2E tests. |
 | Browser-dependent PDF output | Print-to-PDF reports can vary by browser and print settings. | Keep the report page simple, print-ready, and suitable for browser printing. |
 | Academic project constraints | Time and team capacity limit advanced features such as teams, branching, templates, and offline collection. | Prioritize the core survey lifecycle and document exclusions clearly. |
 
@@ -72,7 +73,7 @@ The intended experience is direct and practical: survey owners should be able to
 | --- | --- |
 | Authentication and access control | Email/password registration, login, logout, protected dashboard routes, safe return URLs, and Supabase-backed sessions. |
 | Dashboard overview | Workspace metrics for total surveys, published surveys, views, submissions, and recent surveys. |
-| Survey builder | Multi-section survey creation with title, description, required flags, and type-specific question configuration. |
+| Survey builder | Multi-section survey creation and editing with title, description, required flags, ordering, and type-specific question configuration. |
 | Question type support | Single choice, multiple choice, rating scale, Likert scale, short text, long text, dropdown, yes/no, matrix, ranking, date/time, consent, and number questions. |
 | Survey lifecycle management | Draft, published, and archived survey states, with owner-only listing, state changes, and deletion. |
 | Public sharing | Public survey URL generation, share actions, and QR code display. |
@@ -80,7 +81,7 @@ The intended experience is direct and practical: survey owners should be able to
 | Analytics | Survey-level views, submissions, conversion rate, submission timeline, and answer distribution charts. |
 | Exports | CSV response export, JSON chart report export, and print-ready analytics report page for PDF generation. |
 | Security controls | Dashboard authentication, owner-scoped reads and mutations, route protection, and Supabase row-level security. |
-| Automated testing | Unit and end-to-end tests for core helpers, actions, exports, routing, survey creation, public responses, and analytics. |
+| Automated testing | Unit and end-to-end tests for core helpers, actions, exports, routing, survey creation and editing, public responses, and analytics. |
 
 ### Assumptions and Dependencies
 
@@ -101,14 +102,13 @@ The intended experience is direct and practical: survey owners should be able to
 
 | Release | Included scope |
 | --- | --- |
-| Initial release | Authentication, protected dashboard, survey creation, survey list, publish/archive actions, deletion, public survey responses, link and QR sharing, analytics pages, CSV export, JSON report export, print-ready PDF report page, and automated tests for core flows. |
-| Subsequent releases | Full survey editing, survey duplication, reusable templates, conditional branching between sections, stronger report customization, direct server-side PDF generation, team workspaces, role-based collaboration, improved partial-response recovery, and richer respondent tracking. |
+| Initial release | Authentication, protected dashboard, survey creation and editing, survey list, publish/archive actions, deletion, public survey responses, link and QR sharing, analytics pages, CSV export, JSON report export, print-ready PDF report page, and automated tests for core flows. |
+| Subsequent releases | Survey duplication, reusable templates, conditional branching between sections, stronger report customization, direct server-side PDF generation, team workspaces, role-based collaboration, improved partial-response recovery, and richer respondent tracking. |
 
 ### Limitations and Exclusions
 
 | Limitation or exclusion | Current status |
 | --- | --- |
-| Full survey editing | The edit route exists, but the UI is currently a placeholder. |
 | Republish archived survey | Current status flow allows draft to published and published to archived, but not archived back to published. |
 | Team workspaces and roles | The current data model uses individual survey ownership only. |
 | Survey templates | No template model or template UI is implemented. |

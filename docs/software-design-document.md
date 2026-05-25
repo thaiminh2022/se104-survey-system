@@ -8,7 +8,7 @@ This Software Design Document describes the architecture, data design, interface
 
 ### 1.2 Scope
 
-The design covers the current survey management application: authentication, protected dashboard, survey creation, survey state management, public response collection, analytics, CSV export, JSON report export, and print-ready PDF reporting.
+The design covers the current survey management application: authentication, protected dashboard, survey creation and editing, survey state management, public response collection, analytics, CSV export, JSON report export, and print-ready PDF reporting.
 
 ### 1.3 References
 
@@ -51,8 +51,8 @@ The app has two primary runtime flows:
 | --- | --- |
 | Authentication | Supabase Auth handles identity and sessions. `lib/actions/auth.ts` processes login, registration, logout, and safe return redirects. |
 | Route protection | `proxy.ts` redirects unauthenticated users away from dashboard routes and preserves safe return URLs. |
-| Survey builder | Client components use `useSurveyStore` in `lib/stores/survey_store.ts` to manage survey, section, question, required flag, and question configuration state before persistence. |
-| Survey persistence | `lib/actions/create_survey.ts` converts builder state into survey, section, and question inserts. |
+| Survey builder | Client components use `useSurveyStore` in `lib/stores/survey_store.ts` to manage survey, section, question, required flag, ordering, and question configuration state before persistence. |
+| Survey persistence | `lib/actions/create_survey.ts` converts builder state into survey, section, and question inserts or updates. Existing survey edits update the survey row, delete removed child rows, and upsert the current section and question rows. |
 | Survey reads | `lib/actions/read_survey.ts` loads owned surveys, recent surveys, fake E2E survey data, and published public surveys. |
 | Response collection | Public response components collect answers and call `lib/actions/submit_survey_response.ts` to create submissions and answers. |
 | Analytics | `lib/actions/read_analytics.ts` loads owner-scoped analytics data; `lib/charts/` transforms persisted data into chart-ready series. |
@@ -122,9 +122,9 @@ Application data shapes are defined in `lib/types/`:
 | `/auth/register` | Registration form. |
 | `/dashboard` | Owner dashboard overview. |
 | `/dashboard/surveys` | Owned survey list and management actions. |
-| `/dashboard/surveys/create` | Survey builder. |
+| `/dashboard/surveys/create` | New survey builder. |
 | `/dashboard/surveys/[id]/share` | Public link and QR code sharing page. |
-| `/dashboard/surveys/[id]/edit` | Placeholder edit route. |
+| `/dashboard/surveys/[id]/edit` | Edit builder for an owned survey. |
 | `/surveys/[id]` | Public published survey response page. |
 | `/dashboard/analytics` | Owner analytics list. |
 | `/dashboard/analytics/[id]` | Survey analytics detail page. |
@@ -151,7 +151,7 @@ Application data shapes are defined in `lib/types/`:
 | Action module | Responsibility |
 | --- | --- |
 | `auth.ts` | Register, login, logout, and return URL handling. |
-| `create_survey.ts` | Persist builder surveys as survey, section, and question rows. |
+| `create_survey.ts` | Create new surveys and update existing builder surveys as survey, section, and question rows. |
 | `read_survey.ts` | Load owned surveys, recent surveys, and published public surveys. |
 | `submit_survey_response.ts` | Persist submissions and answers. |
 | `read_analytics.ts` | Load owner-scoped analytics data and answer distributions. |
@@ -174,7 +174,9 @@ Application data shapes are defined in `lib/types/`:
 
 The survey builder uses `useSurveyStore` as the primary client-side state holder. Its state contains one survey, a list of sections, and each section's questions. Store actions add and delete sections, add and delete questions, update question type, update question config, update titles and descriptions, and toggle required status.
 
-When the owner saves, the builder state is submitted to `submitSurvey` in `lib/actions/create_survey.ts`. That action inserts the survey first, then inserts sections and questions with order indexes and the generated survey or section identifiers.
+When the owner creates a survey, the builder state is submitted to `submitSurvey` in `lib/actions/create_survey.ts`. That action inserts the survey first, then inserts sections and questions with order indexes and the generated survey or section identifiers.
+
+When the owner edits an existing survey, the edit route loads the owned survey and hydrates `useSurveyStore` with `setSurvey`. Saving submits the current builder state to `updateSurvey`, which updates the survey row, removes sections and questions no longer present, upserts the remaining section and question rows, revalidates affected routes, and redirects back to the survey list.
 
 ### 5.3 Response Form Design
 
@@ -212,6 +214,7 @@ The survey builder provides:
 - Question cards with question title, description, type selector, required toggle, and type-specific configuration.
 - Toolbar actions for adding sections and questions.
 - Save as draft or publish actions.
+- Edit mode for updating an existing owned survey.
 
 ### 6.4 Respondent UI
 
@@ -237,7 +240,7 @@ The export UI lets owners select CSV format and report options. The PDF report U
 - Respondents can access public survey links over the network.
 - Survey owners have valid Supabase Auth accounts.
 - Browser print-to-PDF is acceptable for the current report export implementation.
-- Full survey editing, templates, branching, team workspaces, and offline response collection are future scope.
+- Survey templates, branching, team workspaces, and offline response collection are future scope.
 
 ### 7.2 Dependencies
 

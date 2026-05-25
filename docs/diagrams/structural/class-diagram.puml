@@ -91,13 +91,18 @@ enum QuestionType {
 
 class SurveyStore {
   +survey: SurveyDraft
+  +setSurvey(survey)
+  +resetSurvey()
   +addSection()
   +deleteSection(sectionId)
+  +reorderSections(sourceIndex, destinationIndex)
   +addQuestion(sectionId, type)
   +deleteQuestion(sectionId, questionId)
+  +reorderQuestions(sectionId, sourceIndex, destinationIndex)
   +updateQuestionType(sectionId, questionId, type)
   +updateQuestionConfig(sectionId, questionId, config)
   +updateQuestionRequired(sectionId, questionId, value)
+  +reorderQuestionConfigOptions(sectionId, questionId, sourceIndex, destinationIndex)
 }
 
 class SurveyDraft {

@@ -25,7 +25,7 @@ SE104 Survey System is an academic web application project for small-team and co
 
 ### 1.3 System Overview
 
-The system supports authenticated survey owners and public respondents. Survey owners can create multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open published survey links and submit answers without signing in.
+The system supports authenticated survey owners and public respondents. Survey owners can create and edit multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open published survey links and submit answers without signing in.
 
 The detailed business rules for ownership, survey state, public access, response collection, analytics, exports, and current constraints are maintained in [Business Rules](business-rules.md).
 
@@ -56,7 +56,7 @@ The system includes these user-facing interfaces:
 - Login and registration pages.
 - Dashboard overview.
 - Survey list and survey actions menu.
-- Survey builder.
+- Survey create/edit builder.
 - Survey sharing page with link and QR code.
 - Public survey response page.
 - Analytics list and survey analytics detail pages.
@@ -112,7 +112,7 @@ No special memory constraints are defined. The system is expected to run within 
 | Authentication | Register, log in, log out, protect dashboard routes, and sanitize return URLs. |
 | Dashboard | Show workspace metrics, recent surveys, and navigation. |
 | Survey creation | Build surveys with title, description, sections, questions, required flags, and type-specific settings. |
-| Survey management | List owned surveys, publish drafts, archive published surveys, and delete surveys after confirmation. |
+| Survey management | List owned surveys, edit existing surveys, publish drafts, archive published surveys, and delete surveys after confirmation. |
 | Sharing | Generate a public survey URL and QR code for distribution. |
 | Public response collection | Display published surveys, validate required answers, store submissions, and show confirmation. |
 | Analytics | Show views, submissions, conversion, submission timeline, and answer distributions. |
@@ -130,7 +130,6 @@ No special memory constraints are defined. The system is expected to run within 
 ### 2.5 Constraints
 
 - The current data model uses individual survey ownership only.
-- Existing survey editing is not implemented beyond a placeholder page.
 - Archived surveys cannot be republished through the current UI.
 - The respondent flow is linear by section; conditional branching is not implemented.
 - No team, organization, role, or collaboration model is implemented.
@@ -164,7 +163,7 @@ No special memory constraints are defined. The system is expected to run within 
 | --- | --- | --- |
 | EIR-UI-01 | The system shall provide login and registration pages for visitors. | Must |
 | EIR-UI-02 | The system shall provide a protected dashboard for authenticated users. | Must |
-| EIR-UI-03 | The system shall provide a survey builder interface for creating sections and questions. | Must |
+| EIR-UI-03 | The system shall provide a survey builder interface for creating and editing sections and questions. | Must |
 | EIR-UI-04 | The system shall provide a survey list with management actions. | Must |
 | EIR-UI-05 | The system shall provide a sharing page with public link and QR code. | Should |
 | EIR-UI-06 | The system shall provide public response pages for published surveys. | Must |
@@ -282,7 +281,7 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-MGMT-04 | The system shall allow owners to archive published surveys. | Must |
 | FR-MGMT-05 | The system shall prevent archived surveys from being publicly answered. | Must |
 | FR-MGMT-06 | The system shall allow owners to delete their own surveys after confirmation. | Must |
-| FR-MGMT-07 | The system should allow owners to edit existing surveys after creation. | Future |
+| FR-MGMT-07 | The system shall allow owners to edit existing surveys after creation. | Must |
 
 #### 3.4.5 Sharing
 
@@ -340,8 +339,8 @@ No special memory constraints are defined. The system is expected to run within 
 | NFR-USAB-02 | The system shall clearly indicate validation errors and blocked required-question navigation. | Should |
 | NFR-DATA-01 | The system shall persist surveys, sections, questions, submissions, and answers according to the committed database schema. | Must |
 | NFR-DATA-02 | The system shall maintain survey state rules for draft, published, and archived surveys. | Must |
-| NFR-TEST-01 | Unit tests should cover helper functions, auth actions, survey store behavior, exports, chart aggregation, and route handlers. | Should |
-| NFR-TEST-02 | End-to-end tests should cover auth routing, public response behavior, survey builder flow, analytics, exports, and API routes. | Should |
+| NFR-TEST-01 | Unit tests should cover helper functions, auth actions, create/update survey actions, response submission, survey store behavior, publish and response validation, exports, chart aggregation, and route handlers. | Should |
+| NFR-TEST-02 | End-to-end tests should cover auth routing, public response behavior, create and edit survey builder flows, analytics, exports, and API routes. | Should |
 
 ### 3.6 Other
 
@@ -367,6 +366,7 @@ No special memory constraints are defined. The system is expected to run within 
 
 - An unauthenticated user who opens `/dashboard` is redirected to login.
 - An authenticated user can create a survey with sections and questions.
+- A survey owner can open an existing survey in the edit builder and save changes.
 - A draft survey is not publicly answerable.
 - A published survey can be opened at `/surveys/{id}` and submitted.
 - Required questions block respondent progress until answered.

@@ -29,7 +29,7 @@
 | FR-25 | Survey Management | The system shall allow owners to archive published surveys. | Must | SRS |
 | FR-26 | Survey Management | The system shall prevent archived surveys from being publicly answered. | Must | SRS |
 | FR-27 | Survey Management | The system shall allow owners to delete their own surveys after confirmation. | Must | SRS |
-| FR-28 | Survey Management | The system should allow owners to edit existing surveys after creation. | Future | SRS |
+| FR-28 | Survey Management | The system shall allow owners to edit existing surveys after creation. | Must | SRS |
 | FR-29 | Sharing | The system shall generate a public survey URL using the configured site URL and survey ID. | Must | SRS |
 | FR-30 | Sharing | The system shall display share actions for the public survey link. | Must | SRS |
 | FR-31 | Sharing | The system shall display a QR code for the public survey URL. | Should | SRS |
@@ -68,7 +68,7 @@
 | NFR-08 | Reliability | The system shall handle failed database operations with user-visible or route-level errors. | Must | SRS |
 | NFR-09 | Maintainability | The codebase shall use TypeScript types for survey, section, question, submission, answer, chart, and export shapes. | Must | SRS |
 | NFR-10 | Maintainability | The codebase shall organize actions, Supabase clients, stores, exports, charts, and types into clear modules. | Should | SRS |
-| NFR-11 | Testing | Unit tests should cover helpers, auth actions, survey store behavior, exports, chart aggregation, and route handlers. | Should | SRS |
-| NFR-12 | Testing | End-to-end tests should cover auth routing, public responses, survey builder, analytics, exports, and API routes. | Should | SRS |
+| NFR-11 | Testing | Unit tests should cover helpers, auth actions, create/update survey actions, response submission, survey store behavior, publish and response validation, exports, chart aggregation, and route handlers. | Should | SRS |
+| NFR-12 | Testing | End-to-end tests should cover auth routing, public responses, create and edit survey builder flows, analytics, exports, and API routes. | Should | SRS |
 | NFR-13 | Portability | The system shall run in environments that support Node.js, pnpm, and Next.js. | Must | SRS |
 | NFR-14 | Portability | The system shall support hosted Supabase or local Supabase development when configured. | Should | SRS |
