@@ -3,6 +3,7 @@
 import {
   QuestionRow,
   SectionRow,
+  SubmissionRow,
   SurveyRow,
   SurveyStatus,
 } from "@/lib/types/db_schema";
@@ -35,9 +36,14 @@ import { createClient } from "../supabase/server";
 import { getUser } from "./read_user";
 import {
   e2eSections,
+  e2eSubmissions,
   e2eSurveyRows,
   isPlaywrightE2E,
 } from "@/lib/e2e/fixtures";
+
+export type SurveyDashboardRow = SurveyRow & {
+  last_response_at: Date | null;
+};
 
 export async function getSurveyRowForUser() {
   if (isPlaywrightE2E()) {
@@ -90,6 +96,81 @@ export async function getRecentSurveyRowsForUser(limit = 5) {
   return createSuccess<SurveyRow[]>(surveysRows as SurveyRow[]);
 }
 
+export async function getSurveyDashboardRowsForUser() {
+  if (isPlaywrightE2E()) {
+    return createSuccess<SurveyDashboardRow[]>(
+      e2eSurveyRows.map((survey) => {
+        const submissions = e2eSubmissions.filter(
+          (submission) => submission.survey_id === survey.id,
+        );
+
+        return {
+          ...survey,
+          submission_count: submissions.length,
+          last_response_at: getLatestSubmissionDate(submissions),
+        };
+      }),
+    );
+  }
+
+  const supabase = await createClient();
+  const userRes = await getUser();
+  if (!userRes.success) {
+    return userRes;
+  }
+  const user = userRes.data;
+
+  const { data: surveysRows, error: surveysError } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (surveysError) {
+    return createError(surveysError, surveysError.message);
+  }
+
+  const surveys = surveysRows as SurveyRow[];
+  const surveyIds = surveys.map((survey) => survey.id);
+
+  if (surveyIds.length === 0) {
+    return createSuccess<SurveyDashboardRow[]>([]);
+  }
+
+  const { data: submissionsData, error: submissionsError } = await supabase
+    .from("submissions")
+    .select("*")
+    .in("survey_id", surveyIds)
+    .order("submitted_at", { ascending: false });
+
+  if (submissionsError) {
+    return createError(submissionsError, submissionsError.message);
+  }
+
+  const submissionsBySurvey = new Map<string, SubmissionRow[]>();
+  for (const submission of submissionsData as SubmissionRow[]) {
+    const surveySubmissions = submissionsBySurvey.get(submission.survey_id);
+
+    if (surveySubmissions) {
+      surveySubmissions.push(submission);
+    } else {
+      submissionsBySurvey.set(submission.survey_id, [submission]);
+    }
+  }
+
+  return createSuccess<SurveyDashboardRow[]>(
+    surveys.map((survey) => {
+      const submissions = submissionsBySurvey.get(survey.id) ?? [];
+
+      return {
+        ...survey,
+        submission_count: submissions.length,
+        last_response_at: getLatestSubmissionDate(submissions),
+      };
+    }),
+  );
+}
+
 export async function updateSurveyStatus(id: string, status: SurveyStatus) {
   if (isPlaywrightE2E()) {
     revalidatePath("/dashboard/surveys");
@@ -128,6 +209,24 @@ export async function updateSurveyStatus(id: string, status: SurveyStatus) {
   }
   revalidatePath("/dashboard/surveys");
   return createSuccess(null);
+}
+
+function getLatestSubmissionDate(
+  submissions: Pick<SubmissionRow, "submitted_at">[],
+) {
+  if (submissions.length === 0) {
+    return null;
+  }
+
+  return submissions.reduce<Date | null>((latest, submission) => {
+    const submittedAt = new Date(submission.submitted_at);
+
+    if (!latest || submittedAt > latest) {
+      return submittedAt;
+    }
+
+    return latest;
+  }, null);
 }
 export async function deleteSurvey(id: string) {
   if (isPlaywrightE2E()) {
@@ -281,7 +380,7 @@ export async function getPublishedSurveyById(id: string) {
     .eq("state", "published");
 
   if (viewCountUpdateRes.error) {
-    console.error("Survey view count update failed", viewCountUpdateRes.error);
+    console.warn("Survey view count update skipped", viewCountUpdateRes.error);
   }
 
   const { data: sectionsData, error: sectionsError } = await supabase

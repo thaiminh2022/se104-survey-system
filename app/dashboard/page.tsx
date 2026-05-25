@@ -65,9 +65,12 @@ export default async function DashboardPage() {
   const publishedSurveys = surveys.filter(
     (survey) => survey.state === "published",
   ).length;
-  const totalViews = surveys.reduce((sum, survey) => sum + survey.view_count, 0);
+  const totalViews = surveys.reduce(
+    (sum, survey) => sum + (survey.view_count ?? 0),
+    0,
+  );
   const totalSubmissions = surveys.reduce(
-    (sum, survey) => sum + survey.submission_count,
+    (sum, survey) => sum + (survey.submission_count ?? 0),
     0,
   );
   const recentSurveys = recentSurveysResult.data;

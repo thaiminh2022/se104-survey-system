@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/submit_survey_response";
 import { Answer, AnswerForm } from "@/lib/types/answer-type";
 import type { Survey } from "@/lib/types/question-type";
+import { getMissingRequiredQuestionIds } from "@/lib/validations/survey_response";
 import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -93,7 +94,7 @@ export default function SurveyResponseForm({ survey }: Props) {
   }
 
   function goNext() {
-    if (hasMissingRequiredAnswers(section, answers)) {
+    if (getMissingRequiredQuestionIds(section, answers).length > 0) {
       return;
     }
 
@@ -188,65 +189,4 @@ export default function SurveyResponseForm({ survey }: Props) {
       </AnswerWriterSyncProvider>
     </FormProvider>
   );
-}
-
-function hasMissingRequiredAnswers(
-  section: Survey["sections"][number],
-  answers: AnswerForm["answers"] | undefined,
-) {
-  return getMissingRequiredQuestionIds(section, answers).length > 0;
-}
-
-function getMissingRequiredQuestionIds(
-  section: Survey["sections"][number],
-  answers: AnswerForm["answers"] | undefined,
-) {
-  return section.questions.flatMap((question) => {
-    const answer = answers?.[question.id];
-
-    return question.required && !hasEnteredValue(answer) ? [question.id] : [];
-  });
-}
-
-function hasEnteredValue(answer: Answer | undefined) {
-  if (answer == undefined) {
-    return false;
-  }
-
-  switch (answer.answer_type) {
-    case "single-choice":
-      if (answer.config.use_other) {
-        return answer.config.other_answer.trim() != "";
-      }
-      return answer.config.selected_option.trim() != "";
-    case "multiple-choice":
-      if (answer.config.use_other) {
-        return answer.config.other_answer.trim() != "";
-      }
-      return answer.config.selected_options.length > 0;
-    case "rating-scale":
-      return answer.config.rating >= 0 && answer.config.rating <= 5;
-    case "likert-scale":
-      return answer.config.selected_option.trim() != "";
-    case "short-text":
-      return answer.config.text.trim() != "";
-    case "long-text":
-      return answer.config.text.trim() != "";
-    case "dropdown":
-      return answer.config.selected_option.trim() != "";
-    case "yes-no":
-      return typeof answer.config.value === "boolean";
-    case "matrix":
-      return Object.values(answer.config.rows).some((value) =>
-        Array.isArray(value) ? value.length > 0 : value.trim() != "",
-      );
-    case "ranking":
-      return answer.config.ranked_options.length > 0;
-    case "date-time":
-      return answer.config.value.trim() != "";
-    case "consent":
-      return answer.config.accepted;
-    case "number":
-      return true;
-  }
 }
