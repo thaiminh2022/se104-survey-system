@@ -197,6 +197,7 @@ Playwright starts the app in E2E fixture mode on port `3100`. This avoids hittin
 - [PlantUML Diagrams](docs/diagrams/README.md)
 - [Use Cases](docs/use-cases.md)
 - [Business Rules](docs/business-rules.md)
+- [Test Suite](docs/test-suite.md)
 
 ## Project Structure
 
