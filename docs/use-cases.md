@@ -144,7 +144,7 @@ Use case flows follow the ownership, survey state, response, analytics, and expo
 | Preconditions | Survey exists and is published. |
 | Trigger | Respondent opens a public survey link. |
 | Main flow | 1. System checks that the survey is published and that the respondent is allowed by the email access rule. 2. System loads the survey. 3. System increments the survey view count. 4. Respondent answers questions section by section. 5. System prevents navigation or submission when required questions in the current section are unanswered. 6. Respondent submits the final section. 7. System re-checks access, creates a submission and answer rows, and displays a submitted confirmation. |
-| Alternate flows | A1. Survey is draft or archived: system denies access. A2. Survey cannot be found: system shows an error. A3. Restricted survey and respondent is not signed in: system redirects to login. A4. Restricted survey and respondent email is not allowed: system denies access. A5. No answers are submitted: system returns an error. |
+| Alternate flows | A1. Survey is draft or archived: system denies access. A2. Survey cannot be found: system shows an error. A3. Restricted survey and respondent is not signed in: system redirects to login. A4. Restricted survey and respondent email is not allowed: system shows the signed-in email and provides a change-account option. A5. Signed-in respondent chooses logout from the public survey area: system signs out and returns to login with the survey return URL. A6. No answers are submitted: system returns an error. |
 | Postconditions | Submission and answers are stored. Survey submission count is maintained by database trigger. |
 
 ### UC-10: View Analytics

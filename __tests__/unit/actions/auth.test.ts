@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const { signInWithPassword, signUp, redirect } = vi.hoisted(() => ({
+const { signInWithPassword, signUp, signOut, redirect } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
+  signOut: vi.fn(),
   redirect: vi.fn((url: string) => {
     throw new Error(`redirect:${url}`);
   }),
@@ -15,6 +16,7 @@ vi.mock("@/lib/supabase/server", () => {
         auth: {
           signInWithPassword,
           signUp,
+          signOut,
         },
       };
     }),
@@ -147,6 +149,34 @@ describe("register action", () => {
 
     await expect(register(makeRegisterFormData())).rejects.toThrow(
       "redirect:/auth/register?returnUrl=%2Fdashboard%2Fsurveys&error=User+already+registered",
+    );
+  });
+});
+
+describe("logoutAndReturn action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test("signs out and redirects to login with a safe return url", async () => {
+    const { logoutAndReturn } = await import("@/lib/actions/auth");
+    const formData = new FormData();
+    formData.set("returnUrl", "/surveys/restricted-survey");
+
+    await expect(logoutAndReturn(formData)).rejects.toThrow(
+      "redirect:/auth/login?returnUrl=%2Fsurveys%2Frestricted-survey",
+    );
+
+    expect(signOut).toHaveBeenCalled();
+  });
+
+  test("falls back to dashboard for unsafe return urls", async () => {
+    const { logoutAndReturn } = await import("@/lib/actions/auth");
+    const formData = new FormData();
+    formData.set("returnUrl", "https://evil.example");
+
+    await expect(logoutAndReturn(formData)).rejects.toThrow(
+      "redirect:/auth/login?returnUrl=%2Fdashboard",
     );
   });
 });

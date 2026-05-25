@@ -1,72 +1,30 @@
-"use client";
+import SurveyEntryForm from "@/components/surveys/SurveyEntryForm";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { IconArrowRight, IconHome } from "@tabler/icons-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { logoutAndReturn } from "@/lib/actions/auth";
+import { getUserData } from "@/lib/actions/read_user";
+import { IconLogout } from "@tabler/icons-react";
 
-export default function Page() {
-  const [id, setId] = useState("");
-  const router = useRouter();
-  const surveyId = id.trim();
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!surveyId) {
-      return;
-    }
-
-    router.push(`/surveys/${encodeURIComponent(surveyId)}`);
-  }
+export default async function Page() {
+  const userResult = await getUserData();
+  const signedInEmail = userResult.success ? userResult.data.email : null;
 
   return (
     <div className="grid min-h-screen w-full place-items-center bg-muted/20 px-4 py-6">
-      <form className="w-full max-w-md" onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Enter a survey</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <Field>
-              <FieldLabel htmlFor="survey-id">Survey id</FieldLabel>
-              <Input
-                type="text"
-                id="survey-id"
-                className="rounded-sm"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-                placeholder="Paste survey id"
-                autoComplete="off"
-              />
-            </Field>
-          </CardContent>
-
-          <CardFooter className="gap-2">
-            <Button type="submit" disabled={!surveyId}>
-              Enter survey
-              <IconArrowRight />
-            </Button>
-
-            <Button variant="secondary" type="button" asChild>
-              <Link href={"/"}>
-                <IconHome />
-                Back to home
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
+      <div className="w-full max-w-md space-y-3">
+        {signedInEmail ? (
+          <div className="flex flex-wrap items-center justify-end gap-2 text-sm text-muted-foreground">
+            <span className="min-w-0 truncate">Signed in as {signedInEmail}</span>
+            <form action={logoutAndReturn}>
+              <input type="hidden" name="returnUrl" value="/surveys" />
+              <Button type="submit" variant="outline">
+                <IconLogout />
+                Log out
+              </Button>
+            </form>
+          </div>
+        ) : null}
+        <SurveyEntryForm />
+      </div>
     </div>
   );
 }

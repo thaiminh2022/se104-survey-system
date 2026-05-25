@@ -46,6 +46,7 @@
 | FR-41 | Survey Response | The system shall associate a submission with a user ID when the respondent is authenticated. | Should | SRS |
 | FR-42 | Survey Response | The system shall show a success message after survey submission. | Must | SRS |
 | FR-42A | Survey Response | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must | SRS |
+| FR-42B | Survey Response | The system shall provide change-account and logout options in public survey access flows when a respondent is signed in. | Should | SRS |
 | FR-43 | Analytics | The system shall show survey-level views, submissions, conversion, and state. | Must | SRS |
 | FR-44 | Analytics | The system shall calculate conversion as submissions divided by views, using zero when views are zero. | Must | SRS |
 | FR-45 | Analytics | The system shall show submission counts over time. | Should | SRS |

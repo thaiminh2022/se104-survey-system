@@ -9,7 +9,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | ID | Rule |
 | --- | --- |
 | BR-ACTOR-01 | A visitor may register, log in, view the public homepage, and open published survey links. |
-| BR-ACTOR-02 | A respondent may submit answers to a published survey without signing in. |
+| BR-ACTOR-02 | A respondent may submit answers to an unrestricted published survey without signing in, or to a restricted published survey after signing in with an allowed email. |
 | BR-ACTOR-03 | A survey owner is an authenticated user who creates and manages surveys under their own account. |
 | BR-ACTOR-04 | Each survey belongs to exactly one survey owner through its `user_id`. |
 | BR-ACTOR-05 | A survey owner may only manage, analyze, and export surveys they own. |
@@ -69,6 +69,7 @@ This document defines the business rules that govern SE104 Survey System behavio
 | BR-SHARE-06 | A survey with no allowed respondent emails is public to anyone with the published link. |
 | BR-SHARE-07 | A survey with one or more allowed respondent emails is restricted and requires the respondent to sign in with a matching normalized email address. |
 | BR-SHARE-08 | Allowed respondent emails must be stored in lowercase trimmed form and must be unique per survey. |
+| BR-SHARE-09 | A signed-in respondent who is not allowed for a restricted survey must be offered a way to change accounts. |
 
 ## 7. Response Collection
 

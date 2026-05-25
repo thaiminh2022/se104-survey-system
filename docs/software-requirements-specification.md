@@ -25,7 +25,7 @@ SE104 Survey System is an academic web application project for small-team and co
 
 ### 1.3 System Overview
 
-The system supports authenticated survey owners and public respondents. Survey owners can create and edit multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open published survey links and submit answers without signing in.
+The system supports authenticated survey owners and public respondents. Survey owners can create and edit multi-section surveys with multiple question types, publish or archive surveys, share public links and QR codes, inspect analytics, and export results. Respondents can open unrestricted published survey links without signing in, or sign in with an allowed email for restricted surveys.
 
 The detailed business rules for ownership, survey state, public access, response collection, analytics, exports, and current constraints are maintained in [Business Rules](business-rules.md).
 
@@ -312,6 +312,8 @@ No special memory constraints are defined. The system is expected to run within 
 | FR-RESP-10 | The system shall show a success message after submission. | Must |
 | FR-RESP-11 | The system shall require login before opening a restricted published survey. | Must |
 | FR-RESP-12 | The system shall reject restricted survey access and submission when the signed-in user's email is not allowed. | Must |
+| FR-RESP-13 | The system shall provide a change-account option when a signed-in respondent is not allowed to access a restricted survey. | Should |
+| FR-RESP-14 | The system shall provide a logout option in the public survey entry and response areas when a respondent is signed in. | Should |
 
 #### 3.4.7 Analytics
 
@@ -376,7 +378,7 @@ No special memory constraints are defined. The system is expected to run within 
 - A survey owner can open an existing survey in the edit builder and save changes.
 - A draft survey is not publicly answerable.
 - A published survey can be opened at `/surveys/{id}` and submitted.
-- A restricted published survey redirects unauthenticated respondents to login and rejects signed-in users whose email is not listed.
+- A restricted published survey redirects unauthenticated respondents to login and offers account switching when a signed-in user's email is not listed.
 - Required questions block respondent progress until answered.
 - A survey owner can see view, submission, and conversion metrics.
 - A survey owner can export CSV response data for owned surveys.
