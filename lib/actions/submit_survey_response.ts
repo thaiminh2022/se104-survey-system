@@ -1,5 +1,6 @@
 "use server";
 
+import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
 import type { AnswerForm } from "@/lib/types/answer-type";
 import {
   AnswerInsert,
@@ -18,9 +19,8 @@ import {
 } from "@/lib/types/question-type";
 import { validateSurveyResponse } from "@/lib/validations/survey_response";
 import { createClient } from "../supabase/server";
-import { getUser } from "./read_user";
 import { getPublishedSurveyAccessStatus } from "./read_survey";
-import { isPlaywrightE2E } from "@/lib/e2e/fixtures";
+import { getUser } from "./read_user";
 
 export async function fakeSubmitSurveyResponse(
   surveyId: string,
@@ -37,6 +37,7 @@ export async function fakeSubmitSurveyResponse(
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
         answer_data: answer.config,
+        answer_type: answer.answer_type,
       }) as AnswerInsert,
   );
   console.log(submission);
@@ -75,8 +76,10 @@ export async function submitSurveyResponse(
         submission_id: submission.id, // This will be set by the database
         question_id: questionId,
         answer_data: answer.config,
+        answer_type: answer.answer_type,
       }) as AnswerInsert,
   );
+  console.log(answerRows);
 
   const supabase = await createClient();
   const accessRes = await getPublishedSurveyAccessStatus(supabase, surveyId);

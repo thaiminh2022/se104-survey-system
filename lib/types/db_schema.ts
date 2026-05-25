@@ -128,6 +128,7 @@ export const answerRowSchema = z.object({
   question_id: z.uuid(),
   created_at: z.coerce.date(),
   answer_data: z.json(),
+  answer_type: questionTypesSchema,
 });
 
 export const answerInsertSchema = z.object({
@@ -135,6 +136,7 @@ export const answerInsertSchema = z.object({
   submission_id: z.uuid(),
   question_id: z.uuid(),
   answer_data: z.json(),
+  answer_type: questionTypesSchema,
   created_at: z.coerce.date().optional(),
 });
 
