@@ -172,11 +172,20 @@ function answer(
   questionId: string,
   answerData: AnswerRow["answer_data"],
 ): AnswerRow {
+  const questionType = e2eSections
+    .flatMap((section) => section.questions)
+    .find((question) => question.id === questionId)?.question_type;
+
+  if (!questionType) {
+    throw new Error(`Missing E2E question fixture for answer ${id}`);
+  }
+
   return {
     id,
     submission_id: submissionId,
     question_id: questionId,
     created_at: createdAt,
     answer_data: answerData,
+    answer_type: questionType as AnswerRow["answer_type"],
   };
 }

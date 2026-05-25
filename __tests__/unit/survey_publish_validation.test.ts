@@ -72,11 +72,15 @@ describe("validateSurveyForPublish", () => {
             ...validSurvey.sections[0],
             questions: [
               {
-                ...validSurvey.sections[0].questions[0],
+                id: "question-1",
+                title: "Favorite topic",
+                description: "",
+                question_type: "single-choice",
                 config: {
                   options: ["UI", "   "],
                   haveOther: false,
                 },
+                required: true,
               },
             ],
           },

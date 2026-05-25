@@ -77,6 +77,7 @@ function answer(
     question_id: questionId,
     created_at: CREATED_AT,
     answer_data: answerData,
+    answer_type: "short-text",
   };
 }
 

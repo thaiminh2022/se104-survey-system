@@ -171,6 +171,7 @@ describe("submitSurveyResponse action", () => {
         submission_id: "submission-1",
         question_id: "question-1",
         answer_data: { text: "Good course" },
+        answer_type: "short-text",
       },
     ]);
   });

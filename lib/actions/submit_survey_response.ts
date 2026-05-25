@@ -40,9 +40,6 @@ export async function fakeSubmitSurveyResponse(
         answer_type: answer.answer_type,
       }) as AnswerInsert,
   );
-  console.log(submission);
-  console.log(answerRows);
-
   return createSuccess(null);
 }
 
@@ -79,8 +76,6 @@ export async function submitSurveyResponse(
         answer_type: answer.answer_type,
       }) as AnswerInsert,
   );
-  console.log(answerRows);
-
   const supabase = await createClient();
   const accessRes = await getPublishedSurveyAccessStatus(supabase, surveyId);
 
