@@ -29,7 +29,7 @@ export default function ChangeStateSurveyButton({
     const result = await updateSurveyStatus(surveyId, changeTo);
     if (!result.success) {
       console.log(result.error);
-      alert("Cannot change state to: " + changeTo);
+      alert(result.message);
     } else {
       alert("Survey is now: " + changeTo);
     }

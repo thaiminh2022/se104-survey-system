@@ -28,6 +28,7 @@ import {
   Survey,
   YesNoQuestionConfig,
 } from "@/lib/types/question-type";
+import { validateSurveyForPublish } from "@/lib/validations/survey_publish";
 import { faker } from "@faker-js/faker";
 import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
@@ -101,20 +102,32 @@ export async function updateSurveyStatus(id: string, status: SurveyStatus) {
     return userRes;
   }
   const user = userRes.data;
-  const { data, error } = await supabase
+
+  if (status === "published") {
+    const surveyRes = await getSurveyById(id);
+
+    if (!surveyRes.success) {
+      return surveyRes;
+    }
+
+    const validation = validateSurveyForPublish(surveyRes.data);
+
+    if (!validation.success) {
+      return createError(null, validation.message);
+    }
+  }
+
+  const { error } = await supabase
     .from("surveys")
     .update({ state: status })
     .eq("id", id)
-    .eq("user_id", user.id)
-    .select()
-    .limit(1)
-    .single();
+    .eq("user_id", user.id);
 
   if (error) {
     return createError(error, error.message);
   }
   revalidatePath("/dashboard/surveys");
-  return createSuccess(data);
+  return createSuccess(null);
 }
 export async function deleteSurvey(id: string) {
   if (isPlaywrightE2E()) {
