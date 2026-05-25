@@ -137,4 +137,118 @@ describe("survey store", () => {
       },
     });
   });
+
+  it("sets an existing survey for editing without sharing references", async () => {
+    const { useSurveyStore } = await loadStore();
+    const existingSurvey = {
+      id: "survey-existing",
+      title: "Existing survey",
+      description: "Loaded from database",
+      state: "published" as const,
+      sections: [
+        {
+          id: "section-existing",
+          title: "Existing section",
+          description: "Existing description",
+          questions: [
+            {
+              id: "question-existing",
+              title: "Existing question",
+              description: "",
+              question_type: "short-text" as const,
+              config: {},
+              required: true,
+            },
+          ],
+        },
+      ],
+    };
+
+    useSurveyStore.getState().setSurvey(existingSurvey);
+    existingSurvey.sections[0].title = "Mutated outside store";
+
+    expect(useSurveyStore.getState().survey).toMatchObject({
+      id: "survey-existing",
+      title: "Existing survey",
+      sections: [
+        {
+          id: "section-existing",
+          title: "Existing section",
+        },
+      ],
+    });
+  });
+
+  it("resets to a fresh default survey after editing", async () => {
+    const { useSurveyStore } = await loadStore();
+
+    useSurveyStore.getState().updateSurveyTitle("Changed survey");
+    useSurveyStore.getState().resetSurvey();
+
+    expect(useSurveyStore.getState().survey).toMatchObject({
+      id: "uuid-4",
+      title: "New survey",
+      state: "draft",
+      sections: [
+        {
+          id: "uuid-5",
+          questions: [
+            {
+              id: "uuid-6",
+              question_type: "short-text",
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("reorders sections and questions by id", async () => {
+    const { useSurveyStore } = await loadStore();
+    const firstSectionId = useSurveyStore.getState().survey.sections[0].id;
+    const secondSectionId = useSurveyStore.getState().addSection();
+
+    useSurveyStore.getState().reorderSections(firstSectionId, secondSectionId);
+    expect(useSurveyStore.getState().survey.sections.map((section) => section.id))
+      .toEqual([secondSectionId, firstSectionId]);
+
+    const sectionId = firstSectionId;
+    const firstQuestionId = useSurveyStore
+      .getState()
+      .survey.sections.find((section) => section.id === sectionId)!
+      .questions[0].id;
+    const secondQuestionId = useSurveyStore
+      .getState()
+      .addQuestion(sectionId, "yes-no");
+
+    useSurveyStore
+      .getState()
+      .reorderQuestions(sectionId, firstQuestionId, secondQuestionId!);
+
+    expect(
+      useSurveyStore
+        .getState()
+        .survey.sections.find((section) => section.id === sectionId)!
+        .questions.map((question) => question.id),
+    ).toEqual([secondQuestionId, firstQuestionId]);
+  });
+
+  it("reorders configurable question options", async () => {
+    const { useSurveyStore } = await loadStore();
+    const sectionId = useSurveyStore.getState().survey.sections[0].id;
+    const questionId = useSurveyStore.getState().survey.sections[0].questions[0].id;
+
+    useSurveyStore.getState().updateQuestionType(sectionId, questionId, "dropdown");
+    useSurveyStore.getState().updateQuestionConfig(sectionId, questionId, {
+      options: ["First", "Second", "Third"],
+    });
+    useSurveyStore
+      .getState()
+      .reorderQuestionConfigOptions(sectionId, questionId, "options", 0, 2);
+
+    expect(useSurveyStore.getState().survey.sections[0].questions[0].config)
+      .toEqual({
+        options: ["Second", "Third", "First"],
+      });
+  });
 });

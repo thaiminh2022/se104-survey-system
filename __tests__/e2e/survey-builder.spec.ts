@@ -52,3 +52,22 @@ test("survey list publish action opens confirm dialog and completes", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Publish" }).last().click();
 });
+
+test("edit survey loads existing content and saves through the builder", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/surveys/e2e-survey/edit");
+
+  await expect(page.getByRole("heading", { name: "Edit survey" })).toBeVisible();
+  await expect(page.getByPlaceholder("Survey title")).toHaveValue(
+    "E2E Published Survey",
+  );
+
+  await page.getByPlaceholder("Survey title").fill("E2E Edited Survey");
+  await page.getByRole("button", { name: /save draft/i }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/surveys$/);
+  await expect(
+    page.getByRole("heading", { name: "Your surveys" }),
+  ).toBeVisible();
+});

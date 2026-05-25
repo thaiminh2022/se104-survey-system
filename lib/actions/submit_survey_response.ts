@@ -49,11 +49,12 @@ export async function submitSurveyResponse(
   answerForm: AnswerForm,
 ) {
   const responseAnswers = answerForm.answers ?? {};
+  if (Object.keys(responseAnswers).length === 0) {
+    return createError(null, "No answers");
+  }
 
   if (isPlaywrightE2E()) {
-    return Object.keys(responseAnswers).length === 0
-      ? createError(null, "No answers")
-      : createSuccess(null);
+    return createSuccess(null);
   }
 
   const userRes = await getUser();
@@ -77,7 +78,10 @@ export async function submitSurveyResponse(
   );
 
   const supabase = await createClient();
-  const surveyRes = await getPublishedSurveyForResponseValidation(surveyId);
+  const surveyRes = await getPublishedSurveyForResponseValidation(
+    supabase,
+    surveyId,
+  );
 
   if (!surveyRes.success) {
     return surveyRes;
@@ -92,10 +96,6 @@ export async function submitSurveyResponse(
       null,
       responseValidation.message ?? "Please complete all required questions.",
     );
-  }
-
-  if (answerRows.length == 0) {
-    return createError(null, "No answers");
   }
 
   const submissionInsertRes = await supabase
@@ -131,8 +131,10 @@ export async function submitSurveyResponse(
   return createSuccess(null);
 }
 
-async function getPublishedSurveyForResponseValidation(surveyId: string) {
-  const supabase = await createClient();
+async function getPublishedSurveyForResponseValidation(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  surveyId: string,
+) {
   const { data: surveyData, error: surveyError } = await supabase
     .from("surveys")
     .select("*")

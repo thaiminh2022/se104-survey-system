@@ -115,6 +115,15 @@ export async function submitSurvey(s: Survey, isDraft: boolean) {
 }
 
 export async function updateSurvey(s: Survey, isDraft: boolean) {
+  if (isPlaywrightE2E()) {
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/surveys");
+    revalidatePath("/dashboard/analytics");
+    revalidatePath(`/dashboard/analytics/${s.id}`);
+    revalidatePath(`/surveys/${s.id}`);
+    redirect("/dashboard/surveys");
+  }
+
   if (!isDraft) {
     const validation = validateSurveyForPublish(s);
 

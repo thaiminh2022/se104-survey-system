@@ -40,6 +40,54 @@ function makeInsertOnlyQuery(result: unknown) {
   return query;
 }
 
+function makeUpdateQuery(result: unknown) {
+  let eqCallCount = 0;
+  const query = {
+    update: vi.fn(() => query),
+    eq: vi.fn(() => {
+      eqCallCount += 1;
+      return eqCallCount === 1 ? query : result;
+    }),
+  };
+
+  return query;
+}
+
+function makeDeleteQuery(result: unknown) {
+  const query = {
+    delete: vi.fn(() => query),
+    in: vi.fn(async () => result),
+  };
+
+  return query;
+}
+
+function makeSectionSelectQuery(result: unknown) {
+  const query = {
+    select: vi.fn(() => query),
+    eq: vi.fn(async () => result),
+  };
+
+  return query;
+}
+
+function makeQuestionSelectQuery(result: unknown) {
+  const query = {
+    select: vi.fn(() => query),
+    eq: vi.fn(async () => result),
+  };
+
+  return query;
+}
+
+function makeUpsertQuery(result: unknown) {
+  const query = {
+    upsert: vi.fn(async () => result),
+  };
+
+  return query;
+}
+
 const survey: Survey = {
   id: "local-survey",
   title: "Course feedback",
@@ -230,5 +278,143 @@ describe("submitSurvey action", () => {
     });
     expect(questionInsertQuery.insert).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateSurvey action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test("updates survey, removes missing sections and questions, upserts current rows, then redirects", async () => {
+    const editedSurvey: Survey = {
+      ...survey,
+      id: "survey-1",
+      title: "Updated course feedback",
+      state: "published",
+      sections: [
+        {
+          ...survey.sections[0],
+          title: "Updated basics",
+          questions: [
+            {
+              ...survey.sections[0].questions[0],
+              title: "Updated rating",
+            },
+          ],
+        },
+      ],
+    };
+    const surveyUpdateQuery = makeUpdateQuery({ error: null });
+    const sectionSelectQuery = makeSectionSelectQuery({
+      data: [{ id: "section-1" }, { id: "section-removed" }],
+      error: null,
+    });
+    const sectionDeleteQuery = makeDeleteQuery({ error: null });
+    const sectionUpsertQuery = makeUpsertQuery({ error: null });
+    const questionSelectQuery = makeQuestionSelectQuery({
+      data: [{ id: "question-1" }, { id: "question-removed" }],
+      error: null,
+    });
+    const questionDeleteQuery = makeDeleteQuery({ error: null });
+    const questionUpsertQuery = makeUpsertQuery({ error: null });
+    const tableCalls = new Map<string, number>();
+    const from = vi.fn((table: string) => {
+      const call = tableCalls.get(table) ?? 0;
+      tableCalls.set(table, call + 1);
+
+      if (table === "surveys") return surveyUpdateQuery;
+      if (table === "sections" && call === 0) return sectionSelectQuery;
+      if (table === "sections" && call === 1) return sectionDeleteQuery;
+      if (table === "sections" && call === 2) return sectionUpsertQuery;
+      if (table === "questions" && call === 0) return questionSelectQuery;
+      if (table === "questions" && call === 1) return questionDeleteQuery;
+      if (table === "questions" && call === 2) return questionUpsertQuery;
+      throw new Error(`Unexpected ${table} call ${call}`);
+    });
+
+    createClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn(async () => ({
+          data: { user: { id: "user-1" } },
+          error: null,
+        })),
+      },
+      from,
+    });
+
+    const { updateSurvey } = await import("@/lib/actions/create_survey");
+
+    await expect(updateSurvey(editedSurvey, false)).rejects.toThrow(
+      "redirect:/dashboard/surveys",
+    );
+
+    expect(surveyUpdateQuery.update).toHaveBeenCalledWith({
+      title: "Updated course feedback",
+      description: "Tell us what worked",
+      state: "published",
+    });
+    expect(surveyUpdateQuery.eq).toHaveBeenNthCalledWith(1, "id", "survey-1");
+    expect(surveyUpdateQuery.eq).toHaveBeenNthCalledWith(2, "user_id", "user-1");
+    expect(sectionDeleteQuery.in).toHaveBeenCalledWith("id", ["section-removed"]);
+    expect(sectionUpsertQuery.upsert).toHaveBeenCalledWith(
+      [
+        {
+          id: "section-1",
+          survey_id: "survey-1",
+          order_index: 0,
+          end_behavior: "continue",
+          config: {},
+          title: "Updated basics",
+          description: "About the class",
+        },
+      ],
+      { onConflict: "id" },
+    );
+    expect(questionDeleteQuery.in).toHaveBeenCalledWith("id", [
+      "question-removed",
+    ]);
+    expect(questionUpsertQuery.upsert).toHaveBeenCalledWith(
+      [
+        {
+          id: "question-1",
+          section_id: "section-1",
+          order_index: 0,
+          title: "Updated rating",
+          question_type: "rating-scale",
+          config: {
+            min: 0,
+            max: 5,
+            minLabel: "Low",
+            maxLabel: "High",
+          },
+          description: "Pick one",
+          required: true,
+        },
+      ],
+      { onConflict: "id" },
+    );
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard");
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/surveys");
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/analytics");
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/analytics/survey-1");
+    expect(revalidatePath).toHaveBeenCalledWith("/surveys/survey-1");
+  });
+
+  test("returns publish validation errors before opening Supabase", async () => {
+    const invalidSurvey: Survey = {
+      ...survey,
+      id: "survey-1",
+      title: "",
+    };
+
+    const { updateSurvey } = await import("@/lib/actions/create_survey");
+
+    await expect(updateSurvey(invalidSurvey, false)).resolves.toEqual({
+      success: false,
+      error: null,
+      message: "Survey title cannot be empty.",
+    });
+    expect(createClient).not.toHaveBeenCalled();
   });
 });
