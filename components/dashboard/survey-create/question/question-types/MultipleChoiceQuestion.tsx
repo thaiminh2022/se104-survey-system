@@ -1,11 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useSurveyStore } from "@/lib/stores/survey_store";
 import { MultipleChoiceQuestionConfig } from "@/lib/types/question-type";
-import { IconSquare, IconX } from "@tabler/icons-react";
+import { OptionListEditor } from "./OptionListEditor";
 
 interface Props {
   sectionID: string;
@@ -39,40 +37,9 @@ export function MultipleChoiceQuestion({ sectionID, questionID }: Props) {
 
   return (
     <div className="mt-4 space-y-3">
-      {options.map((option, index) => (
-        <div key={index} className="flex items-center gap-3">
-          <IconSquare className="size-5 text-muted-foreground" />
-          <Input
-            value={option}
-            onChange={(event) => {
-              const nextOptions = [...options];
-              nextOptions[index] = event.target.value;
-              updateOptions(nextOptions);
-            }}
-            placeholder={`Option ${index + 1}`}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            disabled={options.length <= 1}
-            onClick={() => updateOptions(options.filter((_, i) => i !== index))}
-          >
-            <IconX className="size-4" />
-          </Button>
-        </div>
-      ))}
+      <OptionListEditor options={options} onChange={updateOptions} />
 
-      <div className="flex flex-wrap items-center gap-4 pl-8">
-        <Button
-          type="button"
-          variant="link"
-          className="h-auto p-0"
-          onClick={() => updateOptions([...options, `Option ${options.length + 1}`])}
-        >
-          Add option
-        </Button>
+      <div className="flex flex-wrap items-center gap-4 pl-10">
         <label className="flex items-center gap-2 text-sm">
           <Switch
             checked={config.haveOther ?? false}

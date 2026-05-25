@@ -13,6 +13,8 @@ export function SingleChoiceInput({
   question: Question<"single-choice">;
 }) {
   const { clearAnswer, setAnswer } = useAnswerWriter();
+  const [selectedOption, setSelectedOption] = useState("");
+  const [otherValue, setOtherValue] = useState("");
   const [usingOther, setUsingOther] = useState(false);
 
   function commitOption(value: string) {
@@ -21,6 +23,8 @@ export function SingleChoiceInput({
       return;
     }
 
+    setSelectedOption(value);
+    setOtherValue("");
     setUsingOther(false);
     setAnswer(question.id, {
       answer_type: "single-choice",
@@ -28,9 +32,26 @@ export function SingleChoiceInput({
     });
   }
 
+  function commitOther(value: string) {
+    const otherAnswer = value.trim();
+    setOtherValue(value);
+    setSelectedOption("");
+    setUsingOther(otherAnswer.length > 0);
+
+    if (!otherAnswer) {
+      clearAnswer(question.id);
+      return;
+    }
+
+    setAnswer(question.id, {
+      answer_type: "single-choice",
+      config: { use_other: true, other_answer: otherAnswer },
+    });
+  }
+
   return (
     <div className="space-y-3">
-      <RadioGroup onValueChange={commitOption}>
+      <RadioGroup value={selectedOption} onValueChange={commitOption}>
         {question.config.options.map((option, index) => {
           const identifier = `${question.id}-${option}-${index}`;
           return (
@@ -54,20 +75,9 @@ export function SingleChoiceInput({
         <Input
           type="text"
           placeholder="Other"
-          onFocus={() => setUsingOther(true)}
-          onChange={(event) => {
-            const otherAnswer = event.target.value.trim();
-            setUsingOther(true);
-            if (!otherAnswer) {
-              clearAnswer(question.id);
-              return;
-            }
-
-            setAnswer(question.id, {
-              answer_type: "single-choice",
-              config: { use_other: true, other_answer: otherAnswer },
-            });
-          }}
+          value={otherValue}
+          onFocus={() => setUsingOther(otherValue.trim().length > 0)}
+          onChange={(event) => commitOther(event.target.value)}
           className={usingOther ? "border-primary" : undefined}
         />
       ) : null}
@@ -82,12 +92,16 @@ export function MultipleChoiceInput({
 }) {
   const { clearAnswer, setAnswer } = useAnswerWriter();
   const [selected, setSelected] = useState<string[]>([]);
+  const [otherValue, setOtherValue] = useState("");
+  const [usingOther, setUsingOther] = useState(false);
 
   function updateSelected(option: string, checked: boolean) {
     if (!question.config.options.includes(option)) {
       return;
     }
 
+    setOtherValue("");
+    setUsingOther(false);
     const next = checked
       ? [...selected, option]
       : selected.filter((value) => value !== option);
@@ -100,6 +114,23 @@ export function MultipleChoiceInput({
     setAnswer(question.id, {
       answer_type: "multiple-choice",
       config: { use_other: false, selected_options: next },
+    });
+  }
+
+  function commitOther(value: string) {
+    const otherAnswer = value.trim();
+    setOtherValue(value);
+    setSelected([]);
+    setUsingOther(otherAnswer.length > 0);
+
+    if (!otherAnswer) {
+      clearAnswer(question.id);
+      return;
+    }
+
+    setAnswer(question.id, {
+      answer_type: "multiple-choice",
+      config: { use_other: true, other_answer: otherAnswer },
     });
   }
 
@@ -130,18 +161,9 @@ export function MultipleChoiceInput({
         <Input
           type="text"
           placeholder="Other"
-          onChange={(event) => {
-            const otherAnswer = event.target.value.trim();
-            if (!otherAnswer) {
-              clearAnswer(question.id);
-              return;
-            }
-
-            setAnswer(question.id, {
-              answer_type: "multiple-choice",
-              config: { use_other: true, other_answer: otherAnswer },
-            });
-          }}
+          value={otherValue}
+          onChange={(event) => commitOther(event.target.value)}
+          className={usingOther ? "border-primary" : undefined}
         />
       ) : null}
     </div>

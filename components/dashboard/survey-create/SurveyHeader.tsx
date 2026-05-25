@@ -1,11 +1,13 @@
 "use client";
 
-import { submitSurvey } from "@/lib/actions/create_survey";
+import { submitSurvey, updateSurvey } from "@/lib/actions/create_survey";
 import { useSurveyStore } from "@/lib/stores/survey_store";
+import { validateSurveyForPublish } from "@/lib/validations/survey_publish";
 import { IconDeviceFloppy, IconLoader2, IconSend } from "@tabler/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import SurveyPreviewDialog from "@/components/dashboard/survey-create/SurveyPreviewDialog";
 import {
   Card,
   CardAction,
@@ -17,7 +19,11 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function SurveyHeader() {
+type SurveyHeaderProps = {
+  mode?: "create" | "edit";
+};
+
+export default function SurveyHeader({ mode = "create" }: SurveyHeaderProps) {
   const [submittingAction, setSubmittingAction] = useState<
     "draft" | "publish" | null
   >(null);
@@ -29,11 +35,23 @@ export default function SurveyHeader() {
   const isSubmitting = submittingAction != null;
 
   async function handleSubmit(isDraft: boolean) {
+    if (!isDraft) {
+      const validation = validateSurveyForPublish(survey);
+
+      if (!validation.success) {
+        toast.error(validation.message);
+        return;
+      }
+    }
+
     setSubmittingAction(isDraft ? "draft" : "publish");
     try {
-      const result = await submitSurvey(survey, isDraft);
+      const result =
+        mode === "edit"
+          ? await updateSurvey(survey, isDraft)
+          : await submitSurvey(survey, isDraft);
       if (!result.success) {
-        toast.error(`Survey creation error: ${result.message}`);
+        toast.error(`Survey save error: ${result.message}`);
       } else {
         toast.info(`Survey saved as: ${isDraft ? "Draft" : "Published"}`);
       }
@@ -57,7 +75,8 @@ export default function SurveyHeader() {
             onChange={(event) => updateSurveyTitle(event.target.value)}
           />
         </CardTitle>
-        <CardAction className="flex gap-2">
+        <CardAction className="flex flex-wrap gap-2">
+          <SurveyPreviewDialog survey={survey} />
           <Button
             variant="outline"
             className="rounded-md"
@@ -69,7 +88,7 @@ export default function SurveyHeader() {
             ) : (
               <IconDeviceFloppy />
             )}
-            {submittingAction === "draft" ? "Saving..." : "Draft"}
+            {submittingAction === "draft" ? "Saving..." : "Save draft"}
           </Button>
           <Button
             className="rounded-md"

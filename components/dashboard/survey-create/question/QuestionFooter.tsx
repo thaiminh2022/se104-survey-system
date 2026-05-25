@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import ConfirmDialog from "@/components/dialog/confirm_dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
@@ -92,15 +93,23 @@ export default function QuestionFooter({
           </PopoverTrigger>
           <PopoverContent className="w-64 space-y-3" align="end">
             <ToggleDescription check={showDesc} setCheck={setShowDesc} />
-            <Button
+            <ConfirmDialog
+              title="Delete question?"
+              description="This question and its configuration will be removed from the survey."
+              confirmText="Delete"
+              cancelText="Cancel"
               variant="destructive"
-              type="button"
-              className="w-full justify-start rounded-md"
-              onClick={() => deleteQuestion(sectionID, questionID)}
+              onConfirm={() => deleteQuestion(sectionID, questionID)}
             >
-              <IconTrash />
-              Delete question
-            </Button>
+              <Button
+                variant="destructive"
+                type="button"
+                className="w-full justify-start rounded-md"
+              >
+                <IconTrash />
+                Delete question
+              </Button>
+            </ConfirmDialog>
           </PopoverContent>
         </Popover>
       </div>

@@ -120,12 +120,37 @@ function getDefaultSection(): Section {
   };
 }
 
+function getDefaultSurvey(): Survey {
+  return {
+    id: crypto.randomUUID(),
+    title: "New survey",
+    state: "draft",
+    description: "",
+    sections: [getDefaultSection()],
+  };
+}
+
 type SurveyStore = {
   survey: Survey;
+  setSurvey: (survey: Survey) => void;
+  resetSurvey: () => void;
   addSection: () => string;
   deleteSection: (sectionID: string) => void;
+  reorderSections: (activeId: string, overId: string) => void;
   addQuestion: (sectionID: string, type?: QuestionTypes) => string | null;
   deleteQuestion: (sectionID: string, questionID: string) => void;
+  reorderQuestions: (
+    sectionID: string,
+    activeId: string,
+    overId: string,
+  ) => void;
+  reorderQuestionConfigOptions: (
+    sectionID: string,
+    questionID: string,
+    key: "options" | "rows" | "columns",
+    activeIndex: number,
+    overIndex: number,
+  ) => void;
   updateQuestionType: (
     sectionID: string,
     questionID: string,
@@ -159,13 +184,17 @@ type SurveyStore = {
 
 export const useSurveyStore = create<SurveyStore>()(
   immer((set) => ({
-    survey: {
-      id: crypto.randomUUID(),
-      title: "New survey",
-      state: "draft",
-      description: "",
-      sections: [getDefaultSection()],
-    },
+    survey: getDefaultSurvey(),
+
+    setSurvey: (survey) =>
+      set((state) => {
+        state.survey = structuredClone(survey);
+      }),
+
+    resetSurvey: () =>
+      set((state) => {
+        state.survey = getDefaultSurvey();
+      }),
 
     // --- Section Actions ---
     addSection: () => {
@@ -185,6 +214,15 @@ export const useSurveyStore = create<SurveyStore>()(
         }
         state.survey.sections = state.survey.sections.filter(
           (s) => s.id !== sectionID,
+        );
+      }),
+
+    reorderSections: (activeId, overId) =>
+      set((state) => {
+        state.survey.sections = reorderById(
+          state.survey.sections,
+          activeId,
+          overId,
         );
       }),
 
@@ -230,6 +268,47 @@ export const useSurveyStore = create<SurveyStore>()(
             (q) => q.id !== questionID,
           );
         }
+      }),
+
+    reorderQuestions: (sectionID, activeId, overId) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+
+        if (!section) {
+          return;
+        }
+
+        section.questions = reorderById(section.questions, activeId, overId);
+      }),
+
+    reorderQuestionConfigOptions: (
+      sectionID,
+      questionID,
+      key,
+      activeIndex,
+      overIndex,
+    ) =>
+      set((state) => {
+        const section = state.survey.sections.find((s) => s.id === sectionID);
+
+        if (!section) {
+          return;
+        }
+
+        const question = section.questions.find((q) => q.id === questionID);
+
+        if (!question) {
+          return;
+        }
+
+        const config = question.config as Record<string, unknown>;
+        const values = config[key];
+
+        if (!Array.isArray(values)) {
+          return;
+        }
+
+        config[key] = reorderByIndex(values, activeIndex, overIndex);
       }),
 
     updateQuestionType: (sectionID, questionID, type) =>
@@ -307,3 +386,36 @@ export const useSurveyStore = create<SurveyStore>()(
     },
   })),
 );
+
+function reorderById<T extends { id: string }>(
+  items: T[],
+  activeId: string,
+  overId: string,
+) {
+  const activeIndex = items.findIndex((item) => item.id === activeId);
+  const overIndex = items.findIndex((item) => item.id === overId);
+
+  if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) {
+    return items;
+  }
+
+  return reorderByIndex(items, activeIndex, overIndex);
+}
+
+function reorderByIndex<T>(items: T[], activeIndex: number, overIndex: number) {
+  if (
+    activeIndex < 0 ||
+    overIndex < 0 ||
+    activeIndex >= items.length ||
+    overIndex >= items.length ||
+    activeIndex === overIndex
+  ) {
+    return items;
+  }
+
+  const next = [...items];
+  const [moved] = next.splice(activeIndex, 1);
+  next.splice(overIndex, 0, moved);
+
+  return next;
+}

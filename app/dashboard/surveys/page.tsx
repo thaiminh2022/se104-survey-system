@@ -1,51 +1,39 @@
-import ChangeStateSurveyButton from "@/components/dashboard/surveys/ChangeStateSurveyBtn";
-import SurveyActionsDropdown from "@/components/dashboard/surveys/SurveyActionsDropdown";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { getSurveyRowForUser } from "@/lib/actions/read_survey";
+import SurveyList, {
+  type SurveyListRow,
+} from "@/components/dashboard/surveys/SurveyList";
+import ErrorState from "@/components/dashboard/ErrorState";
+import { getSurveyDashboardRowsForUser } from "@/lib/actions/read_survey";
 
 export default async function Page() {
-  const surveys = await getSurveyRowForUser();
+  const surveys = await getSurveyDashboardRowsForUser();
   if (!surveys.success) {
-    return <>Cannot fetch surveys {surveys.error}</>;
+    return (
+      <main className="mx-auto w-3/4 py-6 lg:w-1/2">
+        <ErrorState
+          title="Cannot load surveys"
+          message={surveys.message}
+        />
+      </main>
+    );
   }
 
-  return (
-    <>
-      <div className="mx-auto lg:w-1/2 w-3/4">
-        <h1 className="text-3xl font-bold my-3">Your surveys</h1>
-        {surveys.data.map((s, i) => {
-          return (
-            <Card key={i} className="mt-3">
-              <CardHeader>
-                <div className="flex">
-                  <CardTitle>{s.title}</CardTitle>
-                  <Badge
-                    className="ml-3"
-                    variant={s.state == "draft" ? "secondary" : "default"}
-                  >
-                    {s.state}
-                  </Badge>
-                  <Badge className="ml-3" variant={"link"}>
-                    {new Date(s.created_at).toLocaleDateString()}
-                  </Badge>
-                </div>
-                <CardDescription>{s.description}</CardDescription>
-                <CardAction className="flex gap-x-3 flex-wrap">
-                  <SurveyActionsDropdown surveyId={s.id} />
-                  <ChangeStateSurveyButton surveyId={s.id} state={s.state} />
-                </CardAction>
-              </CardHeader>
-            </Card>
-          );
-        })}
-      </div>
-    </>
+  const surveyRows = surveys.data.map(
+    (survey): SurveyListRow => ({
+      id: survey.id,
+      title: survey.title,
+      description: survey.description,
+      state: survey.state,
+      created_at: toIsoDate(survey.created_at),
+      submission_count: survey.submission_count ?? 0,
+      last_response_at: survey.last_response_at
+        ? toIsoDate(survey.last_response_at)
+        : null,
+    }),
   );
+
+  return <SurveyList surveys={surveyRows} />;
+}
+
+function toIsoDate(value: Date | string) {
+  return new Date(value).toISOString();
 }

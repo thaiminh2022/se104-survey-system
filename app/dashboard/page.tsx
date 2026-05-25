@@ -1,5 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import EmptyState, {
+  EmptyStateAction,
+} from "@/components/dashboard/EmptyState";
+import ErrorState from "@/components/dashboard/ErrorState";
 import {
   Card,
   CardAction,
@@ -34,12 +38,12 @@ export default async function DashboardPage() {
       <main className="min-h-screen bg-muted/20 px-4 py-6 text-foreground sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-7xl">
           <DashboardHeader />
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Cannot load dashboard</CardTitle>
-              <CardDescription>{surveysResult.message}</CardDescription>
-            </CardHeader>
-          </Card>
+          <div className="mt-6">
+            <ErrorState
+              title="Cannot load dashboard"
+              message={surveysResult.message}
+            />
+          </div>
         </div>
       </main>
     );
@@ -50,12 +54,12 @@ export default async function DashboardPage() {
       <main className="min-h-screen bg-muted/20 px-4 py-6 text-foreground sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-7xl">
           <DashboardHeader />
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Cannot load dashboard</CardTitle>
-              <CardDescription>{recentSurveysResult.message}</CardDescription>
-            </CardHeader>
-          </Card>
+          <div className="mt-6">
+            <ErrorState
+              title="Cannot load dashboard"
+              message={recentSurveysResult.message}
+            />
+          </div>
         </div>
       </main>
     );
@@ -65,9 +69,12 @@ export default async function DashboardPage() {
   const publishedSurveys = surveys.filter(
     (survey) => survey.state === "published",
   ).length;
-  const totalViews = surveys.reduce((sum, survey) => sum + survey.view_count, 0);
+  const totalViews = surveys.reduce(
+    (sum, survey) => sum + (survey.view_count ?? 0),
+    0,
+  );
   const totalSubmissions = surveys.reduce(
-    (sum, survey) => sum + survey.submission_count,
+    (sum, survey) => sum + (survey.submission_count ?? 0),
     0,
   );
   const recentSurveys = recentSurveysResult.data;
@@ -140,18 +147,18 @@ export default async function DashboardPage() {
                   <SurveyListItem key={survey.id} survey={survey} showSeparator={index > 0} />
                 ))
               ) : (
-                <div className="rounded-md border border-dashed border-border bg-background px-4 py-8 text-center">
-                  <p className="font-medium">No surveys yet</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Create your first survey to start collecting responses.
-                  </p>
-                  <Button asChild className="mt-4">
-                    <Link href="/dashboard/surveys/create">
-                      <IconFilePlus />
-                      Create survey
-                    </Link>
-                  </Button>
-                </div>
+                <EmptyState
+                  title="No surveys yet"
+                  description="Create your first survey to start collecting responses."
+                  action={
+                    <EmptyStateAction>
+                      <Link href="/dashboard/surveys/create">
+                        <IconFilePlus />
+                        Create survey
+                      </Link>
+                    </EmptyStateAction>
+                  }
+                />
               )}
             </CardContent>
           </Card>
